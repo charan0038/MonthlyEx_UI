@@ -131,7 +131,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   };
 
   return (
-    <section className="analytics-grid">
+    <section id="charts-section" className="analytics-grid">
       {/* Category Doughnut Card */}
       <div className="chart-card chart-card-doughnut">
         <div className="chart-header">

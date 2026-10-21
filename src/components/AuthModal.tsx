@@ -6,9 +6,10 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  Zap,
   AlertCircle,
   Clock,
+  KeyRound,
+  ArrowLeft,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -26,13 +27,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Rate Limiting Cooldown state
   const [rateLimitSeconds, setRateLimitSeconds] = useState<number>(0);
@@ -84,22 +88,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsLoading(true);
 
+    if (mode === 'forgot') {
+      if (password !== confirmPassword) {
+        setError('New password and confirm password do not match.');
+        return;
+      }
+    }
+
+    setIsLoading(true);
+
     try {
       if (mode === 'login') {
         const auth = await api.login({
           mobileNumber: cleanMobile,
           password,
         });
-        onSuccess(auth.user, `Welcome back, ${auth.user.fullName}! 6-month session activated.`);
+        onSuccess(auth.user, `Welcome back, ${auth.user.fullName}!`);
         onClose();
-      } else {
+      } else if (mode === 'register') {
         const auth = await api.register({
           fullName: fullName.trim(),
           mobileNumber: cleanMobile,
           password,
         });
-        onSuccess(auth.user, `Account created successfully! Welcome to Kharcha, ${auth.user.fullName}.`);
+        onSuccess(auth.user, `Account created successfully! Welcome to Vessel, ${auth.user.fullName}.`);
         onClose();
+      } else if (mode === 'forgot') {
+        const res = await api.forgotPassword({
+          mobileNumber: cleanMobile,
+          newPassword: password,
+        });
+        setSuccessMessage(res.message || 'Password reset successfully! Please sign in with your new password.');
+        setMode('login');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (err: any) {
       if (err instanceof RateLimitError || err.statusCode === 429) {
@@ -115,31 +137,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickDemoLogin = async () => {
-    setMobileNumber('9876543210');
-    setPassword('Password@123');
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const auth = await api.login({
-        mobileNumber: '9876543210',
-        password: 'Password@123',
-      });
-      onSuccess(auth.user, `Logged in with Demo Account! 6-month JWT session ready.`);
-      onClose();
-    } catch (err: any) {
-      if (err instanceof RateLimitError || err.statusCode === 429) {
-        setRateLimitSeconds(err.retryAfterSeconds || 60);
-        setError(`Rate limit active. Please wait ${err.retryAfterSeconds || 60}s before retrying.`);
-      } else {
-        setError(err.message || 'Demo login failed');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="modal-backdrop active" onClick={onClose} role="dialog" aria-modal="true">
       <div
@@ -147,7 +144,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '440px', padding: '0', overflow: 'hidden' }}
       >
-
         {/* Header Header Banner */}
         <div className="auth-header-gradient">
           <button
@@ -163,35 +159,70 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <ShieldCheck size={28} />
           </div>
           <h2 className="auth-title">
-            {mode === 'login' ? 'Sign In to Kharcha' : 'Create Your Account'}
+            {mode === 'login'
+              ? 'Sign In to Vessel'
+              : mode === 'register'
+              ? 'Create Your Account'
+              : 'Reset Password'}
           </h2>
           <p className="auth-subtitle">
-            Secure Mobile & JWT Authentication with 6-Month Refresh Token
+            {mode === 'forgot'
+              ? 'Enter your registered mobile number and choose a new password'
+              : 'Secure Mobile & JWT Authentication'}
           </p>
 
           {/* Mode Switcher Tabs */}
-          <div className="auth-mode-tabs">
-            <button
-              type="button"
-              className={`auth-mode-tab ${mode === 'login' ? 'active' : ''}`}
-              onClick={() => {
-                setMode('login');
-                setError(null);
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              className={`auth-mode-tab ${mode === 'register' ? 'active' : ''}`}
-              onClick={() => {
-                setMode('register');
-                setError(null);
-              }}
-            >
-              New Account
-            </button>
-          </div>
+          {mode !== 'forgot' ? (
+            <div className="auth-mode-tabs">
+              <button
+                type="button"
+                className={`auth-mode-tab ${mode === 'login' ? 'active' : ''}`}
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                className={`auth-mode-tab ${mode === 'register' ? 'active' : ''}`}
+                onClick={() => {
+                  setMode('register');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                New Account
+              </button>
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', marginTop: '10px' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+                style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: '#ffffff',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <ArrowLeft size={14} /> Back to Sign In
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Modal Form Body */}
@@ -206,6 +237,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   Please wait <strong>{rateLimitSeconds}s</strong> before attempting to authenticate again.
                 </p>
               </div>
+            </div>
+          )}
+
+          {/* Success Banner */}
+          {successMessage && !error && rateLimitSeconds === 0 && (
+            <div className="auth-error-banner" style={{ background: 'var(--income-bg, rgba(16, 185, 129, 0.12))', color: 'var(--income, #10b981)', borderColor: 'var(--income, #10b981)' }}>
+              <CheckCircle2 size={18} />
+              <span>{successMessage}</span>
             </div>
           )}
 
@@ -229,7 +268,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     id="authFullName"
                     type="text"
                     className="form-input with-left-icon"
-                    placeholder="e.g. Charan Reddy"
+                    placeholder="Enter your name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
@@ -262,9 +301,31 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="form-group">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label className="form-label" htmlFor="authPassword">
-                  Password
+                  {mode === 'forgot' ? 'New Password' : 'Password'}
                 </label>
-                <span className="auth-hint">Min 6 characters</span>
+                {mode === 'login' ? (
+                  <button
+                    type="button"
+                    className="forgot-password-link"
+                    onClick={() => {
+                      setMode('forgot');
+                      setError(null);
+                      setSuccessMessage(null);
+                    }}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--primary)',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Forgot password?
+                  </button>
+                ) : (
+                  <span className="auth-hint">Min 6 characters</span>
+                )}
               </div>
               <div className="input-with-icon">
                 <Lock size={18} className="input-icon-left" />
@@ -272,7 +333,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   id="authPassword"
                   type={showPassword ? 'text' : 'password'}
                   className="form-input with-left-icon with-right-icon"
-                  placeholder="••••••••"
+                  placeholder={mode === 'forgot' ? 'Enter new password' : '••••••••'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -288,6 +349,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
             </div>
 
+            {mode === 'forgot' && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="authConfirmPassword">
+                  Confirm New Password
+                </label>
+                <div className="input-with-icon">
+                  <KeyRound size={18} className="input-icon-left" />
+                  <input
+                    id="authConfirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    className="form-input with-left-icon with-right-icon"
+                    placeholder="Re-enter new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -298,41 +387,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span className="btn-spinner-text">Processing...</span>
               ) : mode === 'login' ? (
                 'Sign In'
-              ) : (
+              ) : mode === 'register' ? (
                 'Create Account & Login'
+              ) : (
+                'Reset Password'
               )}
             </button>
           </form>
-
-          {/* Quick Demo Credentials Button */}
-          <div className="auth-divider">
-            <span>OR FAST TEST</span>
-          </div>
-
-          <button
-            type="button"
-            className="auth-demo-btn"
-            onClick={handleQuickDemoLogin}
-            disabled={isLoading || rateLimitSeconds > 0}
-          >
-            <Zap size={16} className="text-warning" />
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontWeight: 600, fontSize: '13px' }}>1-Click Demo Login</div>
-              <div style={{ fontSize: '11px', opacity: 0.8 }}>Mobile: 9876543210 • Password: Password@123</div>
-            </div>
-          </button>
-
-          {/* Security Features Badges */}
-          <div className="auth-security-badges">
-            <div className="security-badge-item">
-              <CheckCircle2 size={13} className="text-success" />
-              <span>6 Months Persistent Token</span>
-            </div>
-            <div className="security-badge-item">
-              <CheckCircle2 size={13} className="text-success" />
-              <span>Anti-Brute-Force Rate Limiter</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>

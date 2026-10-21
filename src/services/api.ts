@@ -8,8 +8,12 @@ import type {
   AuthResponse,
   LoginInput,
   RegisterInput,
+  ChangePasswordInput,
+  ForgotPasswordInput,
   CategoryMeta,
   CreateCategoryInput,
+  UpdateProfileInput,
+  YearlySummary,
 } from '../types';
 
 const API_BASE = '/api';
@@ -62,6 +66,10 @@ export const tokenStorage = {
     localStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
     localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     window.dispatchEvent(new CustomEvent('kharcha_auth_change', { detail: data.user }));
+  },
+  setUser(user: User) {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.dispatchEvent(new CustomEvent('kharcha_auth_change', { detail: user }));
   },
   clearAuth() {
     localStorage.removeItem(TOKEN_KEY);
@@ -212,6 +220,52 @@ export const api = {
     return res.json();
   },
 
+  async changePassword(input: ChangePasswordInput): Promise<{ message: string }> {
+    const res = await authFetch(`${API_BASE}/auth/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to change password');
+    }
+    return data;
+  },
+
+  async forgotPassword(input: ForgotPasswordInput): Promise<{ message: string }> {
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      if (res.status === 429) {
+        throw new RateLimitError(
+          data.message || 'Too many reset requests. Please wait a moment.',
+          data.retryAfterSeconds || 60
+        );
+      }
+      throw new Error(data.message || 'Failed to reset password');
+    }
+    return data;
+  },
+
+  async updateProfile(input: UpdateProfileInput): Promise<User> {
+    const res = await authFetch(`${API_BASE}/auth/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to update profile');
+    }
+    tokenStorage.setUser(data);
+    return data;
+  },
+
   getStoredUser(): User | null {
     return tokenStorage.getUser();
   },
@@ -281,20 +335,55 @@ export const api = {
     return res.json();
   },
 
-  // --- Budgets ---
+  async getYearlySummary(year: number): Promise<YearlySummary> {
+    const res = await authFetch(`${API_BASE}/transactions/yearly-summary?year=${year}`);
+    if (!res.ok) throw new Error('Failed to fetch yearly summary');
+    return res.json();
+  },
+
+  // --- Budgets & Balance Settlement ---
   async getBudget(monthYear: string): Promise<MonthlyBudget> {
     const res = await authFetch(`${API_BASE}/budgets/${encodeURIComponent(monthYear)}`);
     if (!res.ok) throw new Error('Failed to fetch budget');
     return res.json();
   },
 
-  async setBudget(monthYear: string, amount: number): Promise<MonthlyBudget> {
+  async setBudget(monthYear: string, amount: number, addToIncome: boolean = true): Promise<MonthlyBudget> {
     const res = await authFetch(`${API_BASE}/budgets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthYear, amount, addToIncome }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to save budget');
+    }
+    return res.json();
+  },
+
+  async cashCheckout(monthYear: string, amount?: number): Promise<any> {
+    const res = await authFetch(`${API_BASE}/budgets/cash-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ monthYear, amount }),
     });
-    if (!res.ok) throw new Error('Failed to save budget');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to complete cash checkout');
+    }
+    return res.json();
+  },
+
+  async rolloverBalance(monthYear: string, amount?: number): Promise<any> {
+    const res = await authFetch(`${API_BASE}/budgets/rollover-balance`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ monthYear, amount }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to carry over balance to next month');
+    }
     return res.json();
   },
 
@@ -307,7 +396,7 @@ export const api = {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Kharcha_${monthYear}.csv`;
+    a.download = `Vessel_${monthYear}.csv`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
@@ -327,7 +416,7 @@ export const api = {
     if (!res.ok) throw new Error('Failed to clear month data');
   },
 
-  // --- Dynamic Categories ---
+  // --- Dynamic Categories & Subcategories ---
   async getCategories(type?: string): Promise<CategoryMeta[]> {
     const query = type && type !== 'ALL' ? `?type=${encodeURIComponent(type)}` : '';
     const res = await authFetch(`${API_BASE}/categories${query}`);
@@ -343,6 +432,13 @@ export const api = {
       color: c.color || '#6366f1',
       isDefault: Boolean(c.isDefault),
       createdBy: c.createdBy,
+      subcategories: (c.subcategories || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        categoryId: s.categoryId,
+        isDefault: Boolean(s.isDefault),
+        createdBy: s.createdBy,
+      })),
     }));
   },
 
@@ -367,6 +463,7 @@ export const api = {
       color: c.color || '#6366f1',
       isDefault: Boolean(c.isDefault),
       createdBy: c.createdBy,
+      subcategories: [],
     };
   },
 
@@ -377,6 +474,29 @@ export const api = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Failed to delete category');
+    }
+  },
+
+  async createSubcategory(categoryId: number, name: string): Promise<any> {
+    const res = await authFetch(`${API_BASE}/categories/${categoryId}/subcategories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to add subcategory');
+    }
+    return await res.json();
+  },
+
+  async deleteSubcategory(id: number): Promise<void> {
+    const res = await authFetch(`${API_BASE}/categories/subcategories/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to delete subcategory');
     }
   },
 };

@@ -9,6 +9,7 @@ import {
   Banknote,
   Plus,
   Layers,
+  FileText,
 } from 'lucide-react';
 import type { Transaction, CategoryMeta } from '../types';
 import { getCategoryMeta, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
@@ -34,6 +35,7 @@ interface TransactionsListProps {
   onDeleteTransaction: (id: string) => void;
   onOpenAddModal: () => void;
   onOpenCategoryManager?: () => void;
+  onExportPdf?: () => void;
 }
 
 export const TransactionsList: React.FC<TransactionsListProps> = ({
@@ -55,6 +57,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
   onDeleteTransaction,
   onOpenAddModal,
   onOpenCategoryManager,
+  onExportPdf,
 }) => {
   const expenseCats = categories.length > 0
     ? categories.filter((c) => !c.type || c.type.toLowerCase() === 'expense')
@@ -65,7 +68,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
     : INCOME_CATEGORIES;
 
   return (
-    <section className="transactions-card">
+    <section id="transactions-section" className="transactions-card">
       <div className="transactions-header">
         <div className="transactions-top-row">
           <div className="transactions-title-group">
@@ -76,6 +79,20 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
           </div>
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {onExportPdf && (
+              <button
+                className="btn-outline"
+                onClick={onExportPdf}
+                title="Export Monthly PDF Statement"
+                style={{
+                  borderColor: 'rgba(239, 68, 68, 0.3)',
+                  color: '#fb7185',
+                  backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                }}
+              >
+                <FileText size={14} /> Export PDF
+              </button>
+            )}
             {onOpenCategoryManager && (
               <button
                 className="btn-outline"
@@ -192,6 +209,12 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                     </div>
                     <div className="tx-meta">
                       <span>{meta.label}</span>
+                      {tx.subcategory && (
+                        <>
+                          <span style={{ opacity: 0.4 }}>›</span>
+                          <span style={{ color: 'var(--text-primary, #f1f5f9)', fontWeight: 500 }}>{tx.subcategory}</span>
+                        </>
+                      )}
                       <span>•</span>
                       <span>{formatDateDisplay(tx.date)}</span>
                       <span className="tx-chip">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, AlertCircle, AlertTriangle, Settings } from 'lucide-react';
+import { ShieldCheck, AlertCircle, AlertTriangle, Settings, Banknote, ArrowRightCircle } from 'lucide-react';
 import { formatINR } from '../utils/formatters';
 
 interface BudgetCardProps {
@@ -7,7 +7,10 @@ interface BudgetCardProps {
   totalExpense: number;
   budgetLeft: number;
   usedPercentage: number;
+  isEndOfMonth?: boolean;
   onOpenBudgetModal: () => void;
+  onCashCheckout?: () => void;
+  onRolloverBalance?: () => void;
 }
 
 export const BudgetCard: React.FC<BudgetCardProps> = ({
@@ -15,7 +18,10 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
   totalExpense,
   budgetLeft,
   usedPercentage,
+  isEndOfMonth = false,
   onOpenBudgetModal,
+  onCashCheckout,
+  onRolloverBalance,
 }) => {
   const isDanger = usedPercentage >= 100;
   const isWarning = usedPercentage >= 80 && usedPercentage < 100;
@@ -73,6 +79,68 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
         </span>
         <span>{Math.round(usedPercentage)}% used</span>
       </div>
+
+      {/* Month-End Settlement Options: Cash Checkout or Next Month Opening Balance (Only occurs at end of month) */}
+      {isEndOfMonth && budgetLeft > 0 && (onCashCheckout || onRolloverBalance) && (
+        <div
+          style={{
+            marginTop: '14px',
+            paddingTop: '12px',
+            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '10px',
+          }}
+        >
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary, #94a3b8)' }}>
+            Remaining <strong style={{ color: 'var(--income, #10b981)' }}>{formatINR(budgetLeft)}</strong> left:
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {onCashCheckout && (
+              <button
+                type="button"
+                className="btn-outline"
+                style={{
+                  fontSize: '11px',
+                  padding: '5px 10px',
+                  borderRadius: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: 'pointer',
+                }}
+                onClick={onCashCheckout}
+                title="Withdraw remaining balance as cash"
+              >
+                <Banknote size={13} /> Cash Checkout
+              </button>
+            )}
+
+            {onRolloverBalance && (
+              <button
+                type="button"
+                className="btn-primary"
+                style={{
+                  fontSize: '11px',
+                  padding: '5px 10px',
+                  borderRadius: '8px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  cursor: 'pointer',
+                }}
+                onClick={onRolloverBalance}
+                title="Save remaining balance as next month's opening income"
+              >
+                <ArrowRightCircle size={13} /> Add to Next Month Opening Balance
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

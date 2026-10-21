@@ -5,15 +5,16 @@ import {
   User as UserIcon,
   Eye,
   EyeOff,
-  ShieldCheck,
-  Zap,
   AlertCircle,
   Clock,
   ArrowRight,
+  ArrowLeft,
+  KeyRound,
+  CheckCircle2,
   Sun,
   Moon,
-  Sparkles,
 } from 'lucide-react';
+import DodgeField from './DodgeField';
 import { api, RateLimitError } from '../services/api';
 import type { User } from '../types';
 
@@ -28,13 +29,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   theme,
   onToggleTheme,
 }) => {
-  const [mode, setMode] = useState<'login' | 'register'>('login');
+  const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
   const [mobileNumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Rate Limiting countdown
   const [rateLimitSeconds, setRateLimitSeconds] = useState<number>(0);
@@ -61,7 +65,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     if (!inputIdentifier) {
       setError(
         mode === 'login'
-          ? 'Please enter your mobile number or username (e.g. Admin).'
+          ? 'Please enter your mobile number or username.'
           : 'Please enter your 10-digit mobile number.'
       );
       return;
@@ -95,6 +99,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       return;
     }
 
+    if (mode === 'forgot') {
+      if (password !== confirmPassword) {
+        setError('New password and confirm password do not match.');
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -103,15 +114,24 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           mobileNumber: inputIdentifier,
           password,
         });
-        onSuccess(auth.user, `Welcome back, ${auth.user.fullName}! 6-month session activated.`);
-      } else {
+        onSuccess(auth.user, `Welcome back, ${auth.user.fullName}!`);
+      } else if (mode === 'register') {
         const cleanMobile = inputIdentifier.replace(/\D/g, '');
         const auth = await api.register({
           fullName: fullName.trim(),
           mobileNumber: cleanMobile,
           password,
         });
-        onSuccess(auth.user, `Welcome to Kharcha, ${auth.user.fullName}! Account created.`);
+        onSuccess(auth.user, `Welcome to Vessel, ${auth.user.fullName}! Account created.`);
+      } else if (mode === 'forgot') {
+        const res = await api.forgotPassword({
+          mobileNumber: inputIdentifier,
+          newPassword: password,
+        });
+        setSuccessMessage(res.message || 'Password reset successfully! Please sign in with your new password.');
+        setMode('login');
+        setPassword('');
+        setConfirmPassword('');
       }
     } catch (err: any) {
       if (err instanceof RateLimitError || err.statusCode === 429) {
@@ -121,30 +141,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         );
       } else {
         setError(err.message || 'Authentication failed. Please check your credentials.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleQuickAdminLogin = async () => {
-    setMobileNumber('Admin');
-    setPassword('123456');
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      const auth = await api.login({
-        mobileNumber: 'Admin',
-        password: '123456',
-      });
-      onSuccess(auth.user, 'Logged in as Admin! 6-month session active.');
-    } catch (err: any) {
-      if (err instanceof RateLimitError || err.statusCode === 429) {
-        setRateLimitSeconds(err.retryAfterSeconds || 60);
-        setError(`Rate limit active. Wait ${err.retryAfterSeconds || 60}s.`);
-      } else {
-        setError(err.message || 'Admin login failed');
       }
     } finally {
       setIsLoading(false);
@@ -164,7 +160,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
             <Wallet size={22} />
           </div>
           <div className="login-brand-text">
-            <span className="login-brand-name">Kharcha</span>
+            <span className="login-brand-name">Vessel</span>
             <span className="login-brand-tag">Expense Tracker</span>
           </div>
         </div>
@@ -184,38 +180,62 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         <div className="login-card">
           <div className="login-card-header">
             <h1 className="login-title">
-              {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+              {mode === 'login'
+                ? 'Welcome Back'
+                : mode === 'register'
+                ? 'Create Account'
+                : 'Reset Password'}
             </h1>
             <p className="login-subtitle">
               {mode === 'login'
                 ? 'Sign in with your 10-digit mobile number'
-                : 'Start tracking monthly expenses in seconds'}
+                : mode === 'register'
+                ? 'Start tracking monthly expenses in seconds'
+                : 'Set a new password for your registered mobile number'}
             </p>
           </div>
 
-          {/* Mode Switcher Tabs */}
-          <div className="login-tabs">
-            <button
-              type="button"
-              className={`login-tab-btn ${mode === 'login' ? 'active' : ''}`}
-              onClick={() => {
-                setMode('login');
-                setError(null);
-              }}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              className={`login-tab-btn ${mode === 'register' ? 'active' : ''}`}
-              onClick={() => {
-                setMode('register');
-                setError(null);
-              }}
-            >
-              New Account
-            </button>
-          </div>
+          {/* Mode Switcher Tabs (or Back to Sign In when resetting) */}
+          {mode !== 'forgot' ? (
+            <div className="login-tabs">
+              <button
+                type="button"
+                className={`login-tab-btn ${mode === 'login' ? 'active' : ''}`}
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                className={`login-tab-btn ${mode === 'register' ? 'active' : ''}`}
+                onClick={() => {
+                  setMode('register');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                New Account
+              </button>
+            </div>
+          ) : (
+            <div style={{ marginBottom: '20px' }}>
+              <button
+                type="button"
+                className="back-to-login-btn"
+                onClick={() => {
+                  setMode('login');
+                  setError(null);
+                  setSuccessMessage(null);
+                }}
+              >
+                <ArrowLeft size={16} /> Back to Sign In
+              </button>
+            </div>
+          )}
 
           {/* Rate Limit Alert */}
           {rateLimitSeconds > 0 && (
@@ -225,6 +245,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 <strong>Rate Limit Active</strong>
                 <p>Too many requests. Cooldown: {rateLimitSeconds}s remaining.</p>
               </div>
+            </div>
+          )}
+
+          {/* Success Banner */}
+          {successMessage && !error && rateLimitSeconds === 0 && (
+            <div className="login-alert-banner alert-success">
+              <CheckCircle2 size={18} className="alert-icon text-success" />
+              <span>{successMessage}</span>
             </div>
           )}
 
@@ -244,12 +272,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                   Full Name *
                 </label>
                 <div className="input-with-icon">
-                  <UserIcon size={18} className="field-icon" />
+                  <UserIcon size={18} className="input-icon-left" />
                   <input
                     id="loginFullName"
                     type="text"
-                    className="form-control"
-                    placeholder="e.g. Charan Kumar"
+                    className="form-control with-left-icon"
+                    placeholder="Enter your name"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required={mode === 'register'}
@@ -261,41 +289,71 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
             <div className="form-group">
               <label className="form-label" htmlFor="loginMobileNumber">
-                {mode === 'login' ? 'Mobile Number or Username *' : 'Mobile Number *'}
+                {mode === 'register' ? 'Mobile Number *' : 'Mobile Number or Username *'}
               </label>
               <div className="input-with-icon">
                 {mode === 'register' ? (
-                  <span className="phone-prefix-badge">🇮🇳 +91</span>
+                  <>
+                    <span className="mobile-prefix-tag">+91</span>
+                    <input
+                      id="loginMobileNumber"
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      className="form-control with-prefix"
+                      placeholder="9876543210"
+                      value={mobileNumber}
+                      onChange={(e) =>
+                        setMobileNumber(e.target.value.replace(/\D/g, ''))
+                      }
+                      required
+                      autoComplete="tel-national"
+                    />
+                  </>
                 ) : (
-                  <UserIcon size={18} className="field-icon" />
+                  <>
+                    <UserIcon size={18} className="input-icon-left" />
+                    <input
+                      id="loginMobileNumber"
+                      type="text"
+                      className="form-control with-left-icon"
+                      placeholder="Mobile number or username"
+                      value={mobileNumber}
+                      onChange={(e) => setMobileNumber(e.target.value)}
+                      required
+                      autoComplete="username"
+                    />
+                  </>
                 )}
-                <input
-                  id="loginMobileNumber"
-                  type={mode === 'register' ? 'tel' : 'text'}
-                  inputMode={mode === 'register' ? 'numeric' : 'text'}
-                  className={`form-control ${mode === 'register' ? 'form-control-phone' : ''}`}
-                  placeholder={mode === 'login' ? 'Admin or 10-digit mobile' : '9876543210'}
-                  value={mobileNumber}
-                  onChange={(e) =>
-                    setMobileNumber(mode === 'register' ? e.target.value.replace(/\D/g, '') : e.target.value)
-                  }
-                  required
-                  autoComplete={mode === 'login' ? 'username' : 'tel-national'}
-                />
               </div>
             </div>
 
             <div className="form-group">
-              <label className="form-label" htmlFor="loginPassword">
-                Password *
-              </label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label className="form-label" htmlFor="loginPassword" style={{ margin: 0 }}>
+                  {mode === 'forgot' ? 'New Password *' : 'Password *'}
+                </label>
+                {mode === 'login' && (
+                  <button
+                    type="button"
+                    className="forgot-password-link"
+                    onClick={() => {
+                      setMode('forgot');
+                      setError(null);
+                      setSuccessMessage(null);
+                    }}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <div className="input-with-icon">
-                <Lock size={18} className="field-icon" />
+                <Lock size={18} className="input-icon-left" />
                 <input
                   id="loginPassword"
                   type={showPassword ? 'text' : 'password'}
-                  className="form-control"
-                  placeholder="Enter your password"
+                  className="form-control with-left-icon with-right-icon"
+                  placeholder={mode === 'forgot' ? 'Enter new password' : 'Enter your password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -312,49 +370,82 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               </div>
             </div>
 
-            <button
-              type="submit"
-              className="login-submit-btn"
-              disabled={isLoading || rateLimitSeconds > 0}
+            {mode === 'forgot' && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="loginConfirmPassword">
+                  Confirm New Password *
+                </label>
+                <div className="input-with-icon">
+                  <KeyRound size={18} className="input-icon-left" />
+                  <input
+                    id="loginConfirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    className="form-control with-left-icon with-right-icon"
+                    placeholder="Re-enter new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <DodgeField
+              patience={3}
+              fieldHeight={76}
+              reach={65}
+              radius={140}
+              falloff={2}
+              fleeDuration={130}
+              returnDuration={620}
+              returnBounce={0.1}
+              axis="both"
+              wall="clamp"
+              disabled={isLoading || rateLimitSeconds > 0 || mode !== 'login'}
+              onCatch={() => console.log('caught')}
             >
-              {isLoading ? (
-                <div className="btn-spinner" />
-              ) : (
-                <>
-                  <span>{mode === 'login' ? 'Sign In' : 'Create My Account'}</span>
-                  <ArrowRight size={18} />
-                </>
+              {({ dodges, gave }) => (
+                <button
+                  type="submit"
+                  className="login-submit-btn"
+                  disabled={isLoading || rateLimitSeconds > 0}
+                  style={{
+                    width: mode === 'login' ? '280px' : '100%',
+                    maxWidth: '100%',
+                    margin: '0 auto',
+                  }}
+                >
+                  {isLoading ? (
+                    <div className="btn-spinner" />
+                  ) : (
+                    <>
+                      <span>
+                        {mode === 'login'
+                          ? gave
+                            ? 'Okay, okay · Sign In'
+                            : dodges
+                            ? `Nope x${dodges} · Catch me`
+                            : 'Sign In'
+                          : mode === 'register'
+                          ? 'Create My Account'
+                          : 'Reset Password'}
+                      </span>
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            </DodgeField>
           </form>
-
-          {/* Quick Default Admin Login Option */}
-          <div className="login-divider">
-            <span>or 1-click admin login</span>
-          </div>
-
-          <button
-            type="button"
-            className="login-demo-btn"
-            onClick={handleQuickAdminLogin}
-            disabled={isLoading || rateLimitSeconds > 0}
-          >
-            <Sparkles size={16} />
-            <span>Default Login: Admin (pass: 123456)</span>
-          </button>
-
-          {/* Security Features Footer */}
-          <div className="login-security-badges">
-            <span className="sec-badge">
-              <ShieldCheck size={13} /> 6-Month JWT
-            </span>
-            <span className="sec-badge">
-              <Zap size={13} /> Rate Limited
-            </span>
-            <span className="sec-badge">
-              <Lock size={13} /> PostgreSQL
-            </span>
-          </div>
         </div>
       </main>
     </div>

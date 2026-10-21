@@ -3,6 +3,7 @@ import { X, Check, ArrowDownRight, ArrowUpRight, Smartphone, Banknote, CreditCar
 import type { Transaction, TransactionType, PaymentMethod, CreateTransactionInput, CategoryMeta } from '../types';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
 import { CategoryIcon } from './CategoryIcon';
+import { CustomDatePicker } from './CustomDatePicker';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState<string>('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
   const [date, setDate] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('UPI');
   const [note, setNote] = useState<string>('');
@@ -42,6 +45,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       );
       if (match?.dbId) {
         setSelectedCategoryId(match.dbId);
+        setSelectedSubcategoryId(null);
+        setSelectedSubcategory('');
       }
     }
   }, [forcedCategory, categories]);
@@ -60,6 +65,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         const match = categories.find((c) => c.label.toLowerCase() === catName?.toLowerCase());
         setSelectedCategoryId(match?.dbId || 1);
       }
+      setSelectedSubcategoryId(editingTransaction.subcategoryId || null);
+      setSelectedSubcategory(editingTransaction.subcategory || '');
       setDate(editingTransaction.date);
       setPaymentMethod(editingTransaction.paymentMethod);
       setNote(editingTransaction.note || '');
@@ -68,6 +75,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setAmount('');
       const defaultExp = categories.find((c) => c.type === 'expense');
       setSelectedCategoryId(defaultExp?.dbId || 1);
+      setSelectedSubcategoryId(null);
+      setSelectedSubcategory('');
       setPaymentMethod('UPI');
       setNote('');
 
@@ -89,6 +98,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     } else {
       setSelectedCategoryId(newType === 'expense' ? 1 : 9);
     }
+    setSelectedSubcategoryId(null);
+    setSelectedSubcategory('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,6 +121,8 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
           type,
           amount: numAmount,
           categoryId: selectedCategoryId,
+          subcategoryId: selectedSubcategoryId || undefined,
+          subcategory: selectedSubcategory.trim() ? selectedSubcategory.trim() : undefined,
           date,
           paymentMethod,
           note: note.trim(),
@@ -232,20 +245,95 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Optional Subcategories */}
+            {(() => {
+              const currentCat = categoryList.find((c) => c.dbId === selectedCategoryId);
+              const currentSubs = currentCat?.subcategories || [];
+              if (currentSubs.length === 0) return null;
+
+              return (
+                <div style={{ marginTop: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary, #94a3b8)' }}>
+                      Subcategory <span style={{ opacity: 0.7, fontWeight: 400 }}>(Optional)</span>
+                    </span>
+                    {selectedSubcategory && (
+                      <button
+                        type="button"
+                        className="quick-link-btn"
+                        style={{ fontSize: '11px', padding: 0, textDecoration: 'underline' }}
+                        onClick={() => {
+                          setSelectedSubcategoryId(null);
+                          setSelectedSubcategory('');
+                        }}
+                      >
+                        Clear subcategory
+                      </button>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    <button
+                      type="button"
+                      style={{
+                        padding: '4px 10px',
+                        borderRadius: '14px',
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        border: !selectedSubcategory ? '1px solid var(--primary, #6366f1)' : '1px solid rgba(255,255,255,0.12)',
+                        backgroundColor: !selectedSubcategory ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)',
+                        color: !selectedSubcategory ? '#a5b4fc' : 'var(--text-secondary, #94a3b8)',
+                        transition: 'all 0.15s ease',
+                      }}
+                      onClick={() => {
+                        setSelectedSubcategoryId(null);
+                        setSelectedSubcategory('');
+                      }}
+                    >
+                      None
+                    </button>
+                    {currentSubs.map((sub) => {
+                      const isSelected =
+                        selectedSubcategoryId === sub.id ||
+                        selectedSubcategory.toLowerCase() === sub.name.toLowerCase();
+                      return (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          style={{
+                            padding: '4px 10px',
+                            borderRadius: '14px',
+                            fontSize: '11px',
+                            fontWeight: 500,
+                            cursor: 'pointer',
+                            border: isSelected ? '1px solid var(--primary, #6366f1)' : '1px solid rgba(255,255,255,0.12)',
+                            backgroundColor: isSelected ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)',
+                            color: isSelected ? '#a5b4fc' : 'var(--text-secondary, #94a3b8)',
+                            transition: 'all 0.15s ease',
+                          }}
+                          onClick={() => {
+                            setSelectedSubcategoryId(sub.id);
+                            setSelectedSubcategory(sub.name);
+                          }}
+                        >
+                          {sub.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
-          {/* Date Picker */}
+          {/* Enhanced Modern Date Picker & Calendar */}
           <div className="form-group">
-            <label className="form-label" htmlFor="txDateInput">
-              Date *
-            </label>
-            <input
-              id="txDateInput"
-              type="date"
-              className="form-control"
-              required
+            <CustomDatePicker
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={setDate}
+              label="Date"
+              required
             />
           </div>
 

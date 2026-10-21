@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus } from 'lucide-react';
 import type {
   Transaction,
   MonthlySummary,
@@ -10,8 +9,11 @@ import type {
 } from './types';
 import { api } from './services/api';
 import type { FilterParams } from './services/api';
-import { getMonthKey } from './utils/formatters';
+import { getMonthKey, getMonthName, formatINR } from './utils/formatters';
 import { setDynamicCategoriesCache } from './constants/categories';
+import { exportMonthlyPdfReport, exportYearlyPdfReport } from './utils/pdfExport';
+
+import { CalendarDays, BarChart3 } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { BudgetCard } from './components/BudgetCard';
@@ -19,11 +21,16 @@ import { SummaryCards } from './components/SummaryCards';
 import { InsightsCard } from './components/InsightsCard';
 import { ChartsSection } from './components/ChartsSection';
 import { TransactionsList } from './components/TransactionsList';
+import { YearlyDashboard } from './components/YearlyDashboard';
 import { TransactionModal } from './components/TransactionModal';
 import { BudgetModal } from './components/BudgetModal';
 import { AuthModal } from './components/AuthModal';
 import { LoginScreen } from './components/LoginScreen';
 import { CategoryModal } from './components/CategoryModal';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
+import { ProfileModal } from './components/ProfileModal';
+import { ConfirmModal } from './components/ConfirmModal';
+import { MobileBottomNav } from './components/MobileBottomNav';
 import { ToastContainer } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
 
@@ -32,6 +39,7 @@ import './App.css';
 export function App() {
   const [currentYear, setCurrentYear] = useState<number>(() => new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(() => new Date().getMonth());
+  const [activeDashboard, setActiveDashboard] = useState<'monthly' | 'yearly'>('monthly');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('kharcha_theme_v2');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -48,7 +56,7 @@ export function App() {
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [budget, setBudget] = useState<MonthlyBudget>({
     monthYear: getMonthKey(currentYear, currentMonth),
-    amount: 50000,
+    amount: 10000,
   });
 
   // Filter states
@@ -63,8 +71,28 @@ export function App() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isBudgetOpen, setIsBudgetOpen] = useState<boolean>(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState<boolean>(false);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [categoryModalType, setCategoryModalType] = useState<'expense' | 'income'>('expense');
   const [forcedTxCategory, setForcedTxCategory] = useState<string | undefined>(undefined);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    type: 'rollover' | 'cash' | 'danger';
+    title: string;
+    subtitle?: string;
+    amount?: number;
+    fromMonth?: string;
+    toMonth?: string;
+    confirmText?: string;
+    cancelText?: string;
+    isLoading?: boolean;
+    onConfirm: () => Promise<void>;
+  }>({
+    isOpen: false,
+    type: 'rollover',
+    title: '',
+    onConfirm: async () => {},
+  });
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -105,8 +133,32 @@ export function App() {
 
   const monthYearKey = getMonthKey(currentYear, currentMonth);
 
+  // Month-end calculation: settlement options only occur at the end of the month
+  const today = new Date();
+  const currentActualYear = today.getFullYear();
+  const currentActualMonth = today.getMonth();
+  const currentActualDay = today.getDate();
+  const daysInViewMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  const isPastMonth =
+    currentYear < currentActualYear ||
+    (currentYear === currentActualYear && currentMonth < currentActualMonth);
+
+  const isCurrentMonth =
+    currentYear === currentActualYear && currentMonth === currentActualMonth;
+
+  // Occurs during the final days of the month (last 3 days) or for past completed months
+  const isMonthEnd = isCurrentMonth && currentActualDay >= daysInViewMonth - 3;
+  const isEndOfMonth = isPastMonth || isMonthEnd;
+
   // Load monthly summary and transactions from .NET backend
   const refreshData = useCallback(async () => {
+    if (!api.isAuthenticated() || !user) {
+      setTransactions([]);
+      setSummary(null);
+      return;
+    }
+
     try {
       const filterParams: FilterParams = {
         monthYear: monthYearKey,
@@ -128,16 +180,25 @@ export function App() {
       setBudget(bgt);
     } catch (err: any) {
       console.error('Error fetching data from API:', err);
+      // Suppress unauthorized error toast if user logged out
+      if (!api.isAuthenticated()) return;
       addToast(err.message || 'Error connecting to backend API', 'error');
     }
-  }, [monthYearKey, search, category, type, payment, sortBy]);
+  }, [monthYearKey, search, category, type, payment, sortBy, user]);
 
   useEffect(() => {
-    refreshData();
+    if (user && api.isAuthenticated()) {
+      refreshData();
+    }
   }, [refreshData, user]);
 
   // Load dynamic categories
   const refreshCategories = useCallback(async () => {
+    if (!api.isAuthenticated() || !user) {
+      setCategories([]);
+      return;
+    }
+
     try {
       const cats = await api.getCategories();
       setCategories(cats);
@@ -145,10 +206,12 @@ export function App() {
     } catch (err: any) {
       console.error('Error fetching categories from API:', err);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    refreshCategories();
+    if (user && api.isAuthenticated()) {
+      refreshCategories();
+    }
   }, [refreshCategories, user]);
 
   const handleOpenCategoryModal = (initialType: 'expense' | 'income' = 'expense') => {
@@ -212,9 +275,10 @@ export function App() {
   const handleLogout = async () => {
     await api.logout();
     setUser(null);
-    addToast('Logged out of 6-month session', 'info');
-    refreshData();
-    refreshCategories();
+    setTransactions([]);
+    setSummary(null);
+    setCategories([]);
+    addToast('Logged out', 'info');
   };
 
   // CRUD actions
@@ -241,33 +305,151 @@ export function App() {
     await refreshData();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this transaction?')) return;
-    try {
-      await api.deleteTransaction(id);
-      addToast('Transaction deleted', 'info');
-      await refreshData();
-    } catch (err: any) {
-      addToast(err.message || 'Failed to delete transaction', 'error');
-    }
+  const handleDelete = (id: string) => {
+    const tx = transactions.find((t) => t.id === id);
+    setConfirmModal({
+      isOpen: true,
+      type: 'danger',
+      title: 'Delete Transaction',
+      subtitle: tx
+        ? `Are you sure you want to permanently delete "${tx.note || tx.category?.name || 'Transaction'}"?`
+        : 'Are you sure you want to permanently delete this transaction?',
+      amount: tx?.amount,
+      confirmText: 'Delete Transaction',
+      cancelText: 'Cancel',
+      isLoading: false,
+      onConfirm: async () => {
+        try {
+          setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+          await api.deleteTransaction(id);
+          addToast('Transaction deleted', 'info');
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+          await refreshData();
+        } catch (err: any) {
+          setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+          addToast(err.message || 'Failed to delete transaction', 'error');
+        }
+      },
+    });
   };
 
-  const handleSaveBudget = async (amount: number) => {
+  const handleSaveBudget = async (amount: number, addToIncome: boolean = true) => {
     try {
-      await api.setBudget(monthYearKey, amount);
-      addToast('Budget updated successfully!', 'success');
+      await api.setBudget(monthYearKey, amount, addToIncome);
+      setBudget({ monthYear: monthYearKey, amount });
+      addToast(
+        addToIncome
+          ? `Budget set to ${formatINR(amount)} and added to Total Income!`
+          : `Budget set to ${formatINR(amount)}!`,
+        'success'
+      );
       await refreshData();
     } catch (err: any) {
       addToast(err.message || 'Failed to update budget', 'error');
     }
   };
 
-  const handleExportCsv = async () => {
+  const handleCashCheckout = () => {
+    const remaining = summary?.budgetLeft ?? 0;
+    if (remaining <= 0) {
+      addToast('No remaining balance to checkout.', 'info');
+      return;
+    }
+
+    const [y, m] = monthYearKey.split('-');
+    const currentMonthName = getMonthName(parseInt(m, 10) - 1, parseInt(y, 10));
+
+    setConfirmModal({
+      isOpen: true,
+      type: 'cash',
+      title: 'Cash Checkout',
+      subtitle: `Withdraw your remaining monthly budget as physical cash. This will record a cash outflow for ${currentMonthName}.`,
+      amount: remaining,
+      fromMonth: currentMonthName,
+      confirmText: `Checkout ${formatINR(remaining)} Cash`,
+      cancelText: 'Cancel',
+      isLoading: false,
+      onConfirm: async () => {
+        try {
+          setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+          await api.cashCheckout(monthYearKey, remaining);
+          addToast(`Cash checkout of ${formatINR(remaining)} completed!`, 'success');
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+          await refreshData();
+        } catch (err: any) {
+          setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+          addToast(err.message || 'Failed to complete cash checkout', 'error');
+        }
+      },
+    });
+  };
+
+  const handleRolloverBalance = () => {
+    const remaining = summary?.budgetLeft ?? 0;
+    if (remaining <= 0) {
+      addToast('No remaining balance to carry forward.', 'info');
+      return;
+    }
+
+    const [y, m] = monthYearKey.split('-');
+    const currentMonthName = getMonthName(parseInt(m, 10) - 1, parseInt(y, 10));
+    const nextDate = new Date(parseInt(y, 10), parseInt(m, 10), 1);
+    const nextMonthName = getMonthName(nextDate.getMonth(), nextDate.getFullYear());
+
+    setConfirmModal({
+      isOpen: true,
+      type: 'rollover',
+      title: 'Add to Next Month Opening Balance',
+      subtitle: `Transfer your remaining budget from ${currentMonthName} directly to ${nextMonthName}'s opening balance as incoming funds.`,
+      amount: remaining,
+      fromMonth: currentMonthName,
+      toMonth: nextMonthName,
+      confirmText: `Transfer ${formatINR(remaining)} to ${nextMonthName}`,
+      cancelText: 'Cancel',
+      isLoading: false,
+      onConfirm: async () => {
+        try {
+          setConfirmModal((prev) => ({ ...prev, isLoading: true }));
+          await api.rolloverBalance(monthYearKey, remaining);
+          addToast(
+            `Transferred ${formatINR(remaining)} to ${nextMonthName} as opening income!`,
+            'success'
+          );
+          setConfirmModal((prev) => ({ ...prev, isOpen: false, isLoading: false }));
+          await refreshData();
+        } catch (err: any) {
+          setConfirmModal((prev) => ({ ...prev, isLoading: false }));
+          addToast(err.message || 'Failed to carry forward balance', 'error');
+        }
+      },
+    });
+  };
+
+  const handleExportPdf = async () => {
     try {
-      await api.exportCsv(monthYearKey);
-      addToast(`Exported CSV for ${monthYearKey}`, 'success');
+      if (activeDashboard === 'yearly') {
+        const yearSum = await api.getYearlySummary(currentYear);
+        exportYearlyPdfReport({
+          year: currentYear,
+          user,
+          summary: yearSum,
+        });
+        addToast(`Exported Annual PDF Report for ${currentYear}!`, 'success');
+      } else {
+        exportMonthlyPdfReport({
+          monthYear: monthYearKey,
+          user,
+          summary,
+          budgetAmount: budget.amount,
+          transactions,
+        });
+        addToast(
+          `Exported Monthly PDF Statement for ${getMonthName(currentMonth, currentYear)}!`,
+          'success'
+        );
+      }
     } catch (err: any) {
-      addToast(err.message || 'Failed to download CSV', 'error');
+      addToast(err.message || 'Failed to generate PDF Report', 'error');
     }
   };
 
@@ -326,73 +508,133 @@ export function App() {
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
         onJumpToday={handleJumpToday}
+        onSelectMonthYear={(y, m) => {
+          setCurrentYear(y);
+          setCurrentMonth(m);
+        }}
         onToggleTheme={toggleTheme}
-        onExportCsv={handleExportCsv}
+        onExportPdf={handleExportPdf}
+        activeDashboard={activeDashboard}
         onOpenCategories={() => handleOpenCategoryModal('expense')}
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
         onLogout={handleLogout}
       />
 
-      {/* Monthly Budget Card */}
-      <BudgetCard
-        budgetLimit={summary?.budgetLimit ?? budget.amount}
-        totalExpense={summary?.totalExpense ?? 0}
-        budgetLeft={summary?.budgetLeft ?? budget.amount}
-        usedPercentage={summary?.budgetUsedPercentage ?? 0}
-        onOpenBudgetModal={() => setIsBudgetOpen(true)}
-      />
+      {/* Dashboard Switcher Bar */}
+      <div className="dashboard-switcher-container">
+        <div className="dashboard-switcher-pills" role="tablist" aria-label="Dashboard views">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeDashboard === 'monthly'}
+            className={`dashboard-switcher-btn ${activeDashboard === 'monthly' ? 'active' : ''}`}
+            onClick={() => setActiveDashboard('monthly')}
+            id="tab-monthly-dashboard"
+          >
+            <CalendarDays size={15} />
+            <span className="dashboard-tab-title-full">Monthly Tracker</span>
+            <span className="dashboard-tab-title-short">Monthly</span>
+            <span className="dashboard-tab-sub">({getMonthName(currentMonth, currentYear)})</span>
+          </button>
 
-      {/* 4 Summary Cards */}
-      <SummaryCards
-        totalIncome={summary?.totalIncome ?? 0}
-        totalExpense={summary?.totalExpense ?? 0}
-        netBalance={summary?.netBalance ?? 0}
-        budgetLeft={summary?.budgetLeft ?? budget.amount}
-        usedPercentage={summary?.budgetUsedPercentage ?? 0}
-      />
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeDashboard === 'yearly'}
+            className={`dashboard-switcher-btn ${activeDashboard === 'yearly' ? 'active' : ''}`}
+            onClick={() => setActiveDashboard('yearly')}
+            id="tab-yearly-dashboard"
+          >
+            <BarChart3 size={15} />
+            <span className="dashboard-tab-title-full">Overall Year Dashboard</span>
+            <span className="dashboard-tab-title-short">Annual</span>
+            <span className="dashboard-tab-badge">{currentYear}</span>
+          </button>
+        </div>
+      </div>
 
-      {/* Smart Insight Banner */}
-      <InsightsCard insightMessage={summary?.insightMessage ?? ''} />
+      {activeDashboard === 'yearly' ? (
+        <main className="dashboard-content-view yearly-view" key={`yearly-${currentYear}`}>
+          <YearlyDashboard
+            initialYear={currentYear}
+            theme={theme}
+            user={user}
+            onNavigateToMonth={(y, m) => {
+              setCurrentYear(y);
+              setCurrentMonth(m);
+              setActiveDashboard('monthly');
+              addToast(`Jumped to ${getMonthName(m, y)} ${y}`, 'info');
+            }}
+            onToast={addToast}
+          />
+        </main>
+      ) : (
+        <main className="dashboard-content-view monthly-view" key={`monthly-${monthYearKey}`}>
+          {/* Monthly Budget Card */}
+          <BudgetCard
+            budgetLimit={summary?.budgetLimit ?? budget.amount}
+            totalExpense={summary?.totalExpense ?? 0}
+            budgetLeft={summary?.budgetLeft ?? budget.amount}
+            usedPercentage={summary?.budgetUsedPercentage ?? 0}
+            isEndOfMonth={isEndOfMonth}
+            onOpenBudgetModal={() => setIsBudgetOpen(true)}
+            onCashCheckout={handleCashCheckout}
+            onRolloverBalance={handleRolloverBalance}
+          />
 
-      {/* Charts Section */}
-      <ChartsSection
-        categoryBreakdown={summary?.categoryBreakdown ?? []}
-        dailySpending={summary?.dailySpending ?? []}
-        theme={theme}
-      />
+          {/* 4 Summary Cards */}
+          <SummaryCards
+            totalIncome={summary?.totalIncome ?? 0}
+            totalExpense={summary?.totalExpense ?? 0}
+            netBalance={summary?.netBalance ?? 0}
+            budgetLeft={summary?.budgetLeft ?? budget.amount}
+            usedPercentage={summary?.budgetUsedPercentage ?? 0}
+          />
 
-      {/* Transactions List & Filter Toolbar */}
-      <TransactionsList
-        transactions={transactions}
-        categories={categories}
-        search={search}
-        category={category}
-        type={type}
-        payment={payment}
-        sortBy={sortBy}
-        onSearchChange={setSearch}
-        onCategoryChange={setCategory}
-        onTypeChange={setType}
-        onPaymentChange={setPayment}
-        onSortByChange={setSortBy}
-        onResetFilters={handleResetFilters}
-        onClearMonth={handleClearMonth}
-        onEditTransaction={handleEdit}
-        onDeleteTransaction={handleDelete}
+          {/* Smart Insight Banner */}
+          <InsightsCard insightMessage={summary?.insightMessage ?? ''} />
+
+          {/* Charts Section */}
+          <ChartsSection
+            categoryBreakdown={summary?.categoryBreakdown ?? []}
+            dailySpending={summary?.dailySpending ?? []}
+            theme={theme}
+          />
+
+          {/* Transactions List & Filter Toolbar */}
+          <TransactionsList
+            transactions={transactions}
+            categories={categories}
+            search={search}
+            category={category}
+            type={type}
+            payment={payment}
+            sortBy={sortBy}
+            onSearchChange={setSearch}
+            onCategoryChange={setCategory}
+            onTypeChange={setType}
+            onPaymentChange={setPayment}
+            onSortByChange={setSortBy}
+            onResetFilters={handleResetFilters}
+            onClearMonth={handleClearMonth}
+            onEditTransaction={handleEdit}
+            onDeleteTransaction={handleDelete}
+            onOpenAddModal={handleOpenAdd}
+            onOpenCategoryManager={() => handleOpenCategoryModal('expense')}
+            onExportPdf={handleExportPdf}
+          />
+        </main>
+      )}
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileBottomNav
+        activeDashboard={activeDashboard}
+        onChangeDashboard={setActiveDashboard}
         onOpenAddModal={handleOpenAdd}
-        onOpenCategoryManager={() => handleOpenCategoryModal('expense')}
+        onOpenCategories={() => handleOpenCategoryModal('expense')}
       />
-
-      {/* Floating Action Button (Mobile) */}
-      <button
-        className="fab-btn"
-        onClick={handleOpenAdd}
-        title="Add Transaction"
-        aria-label="Add Transaction"
-      >
-        <Plus size={24} />
-      </button>
 
       {/* Transaction Modal (Add/Edit) */}
       <TransactionModal
@@ -414,6 +656,7 @@ export function App() {
         onClose={() => setIsCategoryModalOpen(false)}
         onCategoryCreated={handleCategoryCreated}
         onCategoryDeleted={handleCategoryDeleted}
+        onRefreshCategories={refreshCategories}
       />
 
       {/* Budget Modal */}
@@ -430,6 +673,41 @@ export function App() {
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}
         onSuccess={handleAuthSuccess}
+      />
+
+      {/* Change Password Modal (For logged-in users) */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        onSuccess={(msg) => addToast(msg, 'success')}
+      />
+
+      {/* Profile & Security Settings Modal (Edit username, phone & change password) */}
+      <ProfileModal
+        isOpen={isProfileOpen}
+        user={user}
+        onClose={() => setIsProfileOpen(false)}
+        onSuccess={(updatedUser) => {
+          setUser(updatedUser);
+          addToast(`Profile updated! Welcome, ${updatedUser.fullName}`, 'success');
+        }}
+        onPasswordChanged={(msg) => addToast(msg, 'success')}
+      />
+
+      {/* Confirmation & Settlement Modal (Rollover, Cash Checkout, Delete) */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        type={confirmModal.type}
+        title={confirmModal.title}
+        subtitle={confirmModal.subtitle}
+        amount={confirmModal.amount}
+        fromMonth={confirmModal.fromMonth}
+        toMonth={confirmModal.toMonth}
+        confirmText={confirmModal.confirmText}
+        cancelText={confirmModal.cancelText}
+        isLoading={confirmModal.isLoading}
+        onConfirm={confirmModal.onConfirm}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
       />
 
       {/* Toast Notifications */}

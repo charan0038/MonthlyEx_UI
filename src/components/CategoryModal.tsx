@@ -21,6 +21,7 @@ interface CategoryModalProps {
   onClose: () => void;
   onCategoryCreated: (newCat: CategoryMeta) => void;
   onCategoryDeleted: (dbId: number) => void;
+  onRefreshCategories?: () => void;
 }
 
 const AVAILABLE_ICONS = [
@@ -81,6 +82,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onClose,
   onCategoryCreated,
   onCategoryDeleted,
+  onRefreshCategories,
 }) => {
   const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
   const [name, setName] = useState('');
@@ -89,6 +91,9 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [color, setColor] = useState('#6366f1');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [addingSubcatForId, setAddingSubcatForId] = useState<number | null>(null);
+  const [newSubcatName, setNewSubcatName] = useState('');
+  const [isSubcatSubmitting, setIsSubcatSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -98,6 +103,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       setColor(initialType === 'expense' ? '#ec4899' : '#10b981');
       setErrorMessage('');
       setActiveTab('create');
+      setAddingSubcatForId(null);
+      setNewSubcatName('');
     }
   }, [isOpen, initialType]);
 
@@ -111,6 +118,36 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     } else {
       setIconName('ShoppingBag');
       setColor('#ec4899');
+    }
+  };
+
+  const handleSaveSubcategory = async (catId: number) => {
+    const clean = newSubcatName.trim();
+    if (!clean) return;
+    try {
+      setIsSubcatSubmitting(true);
+      await api.createSubcategory(catId, clean);
+      setAddingSubcatForId(null);
+      setNewSubcatName('');
+      if (onRefreshCategories) {
+        onRefreshCategories();
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to add subcategory');
+    } finally {
+      setIsSubcatSubmitting(false);
+    }
+  };
+
+  const handleDeleteSubcategory = async (subId: number) => {
+    if (!window.confirm('Are you sure you want to delete this custom subcategory?')) return;
+    try {
+      await api.deleteSubcategory(subId);
+      if (onRefreshCategories) {
+        onRefreshCategories();
+      }
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete subcategory');
     }
   };
 
@@ -359,7 +396,151 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 </h4>
                 <div className="cat-list-items">
                   {customCategories.map((c) => (
-                    <div key={c.dbId || c.id} className="cat-manage-item">
+                    <div key={c.dbId || c.id} className="cat-manage-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <div className="cat-manage-left">
+                          <div className="cat-manage-icon" style={{ backgroundColor: c.color }}>
+                            <CategoryIcon name={c.iconName} size={16} />
+                          </div>
+                          <div>
+                            <div className="cat-manage-name">{c.label}</div>
+                            <span
+                              className={`cat-manage-type-tag ${
+                                c.type === 'income' ? 'tag-income' : 'tag-expense'
+                              }`}
+                            >
+                              {c.type === 'income' ? 'Income' : 'Expense'}
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="cat-delete-btn"
+                          onClick={() => handleDelete(c)}
+                          title={`Delete ${c.label}`}
+                          aria-label={`Delete ${c.label}`}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+
+                      {/* Subcategories */}
+                      <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                        {(c.subcategories || []).map((sub) => (
+                          <span
+                            key={sub.id}
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '11px',
+                              backgroundColor: 'rgba(255,255,255,0.06)',
+                              color: 'var(--text-secondary, #cbd5e1)',
+                              border: '1px solid rgba(255,255,255,0.08)'
+                            }}
+                          >
+                            {sub.name}
+                            {!sub.isDefault && (
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); handleDeleteSubcategory(sub.id); }}
+                                style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'inline-flex' }}
+                                title="Delete subcategory"
+                              >
+                                <X size={11} />
+                              </button>
+                            )}
+                          </span>
+                        ))}
+
+                        {c.dbId && (
+                          addingSubcatForId === c.dbId ? (
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              <input
+                                type="text"
+                                value={newSubcatName}
+                                onChange={(e) => setNewSubcatName(e.target.value)}
+                                placeholder="Subcategory..."
+                                style={{
+                                  padding: '2px 6px',
+                                  fontSize: '11px',
+                                  borderRadius: '6px',
+                                  background: 'rgba(0,0,0,0.3)',
+                                  border: '1px solid var(--primary, #6366f1)',
+                                  color: '#fff',
+                                  width: '100px'
+                                }}
+                                autoFocus
+                                disabled={isSubcatSubmitting}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleSaveSubcategory(c.dbId!);
+                                  } else if (e.key === 'Escape') {
+                                    setAddingSubcatForId(null);
+                                    setNewSubcatName('');
+                                  }
+                                }}
+                              />
+                              <button
+                                type="button"
+                                disabled={isSubcatSubmitting}
+                                onClick={() => handleSaveSubcategory(c.dbId!)}
+                                style={{ background: 'var(--primary, #6366f1)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', cursor: 'pointer' }}
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                disabled={isSubcatSubmitting}
+                                onClick={() => { setAddingSubcatForId(null); setNewSubcatName(''); }}
+                                style={{ background: 'transparent', color: '#94a3b8', border: 'none', fontSize: '10px', cursor: 'pointer' }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAddingSubcatForId(c.dbId!);
+                                setNewSubcatName('');
+                              }}
+                              style={{
+                                padding: '2px 7px',
+                                borderRadius: '10px',
+                                fontSize: '10px',
+                                border: '1px dashed rgba(255,255,255,0.2)',
+                                background: 'transparent',
+                                color: 'var(--text-secondary, #94a3b8)',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px'
+                              }}
+                            >
+                              <Plus size={10} /> Add
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="cat-group-section">
+              <h4 className="cat-section-title">
+                Default System Categories ({defaultCategories.length})
+              </h4>
+              <div className="cat-list-items">
+                {defaultCategories.map((c) => (
+                  <div key={c.id + (c.type || '')} className="cat-manage-item default-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                       <div className="cat-manage-left">
                         <div className="cat-manage-icon" style={{ backgroundColor: c.color }}>
                           <CategoryIcon name={c.iconName} size={16} />
@@ -376,47 +557,113 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        className="cat-delete-btn"
-                        onClick={() => handleDelete(c)}
-                        title={`Delete ${c.label}`}
-                        aria-label={`Delete ${c.label}`}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      <span className="cat-default-badge" title="Built-in default category">
+                        <Lock size={12} /> Default
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            <div className="cat-group-section">
-              <h4 className="cat-section-title">
-                Default System Categories ({defaultCategories.length})
-              </h4>
-              <div className="cat-list-items">
-                {defaultCategories.map((c) => (
-                  <div key={c.id + (c.type || '')} className="cat-manage-item default-item">
-                    <div className="cat-manage-left">
-                      <div className="cat-manage-icon" style={{ backgroundColor: c.color }}>
-                        <CategoryIcon name={c.iconName} size={16} />
-                      </div>
-                      <div>
-                        <div className="cat-manage-name">{c.label}</div>
+                    {/* Subcategories for default categories */}
+                    <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                      {(c.subcategories || []).map((sub) => (
                         <span
-                          className={`cat-manage-type-tag ${
-                            c.type === 'income' ? 'tag-income' : 'tag-expense'
-                          }`}
+                          key={sub.id}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '2px 8px',
+                            borderRadius: '12px',
+                            fontSize: '11px',
+                            backgroundColor: 'rgba(255,255,255,0.06)',
+                            color: 'var(--text-secondary, #cbd5e1)',
+                            border: '1px solid rgba(255,255,255,0.08)'
+                          }}
                         >
-                          {c.type === 'income' ? 'Income' : 'Expense'}
+                          {sub.name}
+                          {!sub.isDefault && (
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); handleDeleteSubcategory(sub.id); }}
+                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'inline-flex' }}
+                              title="Delete custom subcategory"
+                            >
+                              <X size={11} />
+                            </button>
+                          )}
                         </span>
-                      </div>
-                    </div>
+                      ))}
 
-                    <span className="cat-default-badge" title="Built-in default category">
-                      <Lock size={12} /> Default
-                    </span>
+                      {c.dbId && (
+                        addingSubcatForId === c.dbId ? (
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                            <input
+                              type="text"
+                              value={newSubcatName}
+                              onChange={(e) => setNewSubcatName(e.target.value)}
+                              placeholder="Subcategory..."
+                              style={{
+                                padding: '2px 6px',
+                                fontSize: '11px',
+                                borderRadius: '6px',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: '1px solid var(--primary, #6366f1)',
+                                color: '#fff',
+                                width: '100px'
+                              }}
+                              autoFocus
+                              disabled={isSubcatSubmitting}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleSaveSubcategory(c.dbId!);
+                                } else if (e.key === 'Escape') {
+                                  setAddingSubcatForId(null);
+                                  setNewSubcatName('');
+                                }
+                              }}
+                            />
+                            <button
+                              type="button"
+                              disabled={isSubcatSubmitting}
+                              onClick={() => handleSaveSubcategory(c.dbId!)}
+                              style={{ background: 'var(--primary, #6366f1)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', cursor: 'pointer' }}
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              disabled={isSubcatSubmitting}
+                              onClick={() => { setAddingSubcatForId(null); setNewSubcatName(''); }}
+                              style={{ background: 'transparent', color: '#94a3b8', border: 'none', fontSize: '10px', cursor: 'pointer' }}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAddingSubcatForId(c.dbId!);
+                              setNewSubcatName('');
+                            }}
+                            style={{
+                              padding: '2px 7px',
+                              borderRadius: '10px',
+                              fontSize: '10px',
+                              border: '1px dashed rgba(255,255,255,0.2)',
+                              background: 'transparent',
+                              color: 'var(--text-secondary, #94a3b8)',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '3px'
+                            }}
+                          >
+                            <Plus size={10} /> Add
+                          </button>
+                        )
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
