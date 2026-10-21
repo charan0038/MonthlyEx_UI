@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Wallet,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -86,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="header-brand-row">
         <div className="brand-group">
           <div className="brand-icon">
-            <Wallet size={22} />
+            <img src="/logo-icon.png" alt="Vessel" className="brand-logo-img" />
           </div>
           <div>
             <div className="brand-title">

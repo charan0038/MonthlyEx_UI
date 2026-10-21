@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Wallet,
   Lock,
   User as UserIcon,
   Eye,
@@ -157,7 +156,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <header className="login-top-bar">
         <div className="login-brand">
           <div className="login-brand-icon">
-            <Wallet size={22} />
+            <img src="/logo-icon.png" alt="Vessel" className="login-brand-logo-img" />
           </div>
           <div className="login-brand-text">
             <span className="login-brand-name">Vessel</span>
@@ -179,6 +178,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <main className="login-content-container">
         <div className="login-card">
           <div className="login-card-header">
+            <div className="login-hero-logo-wrap">
+              <img src="/logo.png" alt="Vessel Monthly Expense Tracker" className="login-hero-logo" />
+            </div>
             <h1 className="login-title">
               {mode === 'login'
                 ? 'Welcome Back'
