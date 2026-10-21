@@ -12,6 +12,11 @@ import type { FilterParams } from './services/api';
 import { getMonthKey, getMonthName, formatINR } from './utils/formatters';
 import { setDynamicCategoriesCache } from './constants/categories';
 import { exportMonthlyPdfReport, exportYearlyPdfReport } from './utils/pdfExport';
+import {
+  isMonthBudgetExplicit,
+  markMonthBudgetExplicit,
+  isAutoBudgetTransaction,
+} from './utils/budgetHelper';
 
 import { CalendarDays, BarChart3 } from 'lucide-react';
 
@@ -56,7 +61,7 @@ export function App() {
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [budget, setBudget] = useState<MonthlyBudget>({
     monthYear: getMonthKey(currentYear, currentMonth),
-    amount: 10000,
+    amount: 0,
   });
 
   // Filter states
@@ -172,12 +177,24 @@ export function App() {
       const [txs, sum, bgt] = await Promise.all([
         api.getTransactions(filterParams),
         api.getMonthlySummary(monthYearKey),
-        api.getBudget(monthYearKey),
+        api.getBudget(monthYearKey).catch(() => null),
       ]);
 
-      setTransactions(txs);
+      const isExplicit = isMonthBudgetExplicit(monthYearKey, bgt);
+
+      // Filter out auto-created ghost budget transactions if user never explicitly clicked "Set Budget"
+      const cleanTxs = txs.filter((t) => {
+        if (!isExplicit && isAutoBudgetTransaction(t)) {
+          // Asynchronously purge ghost transaction from backend database
+          api.deleteTransaction(t.id).catch(() => {});
+          return false;
+        }
+        return true;
+      });
+
+      setTransactions(cleanTxs);
       setSummary(sum);
-      setBudget(bgt);
+      setBudget(isExplicit && bgt ? bgt : { monthYear: monthYearKey, amount: 0 });
     } catch (err: any) {
       console.error('Error fetching data from API:', err);
       // Suppress unauthorized error toast if user logged out
@@ -336,7 +353,18 @@ export function App() {
   const handleSaveBudget = async (amount: number, addToIncome: boolean = true) => {
     try {
       await api.setBudget(monthYearKey, amount, addToIncome);
-      setBudget({ monthYear: monthYearKey, amount });
+      markMonthBudgetExplicit(monthYearKey);
+
+      if (!addToIncome) {
+        // If user explicitly chose NOT to add to total income, remove any auto-created budget income transaction
+        const currentTxs = await api.getTransactions({ monthYear: monthYearKey });
+        const budgetTxs = currentTxs.filter((t) => isAutoBudgetTransaction(t));
+        for (const bTx of budgetTxs) {
+          await api.deleteTransaction(bTx.id).catch(() => {});
+        }
+      }
+
+      setBudget({ monthYear: monthYearKey, amount, id: 1 });
       addToast(
         addToIncome
           ? `Budget set to ${formatINR(amount)} and added to Total Income!`
@@ -350,9 +378,9 @@ export function App() {
   };
 
   const handleCashCheckout = () => {
-    const remaining = summary?.budgetLeft ?? 0;
+    const remaining = summary?.netBalance ?? 0;
     if (remaining <= 0) {
-      addToast('No remaining balance to checkout.', 'info');
+      addToast('No surplus net balance available to checkout.', 'info');
       return;
     }
 
@@ -363,7 +391,7 @@ export function App() {
       isOpen: true,
       type: 'cash',
       title: 'Cash Checkout',
-      subtitle: `Withdraw your remaining monthly budget as physical cash. This will record a cash outflow for ${currentMonthName}.`,
+      subtitle: `Withdraw your surplus monthly net balance as physical cash. This will record a cash outflow for ${currentMonthName}.`,
       amount: remaining,
       fromMonth: currentMonthName,
       confirmText: `Checkout ${formatINR(remaining)} Cash`,
@@ -385,9 +413,9 @@ export function App() {
   };
 
   const handleRolloverBalance = () => {
-    const remaining = summary?.budgetLeft ?? 0;
+    const remaining = summary?.netBalance ?? 0;
     if (remaining <= 0) {
-      addToast('No remaining balance to carry forward.', 'info');
+      addToast('No surplus net balance available to carry forward.', 'info');
       return;
     }
 
@@ -400,7 +428,7 @@ export function App() {
       isOpen: true,
       type: 'rollover',
       title: 'Add to Next Month Opening Balance',
-      subtitle: `Transfer your remaining budget from ${currentMonthName} directly to ${nextMonthName}'s opening balance as incoming funds.`,
+      subtitle: `Transfer your surplus net balance from ${currentMonthName} directly to ${nextMonthName}'s opening balance as incoming funds.`,
       amount: remaining,
       fromMonth: currentMonthName,
       toMonth: nextMonthName,
@@ -448,8 +476,11 @@ export function App() {
             api.getTransactions({ monthYear: monthYearKey, sortBy: 'date-desc' }),
           ]);
           if (freshSum) exportSummary = freshSum;
-          if (freshBgt?.amount) exportBudgetAmount = freshBgt.amount;
-          if (allTxs && allTxs.length > 0) exportTransactions = allTxs;
+          const isExplicit = isMonthBudgetExplicit(monthYearKey, freshBgt);
+          exportBudgetAmount = isExplicit && freshBgt?.amount ? freshBgt.amount : 0;
+          if (allTxs && allTxs.length > 0) {
+            exportTransactions = allTxs.filter((t) => !(!isExplicit && isAutoBudgetTransaction(t)));
+          }
         } catch {
           // Fall back gracefully to active state if network fails
         }
@@ -623,10 +654,12 @@ export function App() {
         <main className="dashboard-content-view monthly-view" key={`monthly-${monthYearKey}`}>
           {/* Monthly Budget Card */}
           <BudgetCard
-            budgetLimit={summary?.budgetLimit ?? budget.amount}
+            budgetLimit={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLimit ?? budget.amount) : 0}
             totalExpense={summary?.totalExpense ?? 0}
-            budgetLeft={summary?.budgetLeft ?? budget.amount}
+            budgetLeft={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLeft ?? 0) : 0}
             usedPercentage={summary?.budgetUsedPercentage ?? 0}
+            netBalance={summary?.netBalance ?? 0}
+            isBudgetSet={isMonthBudgetExplicit(monthYearKey, budget)}
             isEndOfMonth={isEndOfMonth}
             onOpenBudgetModal={() => setIsBudgetOpen(true)}
             onCashCheckout={handleCashCheckout}
@@ -638,8 +671,9 @@ export function App() {
             totalIncome={summary?.totalIncome ?? 0}
             totalExpense={summary?.totalExpense ?? 0}
             netBalance={summary?.netBalance ?? 0}
-            budgetLeft={summary?.budgetLeft ?? budget.amount}
+            budgetLeft={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLeft ?? 0) : 0}
             usedPercentage={summary?.budgetUsedPercentage ?? 0}
+            isBudgetSet={isMonthBudgetExplicit(monthYearKey, budget)}
           />
 
           {/* Smart Insight Banner */}
@@ -711,7 +745,7 @@ export function App() {
       {/* Budget Modal */}
       <BudgetModal
         isOpen={isBudgetOpen}
-        currentBudget={budget.amount}
+        currentBudget={isMonthBudgetExplicit(monthYearKey, budget) ? budget.amount : 0}
         monthYear={monthYearKey}
         onClose={() => setIsBudgetOpen(false)}
         onSave={handleSaveBudget}

@@ -7,6 +7,8 @@ interface BudgetCardProps {
   totalExpense: number;
   budgetLeft: number;
   usedPercentage: number;
+  netBalance?: number;
+  isBudgetSet?: boolean;
   isEndOfMonth?: boolean;
   onOpenBudgetModal: () => void;
   onCashCheckout?: () => void;
@@ -18,21 +20,34 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
   totalExpense,
   budgetLeft,
   usedPercentage,
-  isEndOfMonth = false,
+  netBalance = 0,
+  isBudgetSet = true,
+  isEndOfMonth: _isEndOfMonth = false,
   onOpenBudgetModal,
   onCashCheckout,
   onRolloverBalance,
 }) => {
-  const isDanger = usedPercentage >= 100;
-  const isWarning = usedPercentage >= 80 && usedPercentage < 100;
-  const visualWidth = Math.min(Math.max(usedPercentage, 0), 100);
+  const isDanger = isBudgetSet && usedPercentage >= 100;
+  const isWarning = isBudgetSet && usedPercentage >= 80 && usedPercentage < 100;
+  const visualWidth = isBudgetSet ? Math.min(Math.max(usedPercentage, 0), 100) : 0;
 
   return (
     <section className="budget-banner-card" aria-label="Monthly Budget Progress">
       <div className="budget-banner-header">
         <div className="budget-title-wrap">
           <span style={{ fontWeight: 700, fontSize: '15px' }}>Monthly Budget</span>
-          {isDanger ? (
+          {!isBudgetSet ? (
+            <span
+              className="budget-status-pill"
+              style={{
+                background: 'rgba(148, 163, 184, 0.12)',
+                color: 'var(--text-secondary, #94a3b8)',
+                border: '1px solid rgba(148, 163, 184, 0.25)',
+              }}
+            >
+              <AlertCircle size={14} /> Not Set
+            </span>
+          ) : isDanger ? (
             <span className="budget-status-pill budget-status-danger">
               <AlertTriangle size={14} /> Exceeded 100%
             </span>
@@ -52,7 +67,12 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             <span>
               Spent: <strong className="budget-spent-val">{formatINR(totalExpense)}</strong>
             </span>
-            <span>of <span className="budget-limit-val">{formatINR(budgetLimit)}</span></span>
+            <span>
+              of{' '}
+              <span className="budget-limit-val">
+                {isBudgetSet ? formatINR(budgetLimit) : 'Not Set'}
+              </span>
+            </span>
           </div>
 
           <button className="budget-btn-set" onClick={onOpenBudgetModal}>
@@ -62,10 +82,10 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
       </div>
 
       {/* Progress Track */}
-      <div className="progress-track" title={`${Math.round(usedPercentage)}% spent`}>
+      <div className="progress-track" title={isBudgetSet ? `${Math.round(usedPercentage)}% spent` : 'No budget set'}>
         <div
           className={`progress-fill ${
-            isDanger ? 'status-danger' : isWarning ? 'status-warning' : 'status-safe'
+            !isBudgetSet ? '' : isDanger ? 'status-danger' : isWarning ? 'status-warning' : 'status-safe'
           }`}
           style={{ width: `${visualWidth}%` }}
         />
@@ -73,15 +93,17 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
       <div className="budget-footer-text">
         <span>
-          {budgetLeft >= 0
+          {!isBudgetSet
+            ? 'Click "Set Budget" to define monthly spending limit'
+            : budgetLeft >= 0
             ? `Remaining: ${formatINR(budgetLeft)}`
             : `Exceeded by: ${formatINR(Math.abs(budgetLeft))}`}
         </span>
-        <span>{Math.round(usedPercentage)}% used</span>
+        <span>{isBudgetSet ? `${Math.round(usedPercentage)}% used` : '0% used'}</span>
       </div>
 
-      {/* Month-End Settlement Options: Cash Checkout or Next Month Opening Balance (Only occurs at end of month) */}
-      {isEndOfMonth && budgetLeft > 0 && (onCashCheckout || onRolloverBalance) && (
+      {/* Settlement Options: Cash Checkout or Next Month Opening Balance based on positive NET BALANCE */}
+      {netBalance > 0 && (onCashCheckout || onRolloverBalance) && (
         <div
           style={{
             marginTop: '14px',
@@ -94,8 +116,8 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             gap: '10px',
           }}
         >
-          <div style={{ fontSize: '12px', color: 'var(--text-secondary, #94a3b8)' }}>
-            Remaining <strong style={{ color: 'var(--income, #10b981)' }}>{formatINR(budgetLeft)}</strong> left:
+          <div style={{ fontSize: '12.5px', color: 'var(--text-secondary, #94a3b8)' }}>
+            Net Balance surplus: <strong style={{ color: 'var(--income, #10b981)', fontSize: '13.5px' }}>{formatINR(netBalance)}</strong>
           </div>
 
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -113,9 +135,9 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                   cursor: 'pointer',
                 }}
                 onClick={onCashCheckout}
-                title="Withdraw remaining balance as cash"
+                title="Withdraw surplus net balance as cash"
               >
-                <Banknote size={13} /> Cash Checkout
+                <Banknote size={13} /> Cash Checkout ({formatINR(netBalance)})
               </button>
             )}
 
@@ -133,9 +155,9 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                   cursor: 'pointer',
                 }}
                 onClick={onRolloverBalance}
-                title="Save remaining balance as next month's opening income"
+                title="Save surplus net balance as next month's opening income"
               >
-                <ArrowRightCircle size={13} /> Add to Next Month Opening Balance
+                <ArrowRightCircle size={13} /> Add to Next Month Opening Balance ({formatINR(netBalance)})
               </button>
             )}
           </div>

@@ -15,6 +15,11 @@ import type {
   UpdateProfileInput,
   YearlySummary,
 } from '../types';
+import {
+  computeMonthlySummary,
+  isAutoBudgetTransaction,
+  isMonthBudgetExplicit,
+} from '../utils/budgetHelper';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://monthlyex-api.onrender.com/api').replace(/\/+$/, '');
 
@@ -330,15 +335,68 @@ export const api = {
 
   // --- Summary & Analytics ---
   async getMonthlySummary(monthYear: string): Promise<MonthlySummary> {
-    const res = await authFetch(`${API_BASE}/transactions/summary?monthYear=${encodeURIComponent(monthYear)}`);
-    if (!res.ok) throw new Error('Failed to fetch monthly summary');
-    return res.json();
+    // Note: Compute monthly summary directly from transactions and budget to avoid
+    // triggering backend auto-insert side-effect when simply viewing a month.
+    const [txs, bgt] = await Promise.all([
+      this.getTransactions({ monthYear }),
+      this.getBudget(monthYear).catch(() => null),
+    ]);
+    return computeMonthlySummary(monthYear, txs, bgt);
   },
 
   async getYearlySummary(year: number): Promise<YearlySummary> {
     const res = await authFetch(`${API_BASE}/transactions/yearly-summary?year=${year}`);
     if (!res.ok) throw new Error('Failed to fetch yearly summary');
-    return res.json();
+    const data: YearlySummary = await res.json();
+
+    // Verify and clean up any ghost budget transactions for months where user NEVER clicked "Set Budget"
+    try {
+      const yearTxs = await this.getTransactions({ monthYear: String(year) });
+      const ghostTxs = yearTxs.filter((t) => isAutoBudgetTransaction(t));
+
+      if (ghostTxs.length > 0) {
+        const monthMap = new Map<string, Transaction[]>();
+        for (const t of ghostTxs) {
+          const mKey = t.date ? t.date.substring(0, 7) : '';
+          if (mKey) {
+            if (!monthMap.has(mKey)) monthMap.set(mKey, []);
+            monthMap.get(mKey)!.push(t);
+          }
+        }
+
+        for (const [mKey, txList] of monthMap.entries()) {
+          const bgt = await this.getBudget(mKey).catch(() => null);
+          const isExplicit = isMonthBudgetExplicit(mKey, bgt);
+
+          if (!isExplicit) {
+            // Delete ghost transactions from backend permanently
+            for (const t of txList) {
+              await this.deleteTransaction(t.id).catch(() => {});
+            }
+
+            // Adjust monthly breakdown in the yearly summary data so chart is clean
+            const mNum = parseInt(mKey.split('-')[1], 10);
+            const mb = data.monthlyBreakdown?.find((m) => m.month === mNum);
+            if (mb) {
+              const ghostSum = txList.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+              mb.totalIncome = Math.max(0, mb.totalIncome - ghostSum);
+              mb.netBalance = mb.totalIncome - mb.totalExpense;
+            }
+          }
+        }
+
+        // Recalculate annual totalIncome, netSavings, and savingsRate
+        if (data.monthlyBreakdown) {
+          data.totalIncome = data.monthlyBreakdown.reduce((acc, curr) => acc + curr.totalIncome, 0);
+          data.netSavings = data.totalIncome - data.totalExpense;
+          data.savingsRate = data.totalIncome > 0 ? (data.netSavings / data.totalIncome) * 100 : 0;
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking yearly ghost transactions:', e);
+    }
+
+    return data;
   },
 
   // --- Budgets & Balance Settlement ---

@@ -18,14 +18,14 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
   onSave,
 }) => {
   const [amount, setAmount] = useState<string>(
-    currentBudget > 0 ? currentBudget.toString() : '10000'
+    currentBudget > 0 ? currentBudget.toString() : '0'
   );
   const [addToIncome, setAddToIncome] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
-      setAmount(currentBudget > 0 ? currentBudget.toString() : '10000');
+      setAmount(currentBudget > 0 ? currentBudget.toString() : '0');
       setAddToIncome(true);
     }
   }, [currentBudget, isOpen]);
@@ -65,7 +65,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
         <div className="modal-header">
           <div>
             <h3 className="modal-title">Set Monthly Budget</h3>
-            <p className="modal-subtitle">Default budget is ₹10,000 (10k)</p>
+            <p className="modal-subtitle">Set spending limit for {monthDisplayName}</p>
           </div>
           <button className="modal-close-btn" onClick={onClose} aria-label="Close Modal">
             <X size={16} />
@@ -87,7 +87,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                 id="budgetInput"
                 type="number"
                 className="amount-input"
-                placeholder="10000"
+                placeholder="0"
                 step="1000"
                 min="0"
                 required

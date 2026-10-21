@@ -8,6 +8,7 @@ interface SummaryCardsProps {
   netBalance: number;
   budgetLeft: number;
   usedPercentage: number;
+  isBudgetSet?: boolean;
 }
 
 export const SummaryCards: React.FC<SummaryCardsProps> = ({
@@ -16,6 +17,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
   netBalance,
   budgetLeft,
   usedPercentage,
+  isBudgetSet = true,
 }) => {
   return (
     <section className="summary-grid" aria-label="Financial Summary Cards">
@@ -89,14 +91,18 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
             <PiggyBank size={20} />
           </div>
         </div>
-        <div className="stat-card-value">{formatINR(budgetLeft)}</div>
+        <div className="stat-card-value">{isBudgetSet ? formatINR(budgetLeft) : 'Not Set'}</div>
         <div className="stat-card-sub">
-          {budgetLeft >= 0 ? (
-            <span>{Math.round(100 - usedPercentage)}% allowance remaining</span>
+          {isBudgetSet ? (
+            budgetLeft >= 0 ? (
+              <span>{Math.round(100 - usedPercentage)}% allowance remaining</span>
+            ) : (
+              <span style={{ color: 'var(--expense)', fontWeight: 700 }}>
+                Over budget by {formatINR(Math.abs(budgetLeft))}
+              </span>
+            )
           ) : (
-            <span style={{ color: 'var(--expense)', fontWeight: 700 }}>
-              Over budget by {formatINR(Math.abs(budgetLeft))}
-            </span>
+            <span>Set budget to track allowance</span>
           )}
         </div>
       </div>
