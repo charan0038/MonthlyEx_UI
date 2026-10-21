@@ -436,12 +436,61 @@ export function App() {
         });
         addToast(`Exported Annual PDF Report for ${currentYear}!`, 'success');
       } else {
+        // Fetch authoritative fresh data for this month (unfiltered by UI search/category)
+        let exportSummary = summary;
+        let exportBudgetAmount = budget.amount;
+        let exportTransactions = transactions;
+
+        try {
+          const [freshSum, freshBgt, allTxs] = await Promise.all([
+            api.getMonthlySummary(monthYearKey),
+            api.getBudget(monthYearKey),
+            api.getTransactions({ monthYear: monthYearKey, sortBy: 'date-desc' }),
+          ]);
+          if (freshSum) exportSummary = freshSum;
+          if (freshBgt?.amount) exportBudgetAmount = freshBgt.amount;
+          if (allTxs && allTxs.length > 0) exportTransactions = allTxs;
+        } catch {
+          // Fall back gracefully to active state if network fails
+        }
+
+        // If exportSummary has 0s or is null but transactions exist, recalculate totals directly
+        if (exportTransactions.length > 0) {
+          const inc = exportTransactions
+            .filter((t) => t.type?.toLowerCase() === 'income')
+            .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+          const exp = exportTransactions
+            .filter((t) => t.type?.toLowerCase() === 'expense')
+            .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+          const net = inc - exp;
+          const bLeft = exportBudgetAmount - exp;
+
+          if (
+            !exportSummary ||
+            (exportSummary.totalIncome === 0 && exportSummary.totalExpense === 0 && (inc > 0 || exp > 0))
+          ) {
+            exportSummary = {
+              monthYear: monthYearKey,
+              totalIncome: inc,
+              totalExpense: exp,
+              netBalance: net,
+              budgetLimit: exportBudgetAmount,
+              budgetLeft: bLeft,
+              budgetUsedPercentage: exportBudgetAmount > 0 ? (exp / exportBudgetAmount) * 100 : 0,
+              totalTransactions: exportTransactions.length,
+              insightMessage: '',
+              categoryBreakdown: exportSummary?.categoryBreakdown || [],
+              dailySpending: exportSummary?.dailySpending || [],
+            };
+          }
+        }
+
         exportMonthlyPdfReport({
           monthYear: monthYearKey,
           user,
-          summary,
-          budgetAmount: budget.amount,
-          transactions,
+          summary: exportSummary,
+          budgetAmount: exportBudgetAmount,
+          transactions: exportTransactions,
         });
         addToast(
           `Exported Monthly PDF Statement for ${getMonthName(currentMonth, currentYear)}!`,

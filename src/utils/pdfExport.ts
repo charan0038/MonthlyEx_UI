@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Transaction, MonthlySummary, YearlySummary, User } from '../types';
-import { formatINR, getMonthName } from './formatters';
+import { getMonthName } from './formatters';
 
 interface MonthlyPdfOptions {
   monthYear: string;
@@ -18,14 +18,37 @@ interface YearlyPdfOptions {
 }
 
 /**
- * Format currency without symbol for PDF if needed or with ₹
+ * Clean currency formatting specifically for standard PDF fonts (Helvetica)
+ * Avoids the Unicode Rupee symbol (₹) which renders as a broken superscript "¹" in jsPDF.
  */
-function cleanCurrency(amount: number): string {
-  return formatINR(amount);
+function cleanCurrency(amount: number | null | undefined): string {
+  const num = Math.round(Number(amount) || 0);
+  const formatted = new Intl.NumberFormat('en-IN', {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  }).format(Math.abs(num));
+  return (num < 0 ? '- Rs. ' : 'Rs. ') + formatted;
 }
 
 /**
- * Exports a comprehensive Monthly Financial Statement PDF
+ * Format date for PDF display (e.g., "14 Oct 2026")
+ */
+function formatPdfDate(dateStr: string): string {
+  if (!dateStr) return '—';
+  try {
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      const date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+      return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    return dateStr;
+  } catch {
+    return dateStr;
+  }
+}
+
+/**
+ * Exports a clean, executive-grade Monthly Financial Statement PDF
  */
 export function exportMonthlyPdfReport({
   monthYear,
@@ -48,20 +71,31 @@ export function exportMonthlyPdfReport({
   const pageWidth = doc.internal.pageSize.getWidth();
   let currentY = 14;
 
-  // 1. Header Banner
-  doc.setFillColor(30, 27, 75); // Dark Indigo
+  // 1. Elegant Header Banner (Deep Navy Gradient feel)
+  doc.setFillColor(15, 23, 42); // #0f172a
   doc.roundedRect(12, currentY, pageWidth - 24, 28, 4, 4, 'F');
+
+  // Decorative Accent bar on the left edge
+  doc.setFillColor(16, 185, 129); // Emerald Green
+  doc.rect(12, currentY, 3.5, 28, 'F');
 
   // Title & Subtitle inside banner
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text('VESSEL  MONTHLY EXPENSE STATEMENT', 18, currentY + 11);
+  doc.setFontSize(15);
+  doc.text('VESSEL  |  MONTHLY FINANCIAL STATEMENT', 19, currentY + 11);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.5);
-  doc.setTextColor(199, 210, 254); // Light indigo
-  doc.text(`Statement Period: ${monthName} ${year}   |   Generated: ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`, 18, currentY + 19);
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184); // Slate-400
+  const genTime = new Date().toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  doc.text(`Statement Period: ${monthName}   |   Issued: ${genTime}`, 19, currentY + 19);
 
   currentY += 34;
 
@@ -70,43 +104,51 @@ export function exportMonthlyPdfReport({
   doc.setDrawColor(226, 232, 240);
   doc.roundedRect(12, currentY, pageWidth - 24, 18, 3, 3, 'FD');
 
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
   doc.text('Account Holder:', 18, currentY + 7);
-  doc.text('Contact Mobile:', 18, currentY + 13);
+  doc.text('Registered Mobile:', 18, currentY + 13);
 
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
-  doc.text(user?.fullName || 'Personal User', 50, currentY + 7);
-  doc.text(user?.mobileNumber ? `+91 ${user.mobileNumber}` : '—', 50, currentY + 13);
+  doc.text(user?.fullName || 'Personal Account', 52, currentY + 7);
+  doc.text(user?.mobileNumber ? `+91 ${user.mobileNumber}` : '—', 52, currentY + 13);
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Total Recorded Transactions:', pageWidth / 2 + 10, currentY + 7);
-  doc.text('Budget Health Status:', pageWidth / 2 + 10, currentY + 13);
+  doc.text('Total Recorded Transactions:', pageWidth / 2 + 6, currentY + 7);
+  doc.text('Budget Health Status:', pageWidth / 2 + 6, currentY + 13);
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(`${transactions.length} items`, pageWidth / 2 + 65, currentY + 7);
+  doc.text(`${transactions.length} record${transactions.length === 1 ? '' : 's'}`, pageWidth / 2 + 62, currentY + 7);
 
-  const isOverBudget = (summary?.budgetLeft ?? 0) < 0;
+  // Derive summary numbers safely
+  const calculatedExpenses = transactions
+    .filter((t) => t.type?.toLowerCase() === 'expense')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+  const calculatedIncome = transactions
+    .filter((t) => t.type?.toLowerCase() === 'income')
+    .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+
+  const budgetLimit = summary?.budgetLimit ?? budgetAmount;
+  const totalExpense = summary?.totalExpense || calculatedExpenses;
+  const totalIncome = summary?.totalIncome || calculatedIncome;
+  const netBalance = summary?.netBalance ?? (totalIncome - totalExpense);
+  const budgetLeft = summary?.budgetLeft ?? (budgetLimit - totalExpense);
+
+  const isOverBudget = budgetLeft < 0;
   if (isOverBudget) {
     doc.setTextColor(225, 29, 72);
-    doc.text('Over Budget', pageWidth / 2 + 65, currentY + 13);
+    doc.text('Over Budget', pageWidth / 2 + 62, currentY + 13);
   } else {
     doc.setTextColor(16, 185, 129);
-    doc.text('Healthy', pageWidth / 2 + 65, currentY + 13);
+    doc.text('On Track (Healthy)', pageWidth / 2 + 62, currentY + 13);
   }
 
   currentY += 24;
 
   // 3. Executive Financial Summary Cards (AutoTable Grid)
-  const totalIncome = summary?.totalIncome ?? 0;
-  const totalExpense = summary?.totalExpense ?? 0;
-  const netBalance = summary?.netBalance ?? 0;
-  const budgetLeft = summary?.budgetLeft ?? (budgetAmount - totalExpense);
-  const budgetLimit = summary?.budgetLimit ?? budgetAmount;
-
   autoTable(doc, {
     startY: currentY,
     margin: { left: 12, right: 12 },
@@ -116,11 +158,11 @@ export function exportMonthlyPdfReport({
       cleanCurrency(budgetLimit),
       cleanCurrency(totalIncome),
       cleanCurrency(totalExpense),
-      (netBalance >= 0 ? '+' : '') + cleanCurrency(netBalance),
+      (netBalance >= 0 ? '+ ' : '') + cleanCurrency(netBalance),
       cleanCurrency(budgetLeft),
     ]],
     headStyles: {
-      fillColor: [79, 70, 229], // Brand Primary
+      fillColor: [79, 70, 229], // Brand Indigo
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       fontSize: 9,
@@ -144,11 +186,11 @@ export function exportMonthlyPdfReport({
 
   currentY = (doc as any).lastAutoTable.finalY + 8;
 
-  // 4. Category Breakdown Table
+  // 4. Category Breakdown Table (if available)
   const categoryBreakdown = summary?.categoryBreakdown || [];
   if (categoryBreakdown.length > 0) {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10.5);
     doc.setTextColor(15, 23, 42);
     doc.text('Spending by Category', 14, currentY);
 
@@ -187,7 +229,7 @@ export function exportMonthlyPdfReport({
 
   // 5. Complete Transaction Ledger Table
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
   doc.text(`Transactions Ledger (${transactions.length} records)`, 14, currentY);
 
@@ -201,7 +243,7 @@ export function exportMonthlyPdfReport({
 
     return [
       (idx + 1).toString(),
-      tx.date,
+      formatPdfDate(tx.date),
       note,
       catName,
       subName,
@@ -215,7 +257,7 @@ export function exportMonthlyPdfReport({
     startY: currentY + 3,
     margin: { left: 12, right: 12 },
     head: [['#', 'Date', 'Description / Note', 'Category', 'Subcategory', 'Method', 'Type', 'Amount']],
-    body: txRows.length > 0 ? txRows : [['—', '—', 'No transactions found for this month', '—', '—', '—', '—', '—']],
+    body: txRows.length > 0 ? txRows : [['—', '—', 'No transactions recorded for this month', '—', '—', '—', '—', '—']],
     headStyles: {
       fillColor: [30, 41, 59],
       textColor: [255, 255, 255],
@@ -232,13 +274,13 @@ export function exportMonthlyPdfReport({
     },
     columnStyles: {
       0: { cellWidth: 8, halign: 'center' },
-      1: { cellWidth: 20 },
-      2: { cellWidth: 42 },
+      1: { cellWidth: 22 },
+      2: { cellWidth: 44 },
       3: { cellWidth: 26 },
       4: { cellWidth: 26 },
-      5: { cellWidth: 16, halign: 'center' },
+      5: { cellWidth: 18, halign: 'center' },
       6: { cellWidth: 18, halign: 'center' },
-      7: { cellWidth: 26, halign: 'right', fontStyle: 'bold' },
+      7: { cellWidth: 24, halign: 'right', fontStyle: 'bold' },
     },
     didParseCell: (data) => {
       // Color-code income vs expense amounts
@@ -253,7 +295,7 @@ export function exportMonthlyPdfReport({
     },
   });
 
-  // 6. Footer on all pages
+  // 6. Professional Footer on all pages
   const totalPages = (doc as any).internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
@@ -261,7 +303,7 @@ export function exportMonthlyPdfReport({
     doc.setTextColor(148, 163, 184);
     doc.setFont('helvetica', 'normal');
     doc.text(
-      `Vessel Personal Expense Tracker  |  Confidential Financial Report  |  Page ${i} of ${totalPages}`,
+      `Vessel Monthly Expense Tracker  |  Verified Financial Record  |  Page ${i} of ${totalPages}`,
       pageWidth / 2,
       doc.internal.pageSize.getHeight() - 8,
       { align: 'center' }
@@ -269,7 +311,7 @@ export function exportMonthlyPdfReport({
   }
 
   // Save the PDF
-  doc.save(`Vessel_Report_${monthYear}.pdf`);
+  doc.save(`Vessel_Statement_${monthYear}.pdf`);
 }
 
 /**
@@ -290,22 +332,29 @@ export function exportYearlyPdfReport({
   let currentY = 14;
 
   // 1. Header Banner
-  doc.setFillColor(30, 27, 75); // Dark Indigo
+  doc.setFillColor(15, 23, 42); // Dark Navy
   doc.roundedRect(12, currentY, pageWidth - 24, 28, 4, 4, 'F');
+
+  // Decorative Accent bar on the left edge
+  doc.setFillColor(79, 70, 229); // Indigo
+  doc.rect(12, currentY, 3.5, 28, 'F');
 
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(16);
-  doc.text(`VESSEL  ANNUAL FINANCIAL STATEMENT - ${year}`, 18, currentY + 11);
+  doc.setFontSize(15);
+  doc.text(`VESSEL  |  ANNUAL FINANCIAL STATEMENT - ${year}`, 19, currentY + 11);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.5);
-  doc.setTextColor(199, 210, 254);
-  doc.text(
-    `Overall 12-Month Performance   |   Generated: ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`,
-    18,
-    currentY + 19
-  );
+  doc.setFontSize(9);
+  doc.setTextColor(148, 163, 184);
+  const genTime = new Date().toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  doc.text(`12-Month Performance Overview   |   Issued: ${genTime}`, 19, currentY + 19);
 
   currentY += 34;
 
@@ -314,20 +363,20 @@ export function exportYearlyPdfReport({
   doc.setDrawColor(226, 232, 240);
   doc.roundedRect(12, currentY, pageWidth - 24, 18, 3, 3, 'FD');
 
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(100, 116, 139);
   doc.text('Account Holder:', 18, currentY + 7);
-  doc.text('Contact Mobile:', 18, currentY + 13);
+  doc.text('Registered Mobile:', 18, currentY + 13);
 
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
-  doc.text(user?.fullName || 'Personal User', 50, currentY + 7);
-  doc.text(user?.mobileNumber ? `+91 ${user.mobileNumber}` : '—', 50, currentY + 13);
+  doc.text(user?.fullName || 'Personal Account', 52, currentY + 7);
+  doc.text(user?.mobileNumber ? `+91 ${user.mobileNumber}` : '—', 52, currentY + 13);
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text('Annual Transactions:', pageWidth / 2 + 10, currentY + 7);
-  doc.text('Annual Savings Rate:', pageWidth / 2 + 10, currentY + 13);
+  doc.text('Annual Transactions:', pageWidth / 2 + 6, currentY + 7);
+  doc.text('Annual Savings Rate:', pageWidth / 2 + 6, currentY + 13);
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
@@ -347,7 +396,7 @@ export function exportYearlyPdfReport({
     body: [[
       cleanCurrency(summary.totalIncome),
       cleanCurrency(summary.totalExpense),
-      (summary.netSavings >= 0 ? '+' : '') + cleanCurrency(summary.netSavings),
+      (summary.netSavings >= 0 ? '+ ' : '') + cleanCurrency(summary.netSavings),
       cleanCurrency(summary.averageMonthlyExpense),
       summary.topExpenseCategory || 'None',
     ]],
@@ -396,7 +445,7 @@ export function exportYearlyPdfReport({
 
   // 5. 12-Month Performance Breakdown Table
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
   doc.text('12-Month Breakdown Summary', 14, currentY);
 
@@ -408,7 +457,7 @@ export function exportYearlyPdfReport({
       m.totalIncome > 0 ? cleanCurrency(m.totalIncome) : '—',
       m.totalExpense > 0 ? cleanCurrency(m.totalExpense) : '—',
       m.totalIncome > 0 || m.totalExpense > 0
-        ? (isSurplus ? '+' : '') + cleanCurrency(m.netBalance)
+        ? (isSurplus ? '+ ' : '') + cleanCurrency(m.netBalance)
         : '—',
       m.topCategory && m.topCategory !== 'None' ? m.topCategory : '—',
     ];
@@ -458,14 +507,13 @@ export function exportYearlyPdfReport({
   // 6. Annual Category Breakdown Table
   const categories = summary.categoryBreakdown || [];
   if (categories.length > 0) {
-    // Check if we need a new page
     if (currentY > doc.internal.pageSize.getHeight() - 60) {
       doc.addPage();
       currentY = 16;
     }
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
+    doc.setFontSize(10.5);
     doc.setTextColor(15, 23, 42);
     doc.text('Annual Spending by Category', 14, currentY);
 
@@ -508,7 +556,7 @@ export function exportYearlyPdfReport({
     doc.setTextColor(148, 163, 184);
     doc.setFont('helvetica', 'normal');
     doc.text(
-      `Vessel Personal Expense Tracker  |  Annual Financial Statement  |  Page ${i} of ${totalPages}`,
+      `Vessel Monthly Expense Tracker  |  Annual Financial Statement  |  Page ${i} of ${totalPages}`,
       pageWidth / 2,
       doc.internal.pageSize.getHeight() - 8,
       { align: 'center' }
