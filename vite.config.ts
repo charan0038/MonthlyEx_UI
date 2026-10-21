@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5025',
+        target: 'https://monthlyex-api.onrender.com',
         changeOrigin: true,
         secure: false,
       },

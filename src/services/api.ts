@@ -16,7 +16,7 @@ import type {
   YearlySummary,
 } from '../types';
 
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://monthlyex-api.onrender.com/api').replace(/\/+$/, '');
 
 const TOKEN_KEY = 'kharcha_access_token';
 const REFRESH_TOKEN_KEY = 'kharcha_refresh_token';
