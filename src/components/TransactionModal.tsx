@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X, Check, ArrowDownRight, ArrowUpRight, Smartphone, Banknote, CreditCard, Plus } from 'lucide-react';
-import type { Transaction, TransactionType, PaymentMethod, CreateTransactionInput, CategoryMeta } from '../types';
+import type { Transaction, TransactionType, PaymentMethod, CreateTransactionInput, CategoryMeta, SubcategoryItem } from '../types';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
 import { CategoryIcon } from './CategoryIcon';
 import { CustomDatePicker } from './CustomDatePicker';
+import { api } from '../services/api';
 
 interface TransactionModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface TransactionModalProps {
   onClose: () => void;
   onSave: (data: CreateTransactionInput, id?: string) => Promise<void>;
   onOpenCreateCategory?: (type: TransactionType) => void;
+  onSubcategoryCreated?: (categoryId: number, newSub: SubcategoryItem) => void;
 }
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -25,6 +27,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   onClose,
   onSave,
   onOpenCreateCategory,
+  onSubcategoryCreated,
 }) => {
   const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState<string>('');
@@ -35,6 +38,13 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('UPI');
   const [note, setNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Dynamic inline subcategory creation states
+  const [isAddingSub, setIsAddingSub] = useState<boolean>(false);
+  const [newSubName, setNewSubName] = useState<string>('');
+  const [isSubLoading, setIsSubLoading] = useState<boolean>(false);
+  const [subError, setSubError] = useState<string>('');
+  const [customSubcategories, setCustomSubcategories] = useState<Record<number, SubcategoryItem[]>>({});
 
   useEffect(() => {
     if (forcedCategory) {
@@ -47,11 +57,18 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         setSelectedCategoryId(match.dbId);
         setSelectedSubcategoryId(null);
         setSelectedSubcategory('');
+        setIsAddingSub(false);
+        setNewSubName('');
+        setSubError('');
       }
     }
   }, [forcedCategory, categories]);
 
   useEffect(() => {
+    setIsAddingSub(false);
+    setNewSubName('');
+    setSubError('');
+
     if (editingTransaction) {
       setType(editingTransaction.type);
       setAmount(editingTransaction.amount.toString());
@@ -100,6 +117,50 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     }
     setSelectedSubcategoryId(null);
     setSelectedSubcategory('');
+    setIsAddingSub(false);
+    setNewSubName('');
+    setSubError('');
+  };
+
+  const handleCreateSubcategory = async () => {
+    const trimmed = newSubName.trim();
+    if (!trimmed) {
+      setSubError('Please enter a subcategory name');
+      return;
+    }
+    if (!selectedCategoryId) {
+      setSubError('Please select a category first');
+      return;
+    }
+
+    try {
+      setIsSubLoading(true);
+      setSubError('');
+      const createdSub: SubcategoryItem = await api.createSubcategory(selectedCategoryId, trimmed);
+
+      // Add to local custom subcategories map
+      setCustomSubcategories((prev) => ({
+        ...prev,
+        [selectedCategoryId]: [...(prev[selectedCategoryId] || []), createdSub],
+      }));
+
+      // Immediately select newly created subcategory
+      setSelectedSubcategoryId(createdSub.id);
+      setSelectedSubcategory(createdSub.name);
+
+      // Notify parent to refresh cache / global state
+      if (onSubcategoryCreated) {
+        onSubcategoryCreated(selectedCategoryId, createdSub);
+      }
+
+      setIsAddingSub(false);
+      setNewSubName('');
+    } catch (err: any) {
+      console.error('Failed to create subcategory:', err);
+      setSubError(err.message || 'Failed to add subcategory');
+    } finally {
+      setIsSubLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -223,7 +284,14 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                 <div
                   key={cat.id}
                   className={`category-tile ${selectedCategoryId === cat.dbId ? 'selected' : ''}`}
-                  onClick={() => setSelectedCategoryId(cat.dbId || 1)}
+                  onClick={() => {
+                    setSelectedCategoryId(cat.dbId || 1);
+                    setSelectedSubcategoryId(null);
+                    setSelectedSubcategory('');
+                    setIsAddingSub(false);
+                    setNewSubName('');
+                    setSubError('');
+                  }}
                 >
                   <div className="category-tile-icon" style={{ backgroundColor: cat.color }}>
                     <CategoryIcon name={cat.iconName} size={15} />
@@ -248,31 +316,55 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
             {/* Optional Subcategories */}
             {(() => {
-              const currentCat = categoryList.find((c) => c.dbId === selectedCategoryId);
-              const currentSubs = currentCat?.subcategories || [];
-              if (currentSubs.length === 0) return null;
+              const currentCat = categoryList.find(
+                (c) => c.dbId === selectedCategoryId || c.id === String(selectedCategoryId)
+              );
+              const baseSubs = currentCat?.subcategories || [];
+              const localSubs = customSubcategories[selectedCategoryId] || [];
+              const combinedSubs: SubcategoryItem[] = [...baseSubs];
+              for (const ls of localSubs) {
+                if (!combinedSubs.some((s) => s.id === ls.id || s.name.toLowerCase() === ls.name.toLowerCase())) {
+                  combinedSubs.push(ls);
+                }
+              }
 
               return (
                 <div style={{ marginTop: '14px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-secondary, #94a3b8)' }}>
                       Subcategory <span style={{ opacity: 0.7, fontWeight: 400 }}>(Optional)</span>
                     </span>
-                    {selectedSubcategory && (
-                      <button
-                        type="button"
-                        className="quick-link-btn"
-                        style={{ fontSize: '11px', padding: 0, textDecoration: 'underline' }}
-                        onClick={() => {
-                          setSelectedSubcategoryId(null);
-                          setSelectedSubcategory('');
-                        }}
-                      >
-                        Clear subcategory
-                      </button>
-                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      {selectedSubcategory && (
+                        <button
+                          type="button"
+                          className="quick-link-btn"
+                          style={{ fontSize: '11px', padding: 0, textDecoration: 'underline' }}
+                          onClick={() => {
+                            setSelectedSubcategoryId(null);
+                            setSelectedSubcategory('');
+                          }}
+                        >
+                          Clear subcategory
+                        </button>
+                      )}
+                      {!isAddingSub && (
+                        <button
+                          type="button"
+                          className="quick-link-btn"
+                          onClick={() => {
+                            setIsAddingSub(true);
+                            setNewSubName('');
+                            setSubError('');
+                          }}
+                        >
+                          <Plus size={12} /> Add Subcategory
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
                     <button
                       type="button"
                       style={{
@@ -293,7 +385,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                     >
                       None
                     </button>
-                    {currentSubs.map((sub) => {
+                    {combinedSubs.map((sub) => {
                       const isSelected =
                         selectedSubcategoryId === sub.id ||
                         selectedSubcategory.toLowerCase() === sub.name.toLowerCase();
@@ -321,7 +413,82 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
                         </button>
                       );
                     })}
+
+                    {!isAddingSub && (
+                      <button
+                        type="button"
+                        className="subcat-pill-add"
+                        onClick={() => {
+                          setIsAddingSub(true);
+                          setNewSubName('');
+                          setSubError('');
+                        }}
+                        title="Add subcategory"
+                      >
+                        <Plus size={11} /> Add
+                      </button>
+                    )}
                   </div>
+
+                  {isAddingSub && (
+                    <div style={{ marginTop: '8px' }}>
+                      <div className="subcat-inline-add">
+                        <input
+                          type="text"
+                          className="subcat-inline-input"
+                          value={newSubName}
+                          onChange={(e) => {
+                            setNewSubName(e.target.value);
+                            if (subError) setSubError('');
+                          }}
+                          placeholder={`Add subcategory for ${currentCat?.label || 'category'}...`}
+                          autoFocus
+                          maxLength={35}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleCreateSubcategory();
+                            } else if (e.key === 'Escape') {
+                              setIsAddingSub(false);
+                              setNewSubName('');
+                              setSubError('');
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="subcat-inline-btn-save"
+                          onClick={() => handleCreateSubcategory()}
+                          disabled={isSubLoading || !newSubName.trim()}
+                        >
+                          {isSubLoading ? (
+                            'Saving...'
+                          ) : (
+                            <>
+                              <Check size={12} /> Add
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          className="subcat-inline-btn-cancel"
+                          onClick={() => {
+                            setIsAddingSub(false);
+                            setNewSubName('');
+                            setSubError('');
+                          }}
+                          title="Cancel"
+                        >
+                          <X size={15} />
+                        </button>
+                      </div>
+                      {subError && (
+                        <div style={{ color: 'var(--danger, #ef4444)', fontSize: '11px', marginTop: '4px', paddingLeft: '4px' }}>
+                          {subError}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })()}

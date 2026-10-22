@@ -6,6 +6,7 @@ import type {
   MonthlyBudget,
   User,
   CategoryMeta,
+  SubcategoryItem,
 } from './types';
 import { api } from './services/api';
 import type { FilterParams } from './services/api';
@@ -245,6 +246,23 @@ export function App() {
     });
     setForcedTxCategory(newCat.label);
     addToast(`Category "${newCat.label}" created dynamically!`, 'success');
+  };
+
+  const handleSubcategoryCreated = (categoryId: number, newSub: SubcategoryItem) => {
+    setCategories((prev) => {
+      const next = prev.map((c) => {
+        if (c.dbId === categoryId) {
+          const subs = c.subcategories || [];
+          if (!subs.some((s) => s.id === newSub.id || s.name.toLowerCase() === newSub.name.toLowerCase())) {
+            return { ...c, subcategories: [...subs, newSub] };
+          }
+        }
+        return c;
+      });
+      setDynamicCategoriesCache(next);
+      return next;
+    });
+    addToast(`Subcategory "${newSub.name}" added successfully!`, 'success');
   };
 
   const handleCategoryDeleted = (dbId: number) => {
@@ -754,6 +772,7 @@ export function App() {
         onClose={() => setIsAddEditOpen(false)}
         onSave={handleSaveTransaction}
         onOpenCreateCategory={(t) => handleOpenCategoryModal(t)}
+        onSubcategoryCreated={handleSubcategoryCreated}
       />
 
       {/* Category Modal (Create / Manage Dynamic Categories) */}

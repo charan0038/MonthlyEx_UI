@@ -38,6 +38,7 @@ export interface FilterParams {
   startDate?: string;
   endDate?: string;
   category?: string;
+  subcategory?: string;
   type?: string;
   payment?: string;
   search?: string;
@@ -294,6 +295,7 @@ export const api = {
     if (params.startDate) query.set('startDate', params.startDate);
     if (params.endDate) query.set('endDate', params.endDate);
     if (params.category && params.category !== 'ALL') query.set('category', params.category);
+    if (params.subcategory && params.subcategory !== 'ALL') query.set('subcategory', params.subcategory);
     if (params.type && params.type !== 'ALL') query.set('type', params.type);
     if (params.payment && params.payment !== 'ALL') query.set('payment', params.payment);
     if (params.search) query.set('search', params.search);
