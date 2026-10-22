@@ -1,0 +1,816 @@
+/* ==========================================================================
+   Weekly Dashboard & Financial Statement Styles
+   ========================================================================== */
+
+.weekly-dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Control Header Bar --- */
+.weekly-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.15);
+  flex-wrap: wrap;
+}
+
+.weekly-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.weekly-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  color: var(--text-main, #f8fafc);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.weekly-nav-btn:hover {
+  background: var(--primary, #6366f1);
+  color: #fff;
+  border-color: var(--primary, #6366f1);
+  transform: scale(1.04);
+}
+
+.weekly-title-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weekly-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weekly-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(99, 102, 241, 0.18);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.weekly-range-text {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  letter-spacing: -0.3px;
+}
+
+.weekly-year-text {
+  font-size: 12.5px;
+  color: var(--text-muted, #94a3b8);
+}
+
+.weekly-quick-today-btn {
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weekly-quick-today-btn:hover {
+  background: rgba(16, 185, 129, 0.22);
+}
+
+/* Jump to Date Picker */
+.weekly-date-jump {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 10px;
+  padding: 6px 12px;
+}
+
+.weekly-date-jump label {
+  font-size: 12px;
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.weekly-date-input {
+  background: transparent;
+  border: none;
+  color: var(--text-main, #f8fafc);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Action Buttons (Print & Export) */
+.weekly-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.weekly-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.weekly-print-btn {
+  background: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+.weekly-print-btn:hover {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+}
+
+.weekly-pdf-btn {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.weekly-pdf-btn:hover {
+  background: #6366f1;
+  color: #fff;
+  border-color: #6366f1;
+  transform: translateY(-1px);
+}
+
+/* --- KPI Summary Metric Cards Grid --- */
+.weekly-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.weekly-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.weekly-kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.18);
+}
+
+.weekly-kpi-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.weekly-kpi-icon-wrap.expense {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.weekly-kpi-icon-wrap.income {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+}
+
+.weekly-kpi-icon-wrap.balance {
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.weekly-kpi-icon-wrap.average {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
+.weekly-kpi-icon-wrap.peak {
+  background: rgba(168, 85, 247, 0.12);
+  color: #c084fc;
+}
+
+.weekly-kpi-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.weekly-kpi-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted, #94a3b8);
+}
+
+.weekly-kpi-value {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekly-kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11.5px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.weekly-kpi-trend.higher {
+  color: #f87171;
+}
+
+.weekly-kpi-trend.lower {
+  color: #34d399;
+}
+
+.weekly-kpi-trend.neutral {
+  color: var(--text-muted, #94a3b8);
+}
+
+/* --- Smart Weekly Insight Banner --- */
+.weekly-insight-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(168, 85, 247, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 14px;
+  color: var(--text-main, #f8fafc);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.weekly-insight-icon {
+  color: #a5b4fc;
+  flex-shrink: 0;
+}
+
+.weekly-insight-strong {
+  font-weight: 700;
+  color: #c7d2fe;
+}
+
+/* --- 7-Day Performance Grid / Daily Cards --- */
+.weekly-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.weekly-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weekly-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .weekly-days-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  }
+}
+
+.weekly-day-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.weekly-day-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.weekly-day-card.selected {
+  border-color: var(--primary, #6366f1);
+  background: rgba(99, 102, 241, 0.12);
+  box-shadow: 0 0 0 1px var(--primary, #6366f1);
+}
+
+.weekly-day-card.today {
+  border-left: 3px solid #10b981;
+}
+
+.weekly-day-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted, #94a3b8);
+}
+
+.weekly-day-date {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+  margin-bottom: 8px;
+}
+
+.weekly-day-expense {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.weekly-day-income {
+  font-size: 11.5px;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.weekly-day-count {
+  font-size: 10.5px;
+  color: var(--text-muted, #94a3b8);
+  margin-top: 4px;
+}
+
+/* --- Charts & Analytics Section (2 Columns) --- */
+.weekly-charts-row {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .weekly-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.weekly-chart-box {
+  padding: 20px;
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.weekly-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.weekly-chart-canvas-wrap {
+  position: relative;
+  height: 240px;
+  width: 100%;
+}
+
+.weekly-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.weekly-category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.03));
+}
+
+.weekly-category-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.weekly-category-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main, #f8fafc);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weekly-category-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.weekly-category-amount {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+}
+
+.weekly-category-pct {
+  font-size: 11px;
+  color: var(--text-muted, #94a3b8);
+}
+
+/* --- Transactions Table Section --- */
+.weekly-txs-card {
+  padding: 20px;
+  background: var(--bg-surface, #1e293b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.weekly-txs-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.weekly-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.weekly-filter-pill {
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  color: var(--text-muted, #94a3b8);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weekly-filter-pill.active {
+  background: var(--primary, #6366f1);
+  color: #fff;
+  border-color: var(--primary, #6366f1);
+}
+
+.weekly-tx-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-surface-elevated, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: 8px;
+}
+
+.weekly-tx-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-main, #f8fafc);
+  font-size: 12.5px;
+  width: 140px;
+}
+
+.weekly-txs-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.weekly-txs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.weekly-txs-table th {
+  padding: 10px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted, #94a3b8);
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.weekly-txs-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.05));
+  color: var(--text-main, #f8fafc);
+}
+
+.weekly-txs-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.weekly-payment-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+}
+
+.weekly-amount-cell {
+  font-weight: 700;
+  text-align: right;
+}
+
+.weekly-amount-cell.expense {
+  color: #f87171;
+}
+
+.weekly-amount-cell.income {
+  color: #34d399;
+}
+
+.weekly-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-muted, #94a3b8);
+  gap: 10px;
+}
+
+.weekly-empty-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-main, #f8fafc);
+}
+
+/* ==========================================================================
+   OFFICIAL PRINT STYLES (@media print)
+   ========================================================================== */
+.weekly-print-only-header {
+  display: none;
+}
+
+@media print {
+  /* Set A4 page setup and margins */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm;
+  }
+
+  /* Force background colors and remove screen-only UI */
+  body, html {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Hide headers, mobile nav, modals, toast, switcher, interactive buttons */
+  .app-header,
+  .mobile-bottom-nav,
+  .dashboard-switcher-container,
+  .weekly-actions-group,
+  .weekly-nav-btn,
+  .weekly-quick-today-btn,
+  .weekly-date-jump,
+  .weekly-txs-toolbar,
+  .toast-container,
+  button {
+    display: none !important;
+  }
+
+  .weekly-dashboard-container {
+    gap: 16px !important;
+  }
+
+  /* Show executive print header */
+  .weekly-print-only-header {
+    display: block !important;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .print-banner-title {
+    font-size: 18pt !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 0 4px 0;
+  }
+
+  .print-banner-meta {
+    font-size: 9.5pt !important;
+    color: #475569 !important;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Controls bar becomes clean print header info */
+  .weekly-controls-bar {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    padding: 10px 14px !important;
+  }
+
+  .weekly-range-text {
+    color: #0f172a !important;
+    font-size: 13pt !important;
+  }
+
+  .weekly-year-text {
+    color: #475569 !important;
+  }
+
+  /* KPI cards layout for paper */
+  .weekly-kpi-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .weekly-kpi-card {
+    background: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    padding: 10px 12px !important;
+    break-inside: avoid;
+  }
+
+  .weekly-kpi-value {
+    color: #0f172a !important;
+    font-size: 13pt !important;
+  }
+
+  .weekly-kpi-label {
+    color: #64748b !important;
+    font-size: 7.5pt !important;
+  }
+
+  /* Days cards layout for print */
+  .weekly-days-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 6px !important;
+    break-inside: avoid;
+  }
+
+  .weekly-day-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px !important;
+    break-inside: avoid;
+  }
+
+  .weekly-day-date {
+    color: #0f172a !important;
+    font-size: 9.5pt !important;
+  }
+
+  .weekly-day-expense {
+    color: #dc2626 !important;
+    font-size: 10.5pt !important;
+  }
+
+  .weekly-day-income {
+    color: #059669 !important;
+  }
+
+  /* Insight banner */
+  .weekly-insight-banner {
+    background: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #1e293b !important;
+    padding: 8px 12px !important;
+    font-size: 9pt !important;
+    break-inside: avoid;
+  }
+
+  /* Charts & tables */
+  .weekly-charts-row {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    break-inside: avoid;
+  }
+
+  .weekly-chart-box,
+  .weekly-txs-card {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+    padding: 12px !important;
+  }
+
+  .weekly-txs-table th {
+    color: #475569 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+    background: #f8fafc !important;
+    font-size: 8.5pt !important;
+  }
+
+  .weekly-txs-table td {
+    color: #0f172a !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    font-size: 8.5pt !important;
+    padding: 6px 8px !important;
+  }
+
+  .weekly-payment-badge {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .weekly-amount-cell.expense {
+    color: #dc2626 !important;
+  }
+
+  .weekly-amount-cell.income {
+    color: #059669 !important;
+  }
+}

@@ -185,4 +185,38 @@ export interface YearlySummary {
   subcategoryBreakdown: SubcategoryBreakdown[];
 }
 
+export interface DaySpendingSummary {
+  date: string; // "YYYY-MM-DD"
+  dayName: string; // "Monday", "Tuesday", etc.
+  dayShort: string; // "Mon", "Tue", etc.
+  totalIncome: number;
+  totalExpense: number;
+  netBalance: number;
+  transactionCount: number;
+  transactions?: Transaction[];
+}
+
+export interface WeeklySummary {
+  year: number;
+  weekNumber: number;
+  startDate: string; // "YYYY-MM-DD"
+  endDate: string; // "YYYY-MM-DD"
+  formattedRange: string; // "19 Oct – 25 Oct 2026"
+  totalIncome: number;
+  totalExpense: number;
+  netBalance: number;
+  dailyAverage: number;
+  transactionCount: number;
+  highestDayName: string;
+  highestDayAmount: number;
+  topCategory: string;
+  topCategoryAmount: number;
+  insightMessage: string;
+  prevWeekExpense?: number;
+  weekOverWeekChangePercent?: number | null;
+  categoryBreakdown: CategoryBreakdown[];
+  dailyBreakdown: DaySpendingSummary[];
+  transactions?: Transaction[];
+}
+
 

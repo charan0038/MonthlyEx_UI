@@ -22,7 +22,7 @@ interface NavbarProps {
   currentMonth: number;
   theme: 'dark' | 'light';
   user: User | null;
-  activeDashboard?: 'monthly' | 'yearly';
+  activeDashboard?: 'monthly' | 'weekly' | 'yearly';
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onJumpToday: () => void;
@@ -156,6 +156,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <CalendarDays size={14} />
             <span>Annual View {currentYear}</span>
+          </div>
+        ) : activeDashboard === 'weekly' ? (
+          <div
+            className="navbar-yearly-badge"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '999px',
+              backgroundColor: 'rgba(14,165,233,0.14)',
+              border: '1px solid rgba(14,165,233,0.28)',
+              color: '#38bdf8',
+              fontSize: '13px',
+              fontWeight: 700,
+            }}
+          >
+            <CalendarDays size={14} />
+            <span>Weekly Report View</span>
           </div>
         ) : (
           <>

@@ -18,7 +18,7 @@ import {
   isAutoBudgetTransaction,
 } from './utils/budgetHelper';
 
-import { CalendarDays, BarChart3 } from 'lucide-react';
+import { CalendarDays, BarChart3, CalendarRange } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { BudgetCard } from './components/BudgetCard';
@@ -27,6 +27,7 @@ import { InsightsCard } from './components/InsightsCard';
 import { ChartsSection } from './components/ChartsSection';
 import { TransactionsList } from './components/TransactionsList';
 import { YearlyDashboard } from './components/YearlyDashboard';
+import { WeeklyDashboard } from './components/WeeklyDashboard';
 import { TransactionModal } from './components/TransactionModal';
 import { BudgetModal } from './components/BudgetModal';
 import { AuthModal } from './components/AuthModal';
@@ -44,7 +45,7 @@ import './App.css';
 export function App() {
   const [currentYear, setCurrentYear] = useState<number>(() => new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(() => new Date().getMonth());
-  const [activeDashboard, setActiveDashboard] = useState<'monthly' | 'yearly'>('monthly');
+  const [activeDashboard, setActiveDashboard] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('kharcha_theme_v2');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -622,6 +623,20 @@ export function App() {
           <button
             type="button"
             role="tab"
+            aria-selected={activeDashboard === 'weekly'}
+            className={`dashboard-switcher-btn ${activeDashboard === 'weekly' ? 'active' : ''}`}
+            onClick={() => setActiveDashboard('weekly')}
+            id="tab-weekly-dashboard"
+          >
+            <CalendarRange size={15} />
+            <span className="dashboard-tab-title-full">Weekly Report</span>
+            <span className="dashboard-tab-title-short">Weekly</span>
+            <span className="dashboard-tab-badge">7-Day</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
             aria-selected={activeDashboard === 'yearly'}
             className={`dashboard-switcher-btn ${activeDashboard === 'yearly' ? 'active' : ''}`}
             onClick={() => setActiveDashboard('yearly')}
@@ -635,7 +650,17 @@ export function App() {
         </div>
       </div>
 
-      {activeDashboard === 'yearly' ? (
+      {activeDashboard === 'weekly' ? (
+        <main className="dashboard-content-view weekly-view" key="weekly-dashboard-view">
+          <WeeklyDashboard
+            theme={theme}
+            user={user}
+            categories={categories}
+            onToast={addToast}
+            onOpenAddModal={handleOpenAdd}
+          />
+        </main>
+      ) : activeDashboard === 'yearly' ? (
         <main className="dashboard-content-view yearly-view" key={`yearly-${currentYear}`}>
           <YearlyDashboard
             initialYear={currentYear}

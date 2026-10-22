@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import type { Transaction, MonthlySummary, YearlySummary, User } from '../types';
+import type { Transaction, MonthlySummary, YearlySummary, WeeklySummary, User } from '../types';
 import { getMonthName } from './formatters';
 
 interface MonthlyPdfOptions {
@@ -15,6 +15,11 @@ interface YearlyPdfOptions {
   year: number;
   user: User | null;
   summary: YearlySummary;
+}
+
+interface WeeklyPdfOptions {
+  summary: WeeklySummary;
+  user: User | null;
 }
 
 /**
@@ -564,4 +569,315 @@ export function exportYearlyPdfReport({
   }
 
   doc.save(`Vessel_Annual_Report_${year}.pdf`);
+}
+
+/**
+ * Exports an Executive-Grade Weekly Financial Statement PDF
+ */
+export function exportWeeklyPdfReport({ summary, user }: WeeklyPdfOptions) {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let currentY = 14;
+
+  // 1. Elegant Header Banner
+  doc.setFillColor(15, 23, 42); // Dark Navy #0f172a
+  doc.roundedRect(12, currentY, pageWidth - 24, 28, 4, 4, 'F');
+
+  // Decorative Accent bar on the left edge (Indigo / Violet)
+  doc.setFillColor(99, 102, 241); // #6366f1
+  doc.rect(12, currentY, 3.5, 28, 'F');
+
+  // Title & Subtitle inside banner
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14.5);
+  doc.text(`VESSEL  |  WEEKLY FINANCIAL STATEMENT`, 19, currentY + 11);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.8);
+  doc.setTextColor(148, 163, 184);
+  const genTime = new Date().toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  doc.text(`Week ${summary.weekNumber}, ${summary.year} (${summary.formattedRange})   |   Issued: ${genTime}`, 19, currentY + 19);
+
+  currentY += 34;
+
+  // 2. User & Overview Details Box
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(12, currentY, pageWidth - 24, 18, 3, 3, 'FD');
+
+  doc.setFontSize(8.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Account Holder:', 18, currentY + 7);
+  doc.text('Registered Mobile:', 18, currentY + 13);
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.text(user?.fullName || 'Personal Account', 52, currentY + 7);
+  doc.text(user?.mobileNumber ? `+91 ${user.mobileNumber}` : '—', 52, currentY + 13);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Weekly Transactions:', pageWidth / 2 + 6, currentY + 7);
+  doc.text('Week-over-Week Trend:', pageWidth / 2 + 6, currentY + 13);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(`${summary.transactionCount || 0} items`, pageWidth / 2 + 56, currentY + 7);
+
+  if (summary.weekOverWeekChangePercent !== null && summary.weekOverWeekChangePercent !== undefined) {
+    const isHigher = summary.weekOverWeekChangePercent > 0;
+    doc.setTextColor(isHigher ? 225 : 16, isHigher ? 29 : 185, isHigher ? 72 : 129);
+    doc.text(
+      `${isHigher ? '+' : ''}${summary.weekOverWeekChangePercent}% vs prior week`,
+      pageWidth / 2 + 56,
+      currentY + 13
+    );
+  } else {
+    doc.setTextColor(100, 116, 139);
+    doc.text('Baseline Week', pageWidth / 2 + 56, currentY + 13);
+  }
+
+  currentY += 24;
+
+  // 3. Key Weekly KPI Summary Cards Table
+  autoTable(doc, {
+    startY: currentY,
+    margin: { left: 12, right: 12 },
+    theme: 'grid',
+    head: [['Weekly Income', 'Weekly Expenses', 'Net Balance', 'Daily Average', 'Peak Spending Day']],
+    body: [[
+      cleanCurrency(summary.totalIncome),
+      cleanCurrency(summary.totalExpense),
+      (summary.netBalance >= 0 ? '+ ' : '') + cleanCurrency(summary.netBalance),
+      cleanCurrency(summary.dailyAverage),
+      summary.highestDayName !== 'None' ? `${summary.highestDayName} (${cleanCurrency(summary.highestDayAmount)})` : 'None',
+    ]],
+    headStyles: {
+      fillColor: [99, 102, 241],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold',
+      fontSize: 8.5,
+      halign: 'center',
+    },
+    bodyStyles: {
+      fontSize: 9.5,
+      fontStyle: 'bold',
+      halign: 'center',
+      textColor: [15, 23, 42],
+      cellPadding: 4,
+    },
+    columnStyles: {
+      0: { textColor: [16, 185, 129] },
+      1: { textColor: [225, 29, 72] },
+      2: { textColor: summary.netBalance >= 0 ? [16, 185, 129] : [225, 29, 72] },
+      3: { textColor: [71, 85, 105] },
+      4: { textColor: [15, 23, 42] },
+    },
+  });
+
+  currentY = (doc as any).lastAutoTable.finalY + 8;
+
+  // 4. Smart Insight Callout
+  if (summary.insightMessage) {
+    doc.setFillColor(238, 242, 255);
+    doc.setDrawColor(199, 210, 254);
+    doc.roundedRect(12, currentY, pageWidth - 24, 14, 3, 3, 'FD');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(67, 56, 202);
+    doc.text('Weekly Insight: ', 18, currentY + 9);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 41, 59);
+    doc.text(summary.insightMessage, 48, currentY + 9, { maxWidth: pageWidth - 64 });
+
+    currentY += 20;
+  }
+
+  // 5. Day-by-Day Breakdown Table (Monday to Sunday)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+  doc.text('7-Day Performance Breakdown', 14, currentY);
+
+  const dailyRows = (summary.dailyBreakdown || []).map((day) => [
+    day.dayName,
+    formatPdfDate(day.date),
+    cleanCurrency(day.totalIncome),
+    cleanCurrency(day.totalExpense),
+    (day.netBalance >= 0 ? '+ ' : '') + cleanCurrency(day.netBalance),
+    `${day.transactionCount} items`,
+  ]);
+
+  autoTable(doc, {
+    startY: currentY + 3,
+    margin: { left: 12, right: 12 },
+    head: [['Day', 'Date', 'Income', 'Expense', 'Net Balance', 'Transactions']],
+    body: dailyRows,
+    headStyles: {
+      fillColor: [241, 245, 249],
+      textColor: [51, 65, 85],
+      fontStyle: 'bold',
+      fontSize: 8.5,
+    },
+    bodyStyles: {
+      fontSize: 8.5,
+      textColor: [15, 23, 42],
+      cellPadding: 2.5,
+    },
+    columnStyles: {
+      0: { fontStyle: 'bold' },
+      2: { textColor: [16, 185, 129], halign: 'right' },
+      3: { textColor: [225, 29, 72], halign: 'right' },
+      4: { halign: 'right' },
+      5: { halign: 'center' },
+    },
+  });
+
+  currentY = (doc as any).lastAutoTable.finalY + 10;
+
+  // 6. Category Breakdown Table
+  if (summary.categoryBreakdown && summary.categoryBreakdown.length > 0) {
+    if (currentY > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      currentY = 16;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text('Weekly Category Breakdown', 14, currentY);
+
+    const catRows = summary.categoryBreakdown.map((cat, idx) => [
+      (idx + 1).toString(),
+      cat.category,
+      cleanCurrency(cat.amount),
+      `${cat.percentage.toFixed(1)}%`,
+    ]);
+
+    autoTable(doc, {
+      startY: currentY + 3,
+      margin: { left: 12, right: 12 },
+      head: [['#', 'Category', 'Total Spent', '% of Weekly Outflow']],
+      body: catRows,
+      headStyles: {
+        fillColor: [241, 245, 249],
+        textColor: [51, 65, 85],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+      },
+      bodyStyles: {
+        fontSize: 8.5,
+        textColor: [15, 23, 42],
+        cellPadding: 2.5,
+      },
+      columnStyles: {
+        0: { cellWidth: 10, halign: 'center' },
+        2: { halign: 'right', fontStyle: 'bold' },
+        3: { halign: 'right' },
+      },
+    });
+
+    currentY = (doc as any).lastAutoTable.finalY + 10;
+  }
+
+  // 7. Itemized Transactions Register
+  const txs = summary.transactions || [];
+  if (txs.length > 0) {
+    if (currentY > doc.internal.pageSize.getHeight() - 60) {
+      doc.addPage();
+      currentY = 16;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Itemized Weekly Transaction Register (${txs.length} records)`, 14, currentY);
+
+    const txRows = txs.map((t, idx) => {
+      const isExp = t.type?.toLowerCase() === 'expense';
+      const catName =
+        typeof t.category === 'object' && t.category?.name
+          ? t.category.name
+          : typeof t.category === 'string' && t.category
+          ? t.category
+          : 'Other';
+      const sub = t.subcategory ? ` (${t.subcategory})` : '';
+      return [
+        (idx + 1).toString(),
+        formatPdfDate(t.date),
+        `${catName}${sub}`,
+        t.note || '—',
+        t.paymentMethod || 'UPI',
+        t.type?.toUpperCase() || 'EXPENSE',
+        (isExp ? '- ' : '+ ') + cleanCurrency(t.amount),
+      ];
+    });
+
+    autoTable(doc, {
+      startY: currentY + 3,
+      margin: { left: 12, right: 12 },
+      head: [['#', 'Date', 'Category', 'Note / Description', 'Payment', 'Type', 'Amount']],
+      body: txRows,
+      headStyles: {
+        fillColor: [241, 245, 249],
+        textColor: [51, 65, 85],
+        fontStyle: 'bold',
+        fontSize: 8.5,
+      },
+      bodyStyles: {
+        fontSize: 8,
+        textColor: [15, 23, 42],
+        cellPadding: 2.5,
+      },
+      columnStyles: {
+        0: { cellWidth: 8, halign: 'center' },
+        1: { cellWidth: 22 },
+        2: { cellWidth: 32 },
+        4: { cellWidth: 18, halign: 'center' },
+        5: { cellWidth: 18, halign: 'center' },
+        6: { halign: 'right', fontStyle: 'bold' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 6) {
+          const val = String(data.cell.raw);
+          if (val.startsWith('+')) {
+            data.cell.styles.textColor = [16, 185, 129];
+          } else {
+            data.cell.styles.textColor = [225, 29, 72];
+          }
+        }
+      },
+    });
+  }
+
+  // 8. Footer on all pages
+  const totalPages = (doc as any).internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'normal');
+    doc.text(
+      `Vessel Monthly Expense Tracker  |  Weekly Statement (Week ${summary.weekNumber}, ${summary.year})  |  Page ${i} of ${totalPages}`,
+      pageWidth / 2,
+      doc.internal.pageSize.getHeight() - 8,
+      { align: 'center' }
+    );
+  }
+
+  doc.save(`Vessel_Weekly_Report_${summary.year}_W${summary.weekNumber}.pdf`);
 }

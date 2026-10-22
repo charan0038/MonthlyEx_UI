@@ -14,12 +14,18 @@ import type {
   CreateCategoryInput,
   UpdateProfileInput,
   YearlySummary,
+  WeeklySummary,
 } from '../types';
 import {
   computeMonthlySummary,
   isAutoBudgetTransaction,
   isMonthBudgetExplicit,
 } from '../utils/budgetHelper';
+import {
+  computeWeeklySummary,
+  getWeekRange,
+  toISODateString,
+} from '../utils/weekHelper';
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://monthlyex-api.onrender.com/api').replace(/\/+$/, '');
 
@@ -29,6 +35,8 @@ const USER_KEY = 'kharcha_user';
 
 export interface FilterParams {
   monthYear?: string;
+  startDate?: string;
+  endDate?: string;
   category?: string;
   type?: string;
   payment?: string;
@@ -283,6 +291,8 @@ export const api = {
   async getTransactions(params: FilterParams = {}): Promise<Transaction[]> {
     const query = new URLSearchParams();
     if (params.monthYear) query.set('monthYear', params.monthYear);
+    if (params.startDate) query.set('startDate', params.startDate);
+    if (params.endDate) query.set('endDate', params.endDate);
     if (params.category && params.category !== 'ALL') query.set('category', params.category);
     if (params.type && params.type !== 'ALL') query.set('type', params.type);
     if (params.payment && params.payment !== 'ALL') query.set('payment', params.payment);
@@ -397,6 +407,45 @@ export const api = {
     }
 
     return data;
+  },
+
+  async getWeeklySummary(targetDate: Date = new Date()): Promise<WeeklySummary> {
+    const { startDate, endDate } = getWeekRange(targetDate);
+    const dateStr = toISODateString(targetDate);
+
+    // 1. Try backend weekly-summary endpoint
+    try {
+      const res = await authFetch(`${API_BASE}/transactions/weekly-summary?date=${dateStr}`);
+      if (res.ok) {
+        const data: WeeklySummary = await res.json();
+        const weekTxs = await this.getTransactions({ startDate, endDate, sortBy: 'date-desc' });
+        data.transactions = weekTxs.filter((t) => !isAutoBudgetTransaction(t));
+        return data;
+      }
+    } catch {
+      // Fall through to client computation
+    }
+
+    // 2. Resilient client-side computation fallback
+    const prevDate = new Date(targetDate);
+    prevDate.setDate(prevDate.getDate() - 7);
+    const { startDate: prevStart, endDate: prevEnd } = getWeekRange(prevDate);
+
+    let allTxs: Transaction[] = [];
+    try {
+      allTxs = await this.getTransactions({ startDate: prevStart, endDate, sortBy: 'date-desc' });
+    } catch {
+      const m1 = startDate.substring(0, 7);
+      const m2 = prevStart.substring(0, 7);
+      const months = Array.from(new Set([m1, m2]));
+      const txArrays = await Promise.all(months.map((m) => this.getTransactions({ monthYear: m })));
+      allTxs = txArrays.flat();
+    }
+
+    const currentTxs = allTxs.filter((t) => t.date >= startDate && t.date <= endDate);
+    const prevTxs = allTxs.filter((t) => t.date >= prevStart && t.date <= prevEnd);
+
+    return computeWeeklySummary(currentTxs, targetDate, prevTxs);
   },
 
   // --- Budgets & Balance Settlement ---

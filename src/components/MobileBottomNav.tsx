@@ -1,9 +1,9 @@
 import React from 'react';
-import { Calendar, BarChart3, Plus, Receipt, Layers } from 'lucide-react';
+import { Calendar, CalendarRange, BarChart3, Plus, Receipt } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeDashboard: 'monthly' | 'yearly';
-  onChangeDashboard: (dashboard: 'monthly' | 'yearly') => void;
+  activeDashboard: 'monthly' | 'weekly' | 'yearly';
+  onChangeDashboard: (dashboard: 'monthly' | 'weekly' | 'yearly') => void;
   onOpenAddModal: () => void;
   onOpenCategories: () => void;
 }
@@ -42,15 +42,15 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
       <button
         type="button"
-        className={`mobile-nav-item ${activeDashboard === 'yearly' ? 'active' : ''}`}
+        className={`mobile-nav-item ${activeDashboard === 'weekly' ? 'active' : ''}`}
         onClick={() => {
-          onChangeDashboard('yearly');
+          onChangeDashboard('weekly');
           scrollTo();
         }}
-        title="Overall Year Expense Tracker"
+        title="Weekly Report & Print"
       >
-        <BarChart3 size={19} />
-        <span>Annual</span>
+        <CalendarRange size={19} />
+        <span>Weekly</span>
       </button>
 
       {/* Prominent Elevated Center Add Button */}
@@ -67,21 +67,24 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
       <button
         type="button"
-        className="mobile-nav-item"
-        onClick={() => scrollTo('transactions-section')}
-        title="Transactions"
+        className={`mobile-nav-item ${activeDashboard === 'yearly' ? 'active' : ''}`}
+        onClick={() => {
+          onChangeDashboard('yearly');
+          scrollTo();
+        }}
+        title="Overall Year Expense Tracker"
       >
-        <Receipt size={20} />
-        <span>History</span>
+        <BarChart3 size={19} />
+        <span>Annual</span>
       </button>
 
       <button
         type="button"
         className="mobile-nav-item"
         onClick={onOpenCategories}
-        title="Categories"
+        title="Manage Categories"
       >
-        <Layers size={20} />
+        <Receipt size={19} />
         <span>Categories</span>
       </button>
     </nav>
