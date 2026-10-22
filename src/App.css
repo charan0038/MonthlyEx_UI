@@ -99,7 +99,7 @@ button, input, select, textarea {
 .app-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 24px 20px 100px 20px;
+  padding: 24px 20px 40px 20px;
 }
 
 /* Header */
@@ -1090,7 +1090,7 @@ button, input, select, textarea {
 }
 
 @media (max-width: 768px) {
-  .app-container { padding: 16px 14px 90px 14px; }
+  .app-container { padding: 16px 14px 74px 14px; }
   .app-header { flex-direction: column; align-items: stretch; }
   .brand-group, .header-actions { justify-content: space-between; }
   .month-picker-pill { flex: 1; justify-content: space-between; }
@@ -2880,7 +2880,7 @@ button, input, select, textarea {
 /* Mobile Screens & Small Tablets (<= 768px) */
 @media (max-width: 768px) {
   .app-container {
-    padding: 12px 14px 100px 14px;
+    padding: 12px 14px 74px 14px;
     max-width: 100%;
     overflow-x: hidden;
   }
@@ -3205,7 +3205,7 @@ button, input, select, textarea {
   /* Transactions Card */
   .transactions-card {
     border-radius: var(--radius-md) !important;
-    margin-bottom: 84px !important; /* Generous bottom spacing for fixed bottom navigation bar */
+    margin-bottom: 0 !important;
   }
 
   .transactions-header {
@@ -3534,7 +3534,7 @@ button, input, select, textarea {
 /* Very Small Mobile Phones (<= 390px, e.g. iPhone SE / Mini) */
 @media (max-width: 390px) {
   .app-container {
-    padding: 10px 10px 96px 10px !important;
+    padding: 10px 10px 74px 10px !important;
   }
 
   .brand-title {
@@ -3643,7 +3643,7 @@ button, input, select, textarea {
 .dashboard-switcher-container {
   display: flex;
   align-items: center;
-  justifyContent: center;
+  justify-content: center;
   margin: 4px 0 18px 0;
   width: 100%;
 }
@@ -3823,16 +3823,16 @@ button, input, select, textarea {
 /* Mobile Screens (<= 640px) */
 @media (max-width: 640px) {
   .app-container {
-    padding: 12px 10px 96px 10px !important;
+    padding: 12px 10px 74px 10px !important;
   }
 
   .yearly-dashboard-root {
-    padding-bottom: 90px;
+    padding-bottom: 0 !important;
     gap: 14px !important;
   }
 
   .dashboard-content-view {
-    padding-bottom: 90px;
+    padding-bottom: 0 !important;
     gap: 14px !important;
   }
 

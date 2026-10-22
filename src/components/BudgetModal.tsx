@@ -88,7 +88,7 @@ export const BudgetModal: React.FC<BudgetModalProps> = ({
                 type="number"
                 className="amount-input"
                 placeholder="0"
-                step="1000"
+                step="any"
                 min="0"
                 required
                 autoFocus
