@@ -608,4 +608,13 @@ export const api = {
       throw new Error(err.message || 'Failed to delete subcategory');
     }
   },
+
+  // Silently ping the backend health endpoint to wake up Render & Neon DB early
+  warmup(): void {
+    try {
+      fetch(`${API_BASE}/health`).catch(() => {});
+    } catch {
+      // ignore
+    }
+  },
 };

@@ -36,8 +36,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Warm up the backend & Neon DB as soon as the login page loads
+  useEffect(() => {
+    api.warmup();
+  }, []);
+
+  // Show a gentle "waking up" notice if the request takes more than 2.5s (free-tier cold start)
+  useEffect(() => {
+    let timer: any;
+    if (isLoading) {
+      timer = setTimeout(() => {
+        setIsWakingUp(true);
+      }, 2500);
+    } else {
+      setIsWakingUp(false);
+    }
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
   // Rate Limiting countdown
   const [rateLimitSeconds, setRateLimitSeconds] = useState<number>(0);
@@ -447,6 +466,27 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
                 </button>
               )}
             </DodgeField>
+
+            {isWakingUp && (
+              <p
+                style={{
+                  marginTop: '0.9rem',
+                  fontSize: '0.85rem',
+                  color: '#f59e0b',
+                  textAlign: 'center',
+                  background: 'rgba(245, 158, 11, 0.1)',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(245, 158, 11, 0.25)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>⚡ Cloud server is waking up from idle... Please hold on a few seconds!</span>
+              </p>
+            )}
           </form>
         </div>
       </main>

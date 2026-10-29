@@ -104,6 +104,14 @@ export function App() {
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  // Server cold-start status
+  const [isServerWakingUp, setIsServerWakingUp] = useState<boolean>(false);
+
+  // Warm up the backend & Neon DB as soon as App loads
+  useEffect(() => {
+    api.warmup();
+  }, []);
+
   const addToast = (message: string, toastType: 'success' | 'error' | 'info' = 'success') => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 4);
     setToasts((prev) => [...prev, { id, message, type: toastType }]);
@@ -158,6 +166,29 @@ export function App() {
   const isMonthEnd = isCurrentMonth && currentActualDay >= daysInViewMonth - 3;
   const isEndOfMonth = isPastMonth || isMonthEnd;
 
+  // Hydrate from localStorage cache immediately on month or user change (Instant 0ms display)
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const cacheKey = `kharcha_cache_${user.id}_${monthYearKey}`;
+      const cachedStr = localStorage.getItem(cacheKey);
+      if (cachedStr) {
+        const cached = JSON.parse(cachedStr);
+        if (Array.isArray(cached.transactions) && cached.transactions.length > 0) {
+          setTransactions(cached.transactions);
+        }
+        if (cached.summary) {
+          setSummary(cached.summary);
+        }
+        if (cached.budget) {
+          setBudget(cached.budget);
+        }
+      }
+    } catch {
+      // Ignore cache read failures
+    }
+  }, [user?.id, monthYearKey]);
+
   // Load monthly summary and transactions from .NET backend
   const refreshData = useCallback(async () => {
     if (!api.isAuthenticated() || !user) {
@@ -165,6 +196,11 @@ export function App() {
       setSummary(null);
       return;
     }
+
+    // If request takes longer than 2.5s (free tier cold start), show status banner
+    const wakeTimer = setTimeout(() => {
+      setIsServerWakingUp(true);
+    }, 2500);
 
     try {
       const filterParams: FilterParams = {
@@ -194,14 +230,35 @@ export function App() {
         return true;
       });
 
+      const effectiveBudget = isExplicit && bgt ? bgt : { monthYear: monthYearKey, amount: 0 };
+
       setTransactions(cleanTxs);
       setSummary(sum);
-      setBudget(isExplicit && bgt ? bgt : { monthYear: monthYearKey, amount: 0 });
+      setBudget(effectiveBudget);
+
+      // Save to localStorage cache so next app opening is instantaneous (0ms)
+      try {
+        const cacheKey = `kharcha_cache_${user.id}_${monthYearKey}`;
+        localStorage.setItem(
+          cacheKey,
+          JSON.stringify({
+            transactions: cleanTxs,
+            summary: sum,
+            budget: effectiveBudget,
+            updatedAt: Date.now(),
+          })
+        );
+      } catch {
+        // Ignore storage quota errors
+      }
     } catch (err: any) {
       console.error('Error fetching data from API:', err);
       // Suppress unauthorized error toast if user logged out
       if (!api.isAuthenticated()) return;
       addToast(err.message || 'Error connecting to backend API', 'error');
+    } finally {
+      clearTimeout(wakeTimer);
+      setIsServerWakingUp(false);
     }
   }, [monthYearKey, search, category, type, payment, sortBy, user]);
 
@@ -620,6 +677,39 @@ export function App() {
         onOpenProfile={() => setIsProfileOpen(true)}
         onLogout={handleLogout}
       />
+
+      {/* Cloud Server Cold-Start Warmup Notice */}
+      {isServerWakingUp && (
+        <div
+          style={{
+            maxWidth: '1280px',
+            margin: '0.75rem auto',
+            padding: '8px 16px',
+            background: 'rgba(245, 158, 11, 0.12)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            fontSize: '0.86rem',
+            color: '#f59e0b',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          }}
+        >
+          <div
+            className="btn-spinner"
+            style={{
+              width: 14,
+              height: 14,
+              borderWidth: 2,
+              borderColor: '#f59e0b',
+              borderTopColor: 'transparent',
+            }}
+          />
+          <span>Connecting to cloud server (Render & Neon DB waking up from idle)... Showing offline cached data.</span>
+        </div>
+      )}
 
       {/* Dashboard Switcher Bar */}
       <div className="dashboard-switcher-container">
