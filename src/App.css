@@ -4,13 +4,13 @@
 :root {
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Brand Colors */
-  --primary: #6366f1;
-  --primary-hover: #4f46e5;
-  --primary-light: rgba(99, 102, 241, 0.12);
-  --primary-glow: rgba(99, 102, 241, 0.25);
+  /* Brand Colors - Cyber Navy & Electric Blaze */
+  --primary: #FF5722;
+  --primary-hover: #F4511E;
+  --primary-light: rgba(255, 87, 34, 0.14);
+  --primary-glow: rgba(255, 87, 34, 0.4);
 
-  /* Semantic */
+  /* Semantic Status Colors */
   --income: #10b981;
   --income-bg: rgba(16, 185, 129, 0.12);
   --income-glow: rgba(16, 185, 129, 0.25);
@@ -57,22 +57,22 @@
 }
 
 [data-theme="dark"] {
-  --bg-body: #090d16;
-  --bg-surface: #121826;
-  --bg-surface-elevated: #1a2235;
-  --bg-muted: #1c2538;
-  --bg-input: #0e1422;
-  --border-color: #242f46;
-  --border-subtle: #1a2334;
+  --bg-body: #050B14;
+  --bg-surface: #0A1326;
+  --bg-surface-elevated: #101C36;
+  --bg-muted: #15223E;
+  --bg-input: #070F20;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.05);
 
   --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-muted: #8A99AD;
   --text-light: #64748b;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 14px 28px rgba(0, 0, 0, 0.45);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.55);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.65);
+  --shadow-modal: 0 25px 60px -12px rgba(0, 0, 0, 0.85);
 }
 
 *, *::before, *::after {
@@ -84,11 +84,32 @@
 body {
   font-family: var(--font-family);
   background-color: var(--bg-body);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.08) 0%, rgba(5, 11, 20, 0) 65%),
+    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 100% 100%, 32px 32px, 32px 32px;
   color: var(--text-main);
   min-height: 100vh;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   transition: background-color var(--transition-base), color var(--transition-base);
+}
+
+@keyframes hazardStripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
+}
+.animate-hazard-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #F43F5E,
+    #F43F5E 10px,
+    #BE123C 10px,
+    #BE123C 20px
+  );
+  background-size: 40px 40px;
+  animation: hazardStripes 1.2s linear infinite;
 }
 
 button, input, select, textarea {
@@ -793,11 +814,12 @@ button, input, select, textarea {
 .empty-state-desc { font-size: 14px; color: var(--text-muted); max-width: 380px; margin-bottom: 20px; }
 
 /* Modals */
-.modal-backdrop {
+.modal-backdrop, .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(6px);
+  background: rgba(2, 6, 14, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -806,17 +828,19 @@ button, input, select, textarea {
 }
 
 .modal-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
+  background: rgba(10, 19, 38, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 480px;
-  box-shadow: var(--shadow-modal);
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.85), 0 0 1px rgba(255, 255, 255, 0.2);
   transform: translateY(0);
   overflow: hidden;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
 }
 
 .modal-header {
@@ -3433,16 +3457,16 @@ button, input, select, textarea {
     left: 0;
     right: 0;
     height: 64px;
-    background: rgba(18, 24, 38, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border-color);
+    background: rgba(10, 19, 38, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     z-index: 999;
     align-items: center;
     justify-content: space-around;
     padding: 0 8px;
     padding-bottom: env(safe-area-inset-bottom, 0px);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.65);
   }
 
   [data-theme="light"] .mobile-bottom-nav {
@@ -3488,14 +3512,14 @@ button, input, select, textarea {
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+    background: linear-gradient(135deg, #FF5722 0%, #FF7A45 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 18px var(--primary-glow), 0 4px 10px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 87, 34, 0.5), 0 4px 10px rgba(0, 0, 0, 0.4);
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 3px solid var(--bg-surface);
+    border: 3px solid #050B14;
   }
 
   .mobile-nav-add-btn:active .mobile-add-btn-inner {
@@ -3747,12 +3771,12 @@ button, input, select, textarea {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  padding: 5px;
+  background: rgba(10, 19, 38, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 6px;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-sm);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(20px);
   transition: all var(--transition-fast);
 }
 
@@ -3764,7 +3788,7 @@ button, input, select, textarea {
   border-radius: var(--radius-full);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-muted);
+  color: #8A99AD;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
@@ -3774,8 +3798,8 @@ button, input, select, textarea {
 }
 
 .dashboard-switcher-btn:hover {
-  color: var(--text-main);
-  background-color: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 [data-theme="light"] .dashboard-switcher-btn:hover {
@@ -3783,10 +3807,10 @@ button, input, select, textarea {
 }
 
 .dashboard-switcher-btn.active {
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  background: linear-gradient(135deg, #FF5722 0%, #FF7A45 100%);
   color: #ffffff;
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  border-color: rgba(255, 87, 34, 0.4);
+  box-shadow: 0 0 20px rgba(255, 87, 34, 0.45);
 }
 
 .dashboard-tab-sub {
@@ -4158,6 +4182,33 @@ button, input, select, textarea {
     font-weight: 600;
     color: #a5b4fc;
   }
+}
+
+/* ==========================================================================
+   CYBER FINTECH CUSTOM SCROLLBARS & MONOSPACE UTILITIES
+   ========================================================================== */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(5, 11, 20, 0.7);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 87, 34, 0.55);
+}
+
+.font-mono-numbers {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-variant-numeric: tabular-nums !important;
 }
 
 

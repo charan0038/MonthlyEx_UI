@@ -28,8 +28,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   theme,
 }) => {
   const isDark = theme === 'dark';
-  const gridColor = isDark ? 'rgba(36, 47, 70, 0.7)' : 'rgba(226, 232, 240, 0.8)';
-  const textColor = isDark ? '#94a3b8' : '#64748b';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(226, 232, 240, 0.8)';
+  const textColor = isDark ? '#8A99AD' : '#64748b';
 
   // 1. Doughnut chart configuration
   const hasCategoryData = categoryBreakdown.length > 0;
@@ -45,7 +45,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       {
         data: doughnutData,
         backgroundColor: doughnutColors,
-        borderColor: isDark ? '#121826' : '#ffffff',
+        borderColor: isDark ? '#0A1326' : '#ffffff',
         borderWidth: 3,
         hoverOffset: 6,
       },
@@ -61,7 +61,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         labels: {
           color: textColor,
           font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
-          boxWidth: 12,
+          boxWidth: 10,
           padding: 14,
         },
       },
@@ -91,8 +91,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       {
         label: 'Daily Spending (₹)',
         data: barValues,
-        backgroundColor: isDark ? 'rgba(99, 102, 241, 0.75)' : 'rgba(79, 70, 229, 0.8)',
-        hoverBackgroundColor: isDark ? '#818cf8' : '#4f46e5',
+        backgroundColor: isDark ? 'rgba(255, 87, 34, 0.85)' : 'rgba(255, 87, 34, 0.9)',
+        hoverBackgroundColor: isDark ? '#FF7A45' : '#E64A19',
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -115,7 +115,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         grid: { color: gridColor },
         ticks: {
           color: textColor,
-          font: { family: 'Plus Jakarta Sans', size: 11 },
+          font: { family: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace', size: 11 },
           callback: (value: any) => '₹' + value,
         },
       },
@@ -133,40 +133,100 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   return (
     <section id="charts-section" className="analytics-grid">
       {/* Category Doughnut Card */}
-      <div className="chart-card chart-card-doughnut">
-        <div className="chart-header">
+      <div
+        className="chart-card chart-card-doughnut"
+        style={{
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'rgba(10, 19, 38, 0.85)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45)',
+          padding: '24px',
+        }}
+      >
+        <div className="chart-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
-            <h2 className="chart-title">Spending by Category</h2>
-            <p className="chart-subtitle">Breakdown of this month's expenses</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(6, 182, 212, 0.15)',
+                  color: '#22d3ee',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <PieChart size={16} />
+              </div>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                Spending by Category
+              </h2>
+            </div>
+            <p className="chart-subtitle" style={{ fontSize: '12px', color: '#8A99AD', margin: '4px 0 0 36px' }}>
+              Breakdown of this month's expenses
+            </p>
           </div>
         </div>
-        <div className="chart-canvas-wrapper">
+        <div className="chart-canvas-wrapper" style={{ minHeight: '260px' }}>
           {hasCategoryData ? (
             <Doughnut data={doughnutChartData} options={doughnutOptions} />
           ) : (
             <div className="chart-empty-state">
-              <PieChart size={36} style={{ opacity: 0.5 }} />
-              <span>No expense data to display</span>
+              <PieChart size={36} style={{ opacity: 0.35, color: '#8A99AD' }} />
+              <span style={{ color: '#8A99AD', fontSize: '13px' }}>No expense data to display</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Daily Spending Trend Card */}
-      <div className="chart-card chart-card-daily">
-        <div className="chart-header">
+      <div
+        className="chart-card chart-card-daily"
+        style={{
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          background: 'rgba(10, 19, 38, 0.85)',
+          backdropFilter: 'blur(20px)',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45)',
+          padding: '24px',
+        }}
+      >
+        <div className="chart-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
           <div>
-            <h2 className="chart-title">Daily Spending Trend</h2>
-            <p className="chart-subtitle">Day-by-day expense distribution</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '8px',
+                  backgroundColor: 'rgba(255, 87, 34, 0.15)',
+                  color: '#FF5722',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <BarChart2 size={16} />
+              </div>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: '#ffffff', margin: 0 }}>
+                Daily Spending Trend
+              </h2>
+            </div>
+            <p className="chart-subtitle" style={{ fontSize: '12px', color: '#8A99AD', margin: '4px 0 0 36px' }}>
+              Day-by-day expense distribution
+            </p>
           </div>
         </div>
-        <div className="chart-canvas-wrapper">
+        <div className="chart-canvas-wrapper" style={{ minHeight: '260px' }}>
           {hasDailySpending ? (
             <Bar data={barChartData} options={barOptions} />
           ) : (
             <div className="chart-empty-state">
-              <BarChart2 size={36} style={{ opacity: 0.5 }} />
-              <span>No daily expenses recorded yet</span>
+              <BarChart2 size={36} style={{ opacity: 0.35, color: '#8A99AD' }} />
+              <span style={{ color: '#8A99AD', fontSize: '13px' }}>No daily expenses recorded yet</span>
             </div>
           )}
         </div>

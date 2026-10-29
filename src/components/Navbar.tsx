@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
+  Ship,
   ChevronLeft,
   ChevronRight,
   ChevronDown,
@@ -10,7 +11,6 @@ import {
   Plus,
   LogIn,
   LogOut,
-  ShieldCheck,
   Layers,
 } from 'lucide-react';
 
@@ -83,15 +83,64 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="app-header">
       <div className="header-brand-row">
-        <div className="brand-group">
-          <div className="brand-icon">
-            <img src="/logo-icon.png" alt="Vessel" className="brand-logo-img" />
+        <div className="brand-group" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div
+            className="brand-icon"
+            style={{
+              position: 'relative',
+              width: '46px',
+              height: '46px',
+              borderRadius: '14px',
+              background: 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 24px rgba(255, 87, 34, 0.45)',
+              border: '1px solid rgba(255, 255, 255, 0.25)',
+              flexShrink: 0,
+            }}
+          >
+            <Ship size={24} color="#ffffff" strokeWidth={2.4} />
           </div>
           <div>
-            <div className="brand-title">
-              Vessel <span className="brand-badge">Tracks every leak</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.5px', color: '#ffffff' }}>
+                Vessel
+              </span>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '2px 8px',
+                  borderRadius: '999px',
+                  border: '1px solid rgba(6, 182, 212, 0.45)',
+                  backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                  color: '#22d3ee',
+                  fontSize: '10px',
+                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+                  fontWeight: 700,
+                  letterSpacing: '0.8px',
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 12px rgba(6, 182, 212, 0.25)',
+                }}
+              >
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: '#22d3ee',
+                    boxShadow: '0 0 8px #22d3ee',
+                  }}
+                />
+                TRACKS EVERY LEAK
+              </span>
             </div>
-            <p className="brand-subtitle">Smart Monthly Personal Finances</p>
+            <p style={{ fontSize: '12px', color: '#8A99AD', margin: '2px 0 0 0', fontWeight: 500 }}>
+              Smart Monthly Personal Finances
+            </p>
           </div>
         </div>
 
@@ -450,11 +499,38 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* User Auth Profile Pill / Login Button */}
         {user ? (
-          <div className="user-profile-pill" title={`Logged in as ${user.fullName} (${user.mobileNumber})`}>
+          <div
+            className="user-profile-pill"
+            title={`Logged in as ${user.fullName} (${user.mobileNumber})`}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '4px 10px 4px 5px',
+              borderRadius: '999px',
+              backgroundColor: 'rgba(5, 11, 20, 0.85)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              backdropFilter: 'blur(12px)',
+            }}
+          >
             <div
               className="user-avatar-badge"
               onClick={onOpenProfile}
-              style={{ cursor: onOpenProfile ? 'pointer' : 'default' }}
+              style={{
+                width: '30px',
+                height: '30px',
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: 700,
+                fontFamily: 'ui-monospace, monospace',
+                cursor: onOpenProfile ? 'pointer' : 'default',
+                boxShadow: '0 0 10px rgba(6, 182, 212, 0.35)',
+              }}
               title="Click for Profile & Password Settings"
             >
               {user.fullName.charAt(0).toUpperCase()}
@@ -462,12 +538,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div
               className="user-info-text"
               onClick={onOpenProfile}
-              style={{ cursor: onOpenProfile ? 'pointer' : 'default' }}
+              style={{ cursor: onOpenProfile ? 'pointer' : 'default', display: 'flex', flexDirection: 'column' }}
               title={onOpenProfile ? 'Click for Profile & Password Settings' : undefined}
             >
-              <span className="user-name-text">{user.fullName}</span>
-              <span className="user-meta-text">
-                <ShieldCheck size={11} className="text-success inline-icon" /> Active
+              <span className="user-name-text" style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+                {user.fullName}
+              </span>
+              <span className="user-meta-text" style={{ fontSize: '10px', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1.2 }}>
+                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#34d399', boxShadow: '0 0 6px #34d399' }} />
+                Active
               </span>
             </div>
             <button
@@ -475,6 +554,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={onLogout}
               title="Logout"
               aria-label="Logout"
+              style={{
+                marginLeft: '4px',
+                background: 'none',
+                border: 'none',
+                color: '#8A99AD',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '4px',
+                borderRadius: '6px',
+                transition: 'color 0.2s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#f43f5e')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#8A99AD')}
             >
               <LogOut size={15} />
             </button>
@@ -491,8 +584,34 @@ export const Navbar: React.FC<NavbarProps> = ({
         )}
 
         {/* Desktop Primary Add Button */}
-        <button className="btn-primary btn-desktop-add" onClick={onOpenAddModal}>
-          <Plus size={18} /> Add Transaction
+        <button
+          className="btn-primary btn-desktop-add"
+          onClick={onOpenAddModal}
+          style={{
+            background: 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)',
+            boxShadow: '0 0 20px rgba(255, 87, 34, 0.45)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#ffffff',
+            fontWeight: 700,
+            letterSpacing: '0.2px',
+            borderRadius: '12px',
+            padding: '9px 18px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            transition: 'transform 0.18s ease, box-shadow 0.18s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'scale(1.03)';
+            e.currentTarget.style.boxShadow = '0 0 28px rgba(255, 87, 34, 0.65)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'scale(1)';
+            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.45)';
+          }}
+        >
+          <Plus size={18} strokeWidth={2.4} /> Add Transaction
         </button>
       </div>
     </header>
