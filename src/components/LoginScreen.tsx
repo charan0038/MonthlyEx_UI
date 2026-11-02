@@ -40,6 +40,19 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Responsive mobile screen detection
+  const [isMobile, setIsMobile] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 640 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Warm up the backend & Neon DB as soon as the login page loads
   useEffect(() => {
     api.warmup();
@@ -420,52 +433,80 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
               </div>
             )}
 
-            <DodgeField
-              patience={3}
-              fieldHeight={76}
-              reach={65}
-              radius={140}
-              falloff={2}
-              fleeDuration={130}
-              returnDuration={620}
-              returnBounce={0.1}
-              axis="both"
-              wall="clamp"
-              disabled={isLoading || rateLimitSeconds > 0 || mode !== 'login'}
-              onCatch={() => console.log('caught')}
-            >
-              {({ dodges, gave }) => (
-                <button
-                  type="submit"
-                  className="login-submit-btn"
-                  disabled={isLoading || rateLimitSeconds > 0}
-                  style={{
-                    width: mode === 'login' ? '280px' : '100%',
-                    maxWidth: '100%',
-                    margin: '0 auto',
-                  }}
-                >
-                  {isLoading ? (
-                    <div className="btn-spinner" />
-                  ) : (
-                    <>
-                      <span>
-                        {mode === 'login'
-                          ? gave
-                            ? 'Okay, okay · Sign In'
-                            : dodges
-                            ? `Nope x${dodges} · Catch me`
-                            : 'Sign In'
-                          : mode === 'register'
-                          ? 'Create My Account'
-                          : 'Reset Password'}
-                      </span>
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
-              )}
-            </DodgeField>
+            {isMobile ? (
+              <button
+                type="submit"
+                className="login-submit-btn"
+                disabled={isLoading || rateLimitSeconds > 0}
+                style={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  margin: '4px 0 0 0',
+                }}
+              >
+                {isLoading ? (
+                  <div className="btn-spinner" />
+                ) : (
+                  <>
+                    <span>
+                      {mode === 'login'
+                        ? 'Sign In'
+                        : mode === 'register'
+                        ? 'Create My Account'
+                        : 'Reset Password'}
+                    </span>
+                    <ArrowRight size={18} />
+                  </>
+                )}
+              </button>
+            ) : (
+              <DodgeField
+                patience={3}
+                fieldHeight={76}
+                reach={65}
+                radius={140}
+                falloff={2}
+                fleeDuration={130}
+                returnDuration={620}
+                returnBounce={0.1}
+                axis="both"
+                wall="clamp"
+                disabled={isLoading || rateLimitSeconds > 0 || mode !== 'login'}
+                onCatch={() => console.log('caught')}
+              >
+                {({ dodges, gave }) => (
+                  <button
+                    type="submit"
+                    className="login-submit-btn"
+                    disabled={isLoading || rateLimitSeconds > 0}
+                    style={{
+                      width: mode === 'login' ? '280px' : '100%',
+                      maxWidth: '100%',
+                      margin: '0 auto',
+                    }}
+                  >
+                    {isLoading ? (
+                      <div className="btn-spinner" />
+                    ) : (
+                      <>
+                        <span>
+                          {mode === 'login'
+                            ? gave
+                              ? 'Okay, okay · Sign In'
+                              : dodges
+                              ? `Nope x${dodges} · Catch me`
+                              : 'Sign In'
+                            : mode === 'register'
+                            ? 'Create My Account'
+                            : 'Reset Password'}
+                        </span>
+                        <ArrowRight size={18} />
+                      </>
+                    )}
+                  </button>
+                )}
+              </DodgeField>
+            )}
 
             {isWakingUp && (
               <p

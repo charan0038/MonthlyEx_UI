@@ -3171,11 +3171,14 @@ button, input, select, textarea {
 .login-screen-wrapper {
   position: relative;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
+  justify-content: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
   background-color: var(--bg-body);
 }
 
@@ -4659,19 +4662,117 @@ button, input, select, textarea {
     font-size: 16px !important; /* Prevents auto-zoom on iOS safari */
   }
 
-  /* Login Card on Mobile */
-  .login-card {
-    padding: 24px 18px !important;
-    border-radius: 20px !important;
+  /* Login Screen Responsive on Mobile (<= 640px) */
+  .login-screen-wrapper {
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    justify-content: flex-start !important;
+    padding-bottom: max(24px, env(safe-area-inset-bottom, 24px)) !important;
+  }
+
+  .login-top-bar {
+    padding: 10px 16px 4px 16px !important;
     max-width: 100% !important;
   }
 
+  .login-brand-icon {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 9px !important;
+  }
+
+  .login-brand-name {
+    font-size: 16px !important;
+  }
+
+  .login-brand-tag {
+    font-size: 9px !important;
+  }
+
+  .login-theme-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .login-content-container {
+    padding: 4px 14px 24px 14px !important;
+    align-items: center !important;
+    margin: auto 0 !important;
+    width: 100% !important;
+  }
+
+  .login-card {
+    padding: 18px 16px !important;
+    border-radius: 20px !important;
+    max-width: 100% !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .login-card-header {
+    margin-bottom: 12px !important;
+  }
+
+  .login-hero-logo-wrap {
+    margin-bottom: 8px !important;
+  }
+
+  .login-hero-logo {
+    max-width: 86px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28) !important;
+  }
+
   .login-title {
-    font-size: 22px !important;
+    font-size: 19px !important;
+    margin-bottom: 3px !important;
   }
 
   .login-subtitle {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  .login-tabs {
+    margin-bottom: 12px !important;
+    padding: 3px !important;
+  }
+
+  .login-tab-btn {
+    padding: 7px 10px !important;
     font-size: 13px !important;
+    border-radius: 8px !important;
+  }
+
+  .login-form {
+    gap: 11px !important;
+  }
+
+  .login-form .form-group {
+    margin-bottom: 0 !important;
+  }
+
+  .login-form .form-label {
+    font-size: 12px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .login-form .form-control {
+    height: 44px !important;
+    min-height: 44px !important;
+    font-size: 16px !important; /* Prevents auto-zoom on iOS */
+    border-radius: 10px !important;
+  }
+
+  .login-submit-btn {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 46px !important;
+    font-size: 15px !important;
+    border-radius: 12px !important;
+    margin-top: 4px !important;
   }
 }
 
@@ -4741,6 +4842,59 @@ button, input, select, textarea {
 
   .tx-note {
     max-width: 110px !important;
+  }
+
+  /* Compact Login adjustments for iPhone SE / Mini */
+  .login-top-bar {
+    padding: 8px 12px 2px 12px !important;
+  }
+
+  .login-content-container {
+    padding: 2px 10px 20px 10px !important;
+  }
+
+  .login-hero-logo {
+    max-width: 72px !important;
+  }
+
+  .login-card {
+    padding: 14px 14px 16px 14px !important;
+    border-radius: 18px !important;
+  }
+
+  .login-card-header {
+    margin-bottom: 8px !important;
+  }
+
+  .login-title {
+    font-size: 18px !important;
+  }
+
+  .login-subtitle {
+    font-size: 11px !important;
+  }
+
+  .login-tabs {
+    margin-bottom: 9px !important;
+  }
+
+  .login-tab-btn {
+    padding: 6px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .login-form {
+    gap: 9px !important;
+  }
+
+  .login-form .form-control {
+    height: 42px !important;
+    min-height: 42px !important;
+  }
+
+  .login-submit-btn {
+    height: 44px !important;
+    font-size: 14px !important;
   }
 }
 
