@@ -18,10 +18,32 @@ export const INCOME_CATEGORIES: CategoryMeta[] = [
   { id: 'Other', dbId: 12, label: 'Other', iconName: 'Wallet', color: '#14b8a6' },
 ];
 
-let dynamicCategoriesCache: CategoryMeta[] = [];
+const CATEGORIES_CACHE_KEY = 'kharcha_categories_cache_v2';
+
+const loadCachedCategories = (): CategoryMeta[] => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(CATEGORIES_CACHE_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // Ignore cache parse error
+  }
+  return [];
+};
+
+let dynamicCategoriesCache: CategoryMeta[] = loadCachedCategories();
 
 export const setDynamicCategoriesCache = (categories: CategoryMeta[]) => {
   dynamicCategoriesCache = categories;
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(categories));
+    }
+  } catch {
+    // Ignore storage quota
+  }
 };
 
 export const getDynamicCategoriesCache = (): CategoryMeta[] => {

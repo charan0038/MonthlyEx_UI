@@ -233,6 +233,24 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
   return res;
 }
 
+// In-flight request deduplication map to prevent multiple identical concurrent queries
+const inFlightRequests = new Map<string, Promise<any>>();
+
+function dedupeRequest<T>(key: string, fn: () => Promise<T>): Promise<T> {
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key)! as Promise<T>;
+  }
+  const promise = fn().finally(() => {
+    inFlightRequests.delete(key);
+  });
+  inFlightRequests.set(key, promise);
+  return promise;
+}
+
+function clearInFlightCache(): void {
+  inFlightRequests.clear();
+}
+
 export const api = {
   // --- Auth APIs ---
   async login(input: LoginInput): Promise<AuthResponse> {
@@ -364,9 +382,14 @@ export const api = {
     if (params.search) query.set('search', params.search);
     if (params.sortBy) query.set('sortBy', params.sortBy);
 
-    const res = await authFetch(`${API_BASE}/transactions?${query.toString()}`);
-    if (!res.ok) throw new Error(`Failed to fetch transactions: ${res.statusText}`);
-    return res.json();
+    const queryStr = query.toString();
+    const dedupeKey = `txs_${queryStr}`;
+
+    return dedupeRequest(dedupeKey, async () => {
+      const res = await authFetch(`${API_BASE}/transactions?${queryStr}`);
+      if (!res.ok) throw new Error(`Failed to fetch transactions: ${res.statusText}`);
+      return res.json();
+    });
   },
 
   async getTransaction(id: string): Promise<Transaction> {
@@ -376,6 +399,7 @@ export const api = {
   },
 
   async createTransaction(input: CreateTransactionInput): Promise<Transaction> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/transactions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -389,6 +413,7 @@ export const api = {
   },
 
   async updateTransaction(id: string, input: UpdateTransactionInput): Promise<Transaction> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/transactions/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -402,6 +427,7 @@ export const api = {
   },
 
   async deleteTransaction(id: string): Promise<void> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/transactions/${id}`, {
       method: 'DELETE',
     });
@@ -515,12 +541,16 @@ export const api = {
 
   // --- Budgets & Balance Settlement ---
   async getBudget(monthYear: string): Promise<MonthlyBudget> {
-    const res = await authFetch(`${API_BASE}/budgets/${encodeURIComponent(monthYear)}`);
-    if (!res.ok) throw new Error('Failed to fetch budget');
-    return res.json();
+    const dedupeKey = `bgt_${monthYear}`;
+    return dedupeRequest(dedupeKey, async () => {
+      const res = await authFetch(`${API_BASE}/budgets/${encodeURIComponent(monthYear)}`);
+      if (!res.ok) throw new Error('Failed to fetch budget');
+      return res.json();
+    });
   },
 
   async setBudget(monthYear: string, amount: number, addToIncome: boolean = true): Promise<MonthlyBudget> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/budgets`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -534,6 +564,7 @@ export const api = {
   },
 
   async cashCheckout(monthYear: string, amount?: number): Promise<any> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/budgets/cash-checkout`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -547,6 +578,7 @@ export const api = {
   },
 
   async rolloverBalance(monthYear: string, amount?: number): Promise<any> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/budgets/rollover-balance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -582,6 +614,7 @@ export const api = {
   },
 
   async clearMonth(monthYear: string): Promise<void> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/transactions/clear?monthYear=${encodeURIComponent(monthYear)}`, {
       method: 'DELETE',
     });
@@ -590,31 +623,35 @@ export const api = {
 
   // --- Dynamic Categories & Subcategories ---
   async getCategories(type?: string): Promise<CategoryMeta[]> {
-    const query = type && type !== 'ALL' ? `?type=${encodeURIComponent(type)}` : '';
-    const res = await authFetch(`${API_BASE}/categories${query}`);
-    if (!res.ok) throw new Error('Failed to fetch categories');
-    const data: any[] = await res.json();
-    return data.map((c) => ({
-      id: c.name,
-      dbId: c.id,
-      label: c.name,
-      name: c.name,
-      type: c.type as 'expense' | 'income',
-      iconName: c.iconName || 'Sparkles',
-      color: c.color || '#6366f1',
-      isDefault: Boolean(c.isDefault),
-      createdBy: c.createdBy,
-      subcategories: (c.subcategories || []).map((s: any) => ({
-        id: s.id,
-        name: s.name,
-        categoryId: s.categoryId,
-        isDefault: Boolean(s.isDefault),
-        createdBy: s.createdBy,
-      })),
-    }));
+    const dedupeKey = `cat_${type || 'all'}`;
+    return dedupeRequest(dedupeKey, async () => {
+      const query = type && type !== 'ALL' ? `?type=${encodeURIComponent(type)}` : '';
+      const res = await authFetch(`${API_BASE}/categories${query}`);
+      if (!res.ok) throw new Error('Failed to fetch categories');
+      const data: any[] = await res.json();
+      return data.map((c) => ({
+        id: c.name,
+        dbId: c.id,
+        label: c.name,
+        name: c.name,
+        type: c.type as 'expense' | 'income',
+        iconName: c.iconName || 'Sparkles',
+        color: c.color || '#6366f1',
+        isDefault: Boolean(c.isDefault),
+        createdBy: c.createdBy,
+        subcategories: (c.subcategories || []).map((s: any) => ({
+          id: s.id,
+          name: s.name,
+          categoryId: s.categoryId,
+          isDefault: Boolean(s.isDefault),
+          createdBy: s.createdBy,
+        })),
+      }));
+    });
   },
 
   async createCategory(input: CreateCategoryInput): Promise<CategoryMeta> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -640,6 +677,7 @@ export const api = {
   },
 
   async deleteCategory(id: number): Promise<void> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/categories/${id}`, {
       method: 'DELETE',
     });
@@ -650,6 +688,7 @@ export const api = {
   },
 
   async createSubcategory(categoryId: number, name: string): Promise<any> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/categories/${categoryId}/subcategories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -663,6 +702,7 @@ export const api = {
   },
 
   async deleteSubcategory(id: number): Promise<void> {
+    clearInFlightCache();
     const res = await authFetch(`${API_BASE}/categories/subcategories/${id}`, {
       method: 'DELETE',
     });
@@ -691,3 +731,8 @@ export const api = {
     return () => clearInterval(timer);
   },
 };
+
+// Trigger immediate background ping as soon as JS bundle is loaded in browser
+try {
+  api.warmup();
+} catch {}

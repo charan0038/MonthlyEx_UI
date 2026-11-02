@@ -10,12 +10,13 @@ import type {
 } from './types';
 import { api, isNetworkFailure } from './services/api';
 import { getMonthKey, getMonthName, formatINR } from './utils/formatters';
-import { getCategoryMeta, setDynamicCategoriesCache } from './constants/categories';
+import { getCategoryMeta, setDynamicCategoriesCache, getDynamicCategoriesCache } from './constants/categories';
 import { exportMonthlyPdfReport, exportYearlyPdfReport } from './utils/pdfExport';
 import {
   isMonthBudgetExplicit,
   markMonthBudgetExplicit,
   isAutoBudgetTransaction,
+  computeMonthlySummary,
 } from './utils/budgetHelper';
 
 import { CalendarDays, BarChart3, CalendarRange } from 'lucide-react';
@@ -58,7 +59,7 @@ export function App() {
 
   // Data states
   const [rawTransactions, setRawTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<CategoryMeta[]>([]);
+  const [categories, setCategories] = useState<CategoryMeta[]>(() => getDynamicCategoriesCache());
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [budget, setBudget] = useState<MonthlyBudget>({
     monthYear: getMonthKey(currentYear, currentMonth),
@@ -176,7 +177,7 @@ export function App() {
       const cachedStr = localStorage.getItem(cacheKey);
       if (cachedStr) {
         const cached = JSON.parse(cachedStr);
-        if (Array.isArray(cached.transactions) && cached.transactions.length > 0) {
+        if (Array.isArray(cached.transactions)) {
           setRawTransactions(cached.transactions);
         }
         if (cached.summary) {
@@ -185,6 +186,11 @@ export function App() {
         if (cached.budget) {
           setBudget(cached.budget);
         }
+      } else {
+        // If this specific month hasn't been cached yet, clear previous month's lingering state
+        setRawTransactions([]);
+        setSummary(null);
+        setBudget({ monthYear: monthYearKey, amount: 0 });
       }
     } catch {
       // Ignore cache read failures
@@ -278,9 +284,8 @@ export function App() {
     }, 2500);
 
     try {
-      const [txs, sum, bgt] = await Promise.all([
+      const [txs, bgt] = await Promise.all([
         api.getTransactions({ monthYear: monthYearKey }),
-        api.getMonthlySummary(monthYearKey),
         api.getBudget(monthYearKey).catch(() => null),
       ]);
 
@@ -297,6 +302,7 @@ export function App() {
       });
 
       const effectiveBudget = isExplicit && bgt ? bgt : { monthYear: monthYearKey, amount: 0 };
+      const sum = computeMonthlySummary(monthYearKey, cleanTxs, effectiveBudget);
 
       setRawTransactions(cleanTxs);
       setSummary(sum);
