@@ -908,12 +908,18 @@ export function App() {
         <main className="dashboard-content-view monthly-view" key={`monthly-${monthYearKey}`}>
           {/* Monthly Budget Card */}
           <BudgetCard
-            budgetLimit={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLimit ?? budget.amount) : 0}
+            budgetLimit={
+              summary?.budgetLimit ?? Math.max(budget.amount, summary?.totalIncome ?? 0)
+            }
             totalExpense={summary?.totalExpense ?? 0}
-            budgetLeft={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLeft ?? 0) : 0}
+            budgetLeft={
+              summary?.budgetLeft ?? (Math.max(budget.amount, summary?.totalIncome ?? 0) - (summary?.totalExpense ?? 0))
+            }
             usedPercentage={summary?.budgetUsedPercentage ?? 0}
             netBalance={summary?.netBalance ?? 0}
-            isBudgetSet={isMonthBudgetExplicit(monthYearKey, budget)}
+            isBudgetSet={
+              isMonthBudgetExplicit(monthYearKey, budget) || (summary?.totalIncome ?? 0) > 0 || (summary?.budgetLimit ?? 0) > 0 || budget.amount > 0
+            }
             isEndOfMonth={isEndOfMonth}
             onOpenBudgetModal={() => setIsBudgetOpen(true)}
             onCashCheckout={handleCashCheckout}
@@ -925,9 +931,13 @@ export function App() {
             totalIncome={summary?.totalIncome ?? 0}
             totalExpense={summary?.totalExpense ?? 0}
             netBalance={summary?.netBalance ?? 0}
-            budgetLeft={isMonthBudgetExplicit(monthYearKey, budget) ? (summary?.budgetLeft ?? 0) : 0}
+            budgetLeft={
+              summary?.budgetLeft ?? (Math.max(budget.amount, summary?.totalIncome ?? 0) - (summary?.totalExpense ?? 0))
+            }
             usedPercentage={summary?.budgetUsedPercentage ?? 0}
-            isBudgetSet={isMonthBudgetExplicit(monthYearKey, budget)}
+            isBudgetSet={
+              isMonthBudgetExplicit(monthYearKey, budget) || (summary?.totalIncome ?? 0) > 0 || (summary?.budgetLimit ?? 0) > 0 || budget.amount > 0
+            }
           />
 
           {/* Smart Insight Banner */}

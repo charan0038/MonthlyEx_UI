@@ -36,8 +36,8 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
   onCashCheckout,
   onRolloverBalance,
 }) => {
-  const isDanger = isBudgetSet && usedPercentage >= 100;
-  const isWarning = isBudgetSet && usedPercentage >= 80 && usedPercentage < 100;
+  const isDanger = isBudgetSet && budgetLimit > 0 && totalExpense > budgetLimit;
+  const isWarning = isBudgetSet && !isDanger && budgetLimit > 0 && totalExpense >= budgetLimit * 0.8;
 
   // Dual-zone gauge calculation
   const excessAmount = Math.max(0, totalExpense - budgetLimit);

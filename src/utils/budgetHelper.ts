@@ -81,7 +81,9 @@ export const computeMonthlySummary = (
 
   const netBalance = totalIncome - totalExpense;
 
-  const budgetLimit = isExplicit ? Number(budget?.amount) || 0 : 0;
+  const baseBudget = isExplicit ? Number(budget?.amount) || 0 : 0;
+  // When user adds income, it automatically adds into the monthly budget limit
+  const budgetLimit = Math.max(baseBudget, totalIncome);
   const budgetLeft = budgetLimit > 0 ? budgetLimit - totalExpense : 0;
   const budgetUsedPercentage = budgetLimit > 0 ? (totalExpense / budgetLimit) * 100 : 0;
 
