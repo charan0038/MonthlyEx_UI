@@ -56,13 +56,13 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '18px',
-        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(226, 232, 240, 0.95)',
-        background: isDark ? 'rgba(10, 19, 38, 0.82)' : 'rgba(255, 255, 255, 0.96)',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(74, 182, 206, 0.55)',
+        background: isDark ? 'rgba(10, 19, 38, 0.82)' : '#A0E0EF',
         padding: '20px 22px',
         backdropFilter: 'blur(20px)',
         boxShadow: isDark
           ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)'
-          : '0 10px 25px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03)',
+          : '0 12px 28px -6px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4)',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -70,18 +70,18 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
       }}
       className={`spotlight-card ${className}`}
       onMouseOver={(e) => {
-        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(203, 213, 225, 1)';
+        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.18)' : '#0284c7';
         e.currentTarget.style.transform = 'translateY(-2px)';
         e.currentTarget.style.boxShadow = isDark
           ? '0 16px 36px -8px rgba(0, 0, 0, 0.7)'
-          : '0 16px 36px -6px rgba(15, 23, 42, 0.1)';
+          : '0 16px 36px -6px rgba(10, 35, 66, 0.18)';
       }}
       onMouseOut={(e) => {
-        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.95)';
+        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '1px solid rgba(74, 182, 206, 0.55)';
         e.currentTarget.style.transform = 'translateY(0)';
         e.currentTarget.style.boxShadow = isDark
           ? '0 12px 30px -8px rgba(0, 0, 0, 0.55)'
-          : '0 10px 25px -4px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03)';
+          : '0 12px 28px -6px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4)';
       }}
     >
       {/* Spotlight Radial Overlay */}
@@ -107,7 +107,7 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
           height: '1px',
           background: isDark
             ? 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)'
-            : 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent)',
+            : 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent)',
         }}
       />
 
@@ -141,7 +141,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 1. TOTAL INCOME */}
       <SpotlightCard
         theme={theme}
-        spotlightColor={isDark ? 'rgba(16, 185, 129, 0.16)' : 'rgba(16, 185, 129, 0.08)'}
+        spotlightColor={isDark ? 'rgba(16, 185, 129, 0.16)' : 'rgba(255, 255, 255, 0.25)'}
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -151,7 +151,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.8px',
-                color: isDark ? '#8A99AD' : '#64748b',
+                color: isDark ? '#8A99AD' : '#1E4D61',
               }}
             >
               Total Income
@@ -161,13 +161,13 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 width: '36px',
                 height: '36px',
                 borderRadius: '12px',
-                border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(16, 185, 129, 0.3)',
-                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.1)',
-                color: isDark ? '#34d399' : '#059669',
+                border: isDark ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(6, 95, 70, 0.3)',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(255, 255, 255, 0.75)',
+                color: isDark ? '#34d399' : '#065F46',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: isDark ? '0 0 16px rgba(16, 185, 129, 0.25)' : '0 2px 8px rgba(16, 185, 129, 0.15)',
+                boxShadow: isDark ? '0 0 16px rgba(16, 185, 129, 0.25)' : '0 2px 8px rgba(6, 95, 70, 0.15)',
               }}
             >
               <ArrowUpRight size={18} strokeWidth={2.4} />
@@ -181,7 +181,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               fontSize: '28px',
               fontWeight: 800,
               letterSpacing: '-0.5px',
-              color: isDark ? '#ffffff' : '#0f172a',
+              color: isDark ? '#ffffff' : '#081C30',
             }}
           >
             {formatINR(totalIncome)}
@@ -196,12 +196,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               gap: '4px',
               padding: '3px 8px',
               borderRadius: '6px',
-              border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(16, 185, 129, 0.3)',
-              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.12)',
+              border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(6, 95, 70, 0.3)',
+              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.75)',
               fontFamily: 'ui-monospace, monospace',
               fontSize: '10.5px',
               fontWeight: 600,
-              color: isDark ? '#6ee7b7' : '#047857',
+              color: isDark ? '#6ee7b7' : '#065F46',
             }}
           >
             + Inflow | Earned this month
@@ -212,7 +212,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 2. TOTAL EXPENSES */}
       <SpotlightCard
         theme={theme}
-        spotlightColor={isDark ? 'rgba(244, 63, 94, 0.16)' : 'rgba(244, 63, 94, 0.08)'}
+        spotlightColor={isDark ? 'rgba(244, 63, 94, 0.16)' : 'rgba(255, 255, 255, 0.25)'}
       >
         <div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -222,7 +222,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.8px',
-                color: isDark ? '#8A99AD' : '#64748b',
+                color: isDark ? '#8A99AD' : '#1E4D61',
               }}
             >
               Total Expenses
@@ -232,13 +232,13 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 width: '36px',
                 height: '36px',
                 borderRadius: '12px',
-                border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(244, 63, 94, 0.3)',
-                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.12)' : 'rgba(244, 63, 94, 0.1)',
-                color: isDark ? '#fb7185' : '#e11d48',
+                border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(159, 18, 57, 0.3)',
+                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.12)' : 'rgba(255, 255, 255, 0.75)',
+                color: isDark ? '#fb7185' : '#9F1239',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(244, 63, 94, 0.15)',
+                boxShadow: isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(159, 18, 57, 0.15)',
               }}
             >
               <ArrowDownRight size={18} strokeWidth={2.4} />
@@ -252,7 +252,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               fontSize: '28px',
               fontWeight: 800,
               letterSpacing: '-0.5px',
-              color: isDark ? '#FB7185' : '#e11d48',
+              color: isDark ? '#FB7185' : '#9F1239',
             }}
           >
             {formatINR(totalExpense)}
@@ -267,12 +267,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               gap: '4px',
               padding: '3px 8px',
               borderRadius: '6px',
-              border: isDark ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(244, 63, 94, 0.3)',
-              backgroundColor: isDark ? 'rgba(244, 63, 94, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+              border: isDark ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(159, 18, 57, 0.3)',
+              backgroundColor: isDark ? 'rgba(244, 63, 94, 0.1)' : 'rgba(255, 255, 255, 0.75)',
               fontFamily: 'ui-monospace, monospace',
               fontSize: '10.5px',
               fontWeight: 600,
-              color: isDark ? '#fda4af' : '#be123c',
+              color: isDark ? '#fda4af' : '#9F1239',
             }}
           >
             — Outflow | Spent this month
@@ -285,8 +285,8 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         theme={theme}
         spotlightColor={
           netBalance >= 0
-            ? isDark ? 'rgba(52, 211, 153, 0.16)' : 'rgba(16, 185, 129, 0.08)'
-            : isDark ? 'rgba(244, 63, 94, 0.16)' : 'rgba(244, 63, 94, 0.08)'
+            ? isDark ? 'rgba(52, 211, 153, 0.16)' : 'rgba(255, 255, 255, 0.25)'
+            : isDark ? 'rgba(244, 63, 94, 0.16)' : 'rgba(255, 255, 255, 0.25)'
         }
       >
         <div>
@@ -297,7 +297,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.8px',
-                color: isDark ? '#8A99AD' : '#64748b',
+                color: isDark ? '#8A99AD' : '#1E4D61',
               }}
             >
               Net Balance
@@ -309,23 +309,22 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 borderRadius: '12px',
                 border:
                   netBalance >= 0
-                    ? isDark ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid rgba(16, 185, 129, 0.35)'
-                    : isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(244, 63, 94, 0.3)',
-                backgroundColor:
-                  netBalance >= 0
-                    ? isDark ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.1)'
-                    : isDark ? 'rgba(244, 63, 94, 0.12)' : 'rgba(244, 63, 94, 0.1)',
+                    ? isDark ? '1px solid rgba(52, 211, 153, 0.35)' : '1px solid rgba(6, 95, 70, 0.3)'
+                    : isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(159, 18, 57, 0.3)',
+                backgroundColor: isDark
+                  ? netBalance >= 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)'
+                  : 'rgba(255, 255, 255, 0.75)',
                 color:
                   netBalance >= 0
-                    ? isDark ? '#34d399' : '#059669'
-                    : isDark ? '#fb7185' : '#e11d48',
+                    ? isDark ? '#34d399' : '#065F46'
+                    : isDark ? '#fb7185' : '#9F1239',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow:
                   netBalance >= 0
-                    ? isDark ? '0 0 16px rgba(52, 211, 153, 0.25)' : '0 2px 8px rgba(16, 185, 129, 0.15)'
-                    : isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(244, 63, 94, 0.15)',
+                    ? isDark ? '0 0 16px rgba(52, 211, 153, 0.25)' : '0 2px 8px rgba(6, 95, 70, 0.15)'
+                    : isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(159, 18, 57, 0.15)',
               }}
             >
               <Scale size={18} strokeWidth={2.2} />
@@ -341,8 +340,8 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               letterSpacing: '-0.5px',
               color:
                 netBalance >= 0
-                  ? isDark ? '#34D399' : '#059669'
-                  : isDark ? '#FB7185' : '#e11d48',
+                  ? isDark ? '#34D399' : '#065F46'
+                  : isDark ? '#FB7185' : '#9F1239',
             }}
           >
             {formatINR(netBalance)}
@@ -358,12 +357,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 gap: '4px',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(16, 185, 129, 0.3)',
-                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.12)',
+                border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(6, 95, 70, 0.3)',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.75)',
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: '10.5px',
                 fontWeight: 600,
-                color: isDark ? '#6ee7b7' : '#047857',
+                color: isDark ? '#6ee7b7' : '#065F46',
               }}
             >
               <CheckCircle2 size={11} /> Surplus | Savings intact
@@ -376,12 +375,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 gap: '4px',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                border: isDark ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(244, 63, 94, 0.3)',
-                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.1)' : 'rgba(244, 63, 94, 0.1)',
+                border: isDark ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(159, 18, 57, 0.3)',
+                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.1)' : 'rgba(255, 255, 255, 0.75)',
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: '10.5px',
                 fontWeight: 600,
-                color: isDark ? '#fda4af' : '#be123c',
+                color: isDark ? '#fda4af' : '#9F1239',
               }}
             >
               <AlertCircle size={11} /> Deficit | Spending exceeded income
@@ -395,8 +394,8 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         theme={theme}
         spotlightColor={
           budgetLeft < 0
-            ? isDark ? 'rgba(244, 63, 94, 0.2)' : 'rgba(244, 63, 94, 0.08)'
-            : isDark ? 'rgba(255, 87, 34, 0.16)' : 'rgba(255, 87, 34, 0.08)'
+            ? isDark ? 'rgba(244, 63, 94, 0.2)' : 'rgba(255, 255, 255, 0.25)'
+            : isDark ? 'rgba(255, 87, 34, 0.16)' : 'rgba(255, 255, 255, 0.25)'
         }
       >
         <div>
@@ -407,7 +406,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 fontWeight: 700,
                 textTransform: 'uppercase',
                 letterSpacing: '0.8px',
-                color: isDark ? '#8A99AD' : '#64748b',
+                color: isDark ? '#8A99AD' : '#1E4D61',
               }}
             >
               Budget Left
@@ -419,22 +418,21 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 borderRadius: '12px',
                 border:
                   budgetLeft < 0
-                    ? isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(244, 63, 94, 0.3)'
-                    : isDark ? '1px solid rgba(255, 87, 34, 0.35)' : '1px solid rgba(255, 87, 34, 0.3)',
-                backgroundColor:
-                  budgetLeft < 0
-                    ? isDark ? 'rgba(244, 63, 94, 0.12)' : 'rgba(244, 63, 94, 0.1)'
-                    : isDark ? 'rgba(255, 87, 34, 0.12)' : 'rgba(255, 87, 34, 0.1)',
+                    ? isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(159, 18, 57, 0.3)'
+                    : isDark ? '1px solid rgba(255, 87, 34, 0.35)' : '1px solid rgba(255, 87, 34, 0.35)',
+                backgroundColor: isDark
+                  ? budgetLeft < 0 ? 'rgba(244, 63, 94, 0.12)' : 'rgba(255, 87, 34, 0.12)'
+                  : 'rgba(255, 255, 255, 0.75)',
                 color:
                   budgetLeft < 0
-                    ? isDark ? '#fb7185' : '#e11d48'
+                    ? isDark ? '#fb7185' : '#9F1239'
                     : '#FF7A45',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 boxShadow:
                   budgetLeft < 0
-                    ? isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(244, 63, 94, 0.15)'
+                    ? isDark ? '0 0 16px rgba(244, 63, 94, 0.25)' : '0 2px 8px rgba(159, 18, 57, 0.15)'
                     : isDark ? '0 0 16px rgba(255, 87, 34, 0.25)' : '0 2px 8px rgba(255, 87, 34, 0.15)',
               }}
             >
@@ -450,10 +448,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               fontWeight: 800,
               letterSpacing: '-0.5px',
               color: !isBudgetSet
-                ? isDark ? '#8A99AD' : '#94a3b8'
+                ? isDark ? '#8A99AD' : '#1E4D61'
                 : budgetLeft < 0
-                ? isDark ? '#FB7185' : '#e11d48'
-                : isDark ? '#ffffff' : '#0f172a',
+                ? isDark ? '#FB7185' : '#9F1239'
+                : isDark ? '#ffffff' : '#081C30',
             }}
           >
             {isBudgetSet ? formatINR(budgetLeft) : 'Not Set'}
@@ -469,11 +467,11 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 gap: '4px',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(203, 213, 225, 0.8)',
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(241, 245, 249, 0.8)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(74, 182, 206, 0.4)',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.65)',
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: '10.5px',
-                color: isDark ? '#8A99AD' : '#64748b',
+                color: isDark ? '#8A99AD' : '#1E4D61',
               }}
             >
               Define in budget settings
@@ -486,12 +484,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 gap: '4px',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(244, 63, 94, 0.3)',
-                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.15)' : 'rgba(244, 63, 94, 0.1)',
+                border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(159, 18, 57, 0.35)',
+                backgroundColor: isDark ? 'rgba(244, 63, 94, 0.15)' : 'rgba(255, 255, 255, 0.75)',
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: '10.5px',
                 fontWeight: 700,
-                color: isDark ? '#fca5a5' : '#be123c',
+                color: isDark ? '#fca5a5' : '#9F1239',
               }}
             >
               ⚠ Over budget by {formatINR(Math.abs(budgetLeft))}
@@ -504,12 +502,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 gap: '4px',
                 padding: '3px 8px',
                 borderRadius: '6px',
-                border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(16, 185, 129, 0.3)',
-                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.12)',
+                border: isDark ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(6, 95, 70, 0.3)',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255, 255, 255, 0.75)',
                 fontFamily: 'ui-monospace, monospace',
                 fontSize: '10.5px',
                 fontWeight: 600,
-                color: isDark ? '#6ee7b7' : '#047857',
+                color: isDark ? '#6ee7b7' : '#065F46',
               }}
             >
               {Math.round(100 - usedPercentage)}% allowance remaining

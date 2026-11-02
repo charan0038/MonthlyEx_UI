@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   fontSize: '22px',
                   fontWeight: 800,
                   letterSpacing: '-0.5px',
-                  color: theme === 'dark' ? '#ffffff' : '#0f172a',
+                  color: theme === 'dark' ? '#ffffff' : '#081C30',
                   transition: 'color 0.2s ease',
                 }}
               >
@@ -153,7 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <p
               style={{
                 fontSize: '12px',
-                color: theme === 'dark' ? '#8A99AD' : '#64748b',
+                color: theme === 'dark' ? '#8A99AD' : '#1E4D61',
                 margin: '2px 0 0 0',
                 fontWeight: 500,
                 transition: 'color 0.2s ease',
@@ -528,9 +528,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               gap: '8px',
               padding: '4px 10px 4px 5px',
               borderRadius: '999px',
-              backgroundColor: theme === 'dark' ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.95)',
-              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(226, 232, 240, 0.95)',
-              boxShadow: theme === 'dark' ? 'none' : '0 2px 10px rgba(15, 23, 42, 0.05)',
+              backgroundColor: theme === 'dark' ? 'rgba(5, 11, 20, 0.85)' : '#A0E0EF',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(74, 182, 206, 0.55)',
+              boxShadow: theme === 'dark' ? 'none' : '0 2px 10px rgba(74, 182, 206, 0.25)',
               backdropFilter: 'blur(12px)',
             }}
           >
@@ -567,7 +567,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,
-                  color: theme === 'dark' ? '#ffffff' : '#0f172a',
+                  color: theme === 'dark' ? '#ffffff' : '#081C30',
                   lineHeight: 1.2,
                 }}
               >
@@ -613,7 +613,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 marginLeft: '4px',
                 background: 'none',
                 border: 'none',
-                color: theme === 'dark' ? '#8A99AD' : '#64748b',
+                color: theme === 'dark' ? '#8A99AD' : '#081C30',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -622,7 +622,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 transition: 'color 0.2s',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#f43f5e')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = theme === 'dark' ? '#8A99AD' : '#64748b')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = theme === 'dark' ? '#8A99AD' : '#081C30')}
             >
               <LogOut size={15} />
             </button>

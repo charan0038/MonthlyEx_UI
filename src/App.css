@@ -38,22 +38,22 @@
 }
 
 [data-theme="light"] {
-  --bg-body: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-elevated: #ffffff;
-  --bg-muted: #f1f5f9;
-  --bg-input: #f8fafc;
-  --border-color: #e2e8f0;
-  --border-subtle: #f1f5f9;
+  --bg-body: #edf9fc;
+  --bg-surface: #A0E0EF;
+  --bg-surface-elevated: #b8ebf6;
+  --bg-muted: #d0f2f9;
+  --bg-input: #ffffff;
+  --border-color: rgba(74, 182, 206, 0.4);
+  --border-subtle: rgba(74, 182, 206, 0.25);
   
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-light: #94a3b8;
+  --text-main: #081C30;
+  --text-muted: #1E4D61;
+  --text-light: #3D758D;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.08);
-  --shadow-modal: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+  --shadow-sm: 0 1px 3px rgba(10, 35, 66, 0.08);
+  --shadow-md: 0 4px 12px rgba(10, 35, 66, 0.1);
+  --shadow-lg: 0 12px 28px -4px rgba(10, 35, 66, 0.12);
+  --shadow-modal: 0 25px 50px -12px rgba(10, 35, 66, 0.25);
 }
 
 [data-theme="dark"] {
@@ -97,11 +97,11 @@ body {
 }
 
 [data-theme="light"] body {
-  background-color: #f8fafc;
+  background-color: #edf9fc;
   background-image:
-    radial-gradient(circle at 50% 0%, rgba(255, 87, 34, 0.06) 0%, rgba(248, 250, 252, 0) 65%),
-    linear-gradient(to right, rgba(15, 23, 42, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+    radial-gradient(circle at 50% 0%, rgba(160, 224, 239, 0.45) 0%, rgba(237, 249, 252, 0) 65%),
+    linear-gradient(to right, rgba(10, 35, 66, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(10, 35, 66, 0.04) 1px, transparent 1px);
 }
 
 @keyframes hazardStripes {
@@ -3789,9 +3789,9 @@ button, input, select, textarea {
 }
 
 [data-theme="light"] .dashboard-switcher-pills {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  background: #A0E0EF;
+  border: 1px solid rgba(74, 182, 206, 0.5);
+  box-shadow: 0 10px 25px -4px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4);
 }
 
 .dashboard-switcher-btn {
@@ -3812,7 +3812,7 @@ button, input, select, textarea {
 }
 
 [data-theme="light"] .dashboard-switcher-btn {
-  color: #64748b;
+  color: #081C30;
 }
 
 .dashboard-switcher-btn:hover {
@@ -3821,8 +3821,8 @@ button, input, select, textarea {
 }
 
 [data-theme="light"] .dashboard-switcher-btn:hover {
-  color: #0f172a;
-  background-color: rgba(15, 23, 42, 0.05);
+  color: #000000;
+  background-color: rgba(255, 255, 255, 0.45);
 }
 
 .dashboard-switcher-btn.active {
@@ -3836,7 +3836,7 @@ button, input, select, textarea {
   background: linear-gradient(135deg, #FF5722 0%, #FF7A45 100%);
   color: #ffffff;
   border-color: rgba(255, 87, 34, 0.5);
-  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.35);
+  box-shadow: 0 4px 16px rgba(255, 87, 34, 0.4);
 }
 
 .dashboard-tab-sub {
@@ -3857,6 +3857,11 @@ button, input, select, textarea {
 .dashboard-switcher-btn:not(.active) .dashboard-tab-badge {
   background: var(--primary-light);
   color: var(--primary);
+}
+
+[data-theme="light"] .dashboard-switcher-btn:not(.active) .dashboard-tab-badge {
+  background: rgba(255, 255, 255, 0.65);
+  color: #081C30;
 }
 
 .dashboard-content-view {
