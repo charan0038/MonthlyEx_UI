@@ -28,8 +28,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   theme,
 }) => {
   const isDark = theme === 'dark';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(10, 35, 66, 0.12)';
-  const textColor = isDark ? '#8A99AD' : '#081C30';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 90, 156, 0.12)';
+  const textColor = isDark ? '#8A99AD' : '#005A9C';
 
   // 1. Doughnut chart configuration
   const hasCategoryData = categoryBreakdown.length > 0;
@@ -91,8 +91,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       {
         label: 'Daily Spending (₹)',
         data: barValues,
-        backgroundColor: isDark ? 'rgba(255, 87, 34, 0.85)' : 'rgba(255, 87, 34, 0.9)',
-        hoverBackgroundColor: isDark ? '#FF7A45' : '#E64A19',
+        backgroundColor: isDark ? 'rgba(255, 87, 34, 0.85)' : '#005A9C',
+        hoverBackgroundColor: isDark ? '#FF7A45' : '#60C1E5',
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -137,12 +137,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         className="chart-card chart-card-doughnut"
         style={{
           borderRadius: '20px',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(74, 182, 206, 0.55)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
+          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '3px solid #005A9C',
           background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#A0E0EF',
           backdropFilter: 'blur(20px)',
           boxShadow: isDark
             ? '0 12px 32px rgba(0, 0, 0, 0.45)'
-            : '0 12px 28px -6px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4)',
+            : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
           padding: '24px',
           transition: 'all 0.25s ease',
         }}
@@ -155,8 +156,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
                   width: '28px',
                   height: '28px',
                   borderRadius: '8px',
-                  backgroundColor: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.75)',
-                  color: isDark ? '#22d3ee' : '#0369a1',
+                  backgroundColor: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.85)',
+                  color: isDark ? '#22d3ee' : '#005A9C',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -164,7 +165,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
               >
                 <PieChart size={16} />
               </div>
-              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#081C30', margin: 0 }}>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', margin: 0 }}>
                 Spending by Category
               </h2>
             </div>
@@ -190,12 +191,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         className="chart-card chart-card-daily"
         style={{
           borderRadius: '20px',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(74, 182, 206, 0.55)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
+          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '3px solid #005A9C',
           background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#A0E0EF',
           backdropFilter: 'blur(20px)',
           boxShadow: isDark
             ? '0 12px 32px rgba(0, 0, 0, 0.45)'
-            : '0 12px 28px -6px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4)',
+            : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
           padding: '24px',
           transition: 'all 0.25s ease',
         }}
@@ -208,8 +210,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
                   width: '28px',
                   height: '28px',
                   borderRadius: '8px',
-                  backgroundColor: isDark ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 255, 255, 0.75)',
-                  color: '#FF5722',
+                  backgroundColor: isDark ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 255, 255, 0.85)',
+                  color: isDark ? '#FF5722' : '#005A9C',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -217,7 +219,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
               >
                 <BarChart2 size={16} />
               </div>
-              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#081C30', margin: 0 }}>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', margin: 0 }}>
                 Daily Spending Trend
               </h2>
             </div>

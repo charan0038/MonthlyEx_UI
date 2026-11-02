@@ -16,15 +16,16 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '18px',
-        border: isDark ? '1px solid rgba(6, 182, 212, 0.25)' : '1px solid rgba(74, 182, 206, 0.55)',
+        border: isDark ? '1px solid rgba(6, 182, 212, 0.25)' : '1px solid rgba(96, 193, 229, 0.65)',
+        borderTop: isDark ? '1px solid rgba(6, 182, 212, 0.25)' : '3px solid #005A9C',
         background: isDark
           ? 'linear-gradient(135deg, rgba(10, 19, 38, 0.88) 0%, rgba(6, 182, 212, 0.05) 50%, rgba(255, 87, 34, 0.05) 100%)'
-          : 'linear-gradient(135deg, #A0E0EF 0%, #B8EBF6 50%, #A0E0EF 100%)',
+          : '#A0E0EF',
         padding: '18px 22px',
         backdropFilter: 'blur(20px)',
         boxShadow: isDark
           ? '0 12px 32px -8px rgba(0, 0, 0, 0.55), 0 0 1px rgba(6, 182, 212, 0.2)'
-          : '0 12px 28px -6px rgba(10, 35, 66, 0.12), 0 2px 8px rgba(160, 224, 239, 0.4)',
+          : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
         marginBottom: '24px',
         display: 'flex',
         alignItems: 'center',
@@ -41,7 +42,7 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
           width: '120px',
           height: '120px',
           borderRadius: '50%',
-          background: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(6, 182, 212, 0.12)',
+          background: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(96, 193, 229, 0.2)',
           filter: 'blur(35px)',
           pointerEvents: 'none',
         }}
@@ -54,12 +55,12 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
           height: '42px',
           minWidth: '42px',
           borderRadius: '13px',
-          background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+          background: isDark ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'linear-gradient(135deg, #005A9C 0%, #60C1E5 100%)',
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: isDark ? '0 0 20px rgba(6, 182, 212, 0.45)' : '0 2px 10px rgba(6, 182, 212, 0.35)',
+          boxShadow: isDark ? '0 0 20px rgba(6, 182, 212, 0.45)' : '0 2px 10px rgba(0, 90, 156, 0.25)',
           border: '1px solid rgba(255, 255, 255, 0.25)',
           flexShrink: 0,
         }}
@@ -76,13 +77,13 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
               fontWeight: 700,
               textTransform: 'uppercase',
               letterSpacing: '0.8px',
-              color: isDark ? '#22d3ee' : '#0369a1',
+              color: isDark ? '#22d3ee' : '#005A9C',
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
             }}
           >
-            <Zap size={12} color={isDark ? '#22d3ee' : '#0369a1'} /> Monthly Spending Telemetry Insight
+            <Zap size={12} color={isDark ? '#22d3ee' : '#005A9C'} /> Monthly Spending Telemetry Insight
           </span>
           <span
             style={{
@@ -91,7 +92,7 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
               gap: '4px',
               padding: '1px 6px',
               borderRadius: '999px',
-              background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.8)',
+              background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.85)',
               border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(6, 95, 70, 0.3)',
               fontSize: '9.5px',
               fontFamily: 'ui-monospace, monospace',
@@ -114,7 +115,7 @@ export const InsightsCard: React.FC<InsightsCardProps> = ({ insightMessage, them
         <div
           style={{
             fontSize: '13.5px',
-            color: isDark ? '#e2e8f0' : '#081C30',
+            color: isDark ? '#e2e8f0' : '#003865',
             fontWeight: 600,
             lineHeight: 1.5,
           }}

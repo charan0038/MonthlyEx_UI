@@ -95,12 +95,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               width: '46px',
               height: '46px',
               borderRadius: '14px',
-              background: 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)',
+              background: theme === 'dark' ? 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)' : 'linear-gradient(135deg, #005A9C 0%, #60C1E5 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 24px rgba(255, 87, 34, 0.45)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              boxShadow: theme === 'dark' ? '0 0 24px rgba(255, 87, 34, 0.45)' : '0 4px 16px rgba(0, 90, 156, 0.35)',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid rgba(96, 193, 229, 0.6)',
               flexShrink: 0,
             }}
           >
@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   fontSize: '22px',
                   fontWeight: 800,
                   letterSpacing: '-0.5px',
-                  color: theme === 'dark' ? '#ffffff' : '#081C30',
+                  color: theme === 'dark' ? '#ffffff' : '#005A9C',
                   transition: 'color 0.2s ease',
                 }}
               >
@@ -126,15 +126,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   gap: '6px',
                   padding: '2px 8px',
                   borderRadius: '999px',
-                  border: theme === 'dark' ? '1px solid rgba(6, 182, 212, 0.45)' : '1px solid rgba(6, 182, 212, 0.35)',
-                  backgroundColor: theme === 'dark' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(6, 182, 212, 0.12)',
-                  color: theme === 'dark' ? '#22d3ee' : '#0891b2',
+                  border: theme === 'dark' ? '1px solid rgba(6, 182, 212, 0.45)' : '1px solid rgba(96, 193, 229, 0.6)',
+                  backgroundColor: theme === 'dark' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255, 255, 255, 0.85)',
+                  color: theme === 'dark' ? '#22d3ee' : '#005A9C',
                   fontSize: '10px',
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                   fontWeight: 700,
                   letterSpacing: '0.8px',
                   textTransform: 'uppercase',
-                  boxShadow: theme === 'dark' ? '0 0 12px rgba(6, 182, 212, 0.25)' : '0 2px 8px rgba(6, 182, 212, 0.12)',
+                  boxShadow: theme === 'dark' ? '0 0 12px rgba(6, 182, 212, 0.25)' : '0 2px 8px rgba(0, 90, 156, 0.1)',
                 }}
               >
                 <span
@@ -529,8 +529,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               padding: '4px 10px 4px 5px',
               borderRadius: '999px',
               backgroundColor: theme === 'dark' ? 'rgba(5, 11, 20, 0.85)' : '#A0E0EF',
-              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(74, 182, 206, 0.55)',
-              boxShadow: theme === 'dark' ? 'none' : '0 2px 10px rgba(74, 182, 206, 0.25)',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(96, 193, 229, 0.65)',
+              boxShadow: theme === 'dark' ? 'none' : '0 2px 10px rgba(0, 90, 156, 0.12)',
               backdropFilter: 'blur(12px)',
             }}
           >
@@ -541,7 +541,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 width: '30px',
                 height: '30px',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                background: theme === 'dark' ? 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' : 'linear-gradient(135deg, #005A9C 0%, #60C1E5 100%)',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
@@ -550,7 +550,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 fontWeight: 700,
                 fontFamily: 'ui-monospace, monospace',
                 cursor: onOpenProfile ? 'pointer' : 'default',
-                boxShadow: '0 0 10px rgba(6, 182, 212, 0.35)',
+                boxShadow: theme === 'dark' ? '0 0 10px rgba(6, 182, 212, 0.35)' : '0 2px 8px rgba(0, 90, 156, 0.3)',
               }}
               title="Click for Profile & Password Settings"
             >
@@ -567,7 +567,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 style={{
                   fontSize: '12px',
                   fontWeight: 700,
-                  color: theme === 'dark' ? '#ffffff' : '#081C30',
+                  color: theme === 'dark' ? '#ffffff' : '#005A9C',
                   lineHeight: 1.2,
                 }}
               >
@@ -613,7 +613,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 marginLeft: '4px',
                 background: 'none',
                 border: 'none',
-                color: theme === 'dark' ? '#8A99AD' : '#081C30',
+                color: theme === 'dark' ? '#8A99AD' : '#005A9C',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -622,7 +622,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 transition: 'color 0.2s',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#f43f5e')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = theme === 'dark' ? '#8A99AD' : '#081C30')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = theme === 'dark' ? '#8A99AD' : '#005A9C')}
             >
               <LogOut size={15} />
             </button>
@@ -643,9 +643,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           className="btn-primary btn-desktop-add"
           onClick={onOpenAddModal}
           style={{
-            background: 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)',
-            boxShadow: '0 0 20px rgba(255, 87, 34, 0.45)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            background: theme === 'dark' ? 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)' : 'linear-gradient(135deg, #005A9C 0%, #60C1E5 100%)',
+            boxShadow: theme === 'dark' ? '0 0 20px rgba(255, 87, 34, 0.45)' : '0 4px 16px rgba(0, 90, 156, 0.35)',
+            border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(96, 193, 229, 0.6)',
             color: '#ffffff',
             fontWeight: 700,
             letterSpacing: '0.2px',
@@ -659,11 +659,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'scale(1.03)';
-            e.currentTarget.style.boxShadow = '0 0 28px rgba(255, 87, 34, 0.65)';
+            e.currentTarget.style.boxShadow = theme === 'dark' ? '0 0 28px rgba(255, 87, 34, 0.65)' : '0 6px 22px rgba(0, 90, 156, 0.5)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 87, 34, 0.45)';
+            e.currentTarget.style.boxShadow = theme === 'dark' ? '0 0 20px rgba(255, 87, 34, 0.45)' : '0 4px 16px rgba(0, 90, 156, 0.35)';
           }}
         >
           <Plus size={18} strokeWidth={2.4} /> Add Transaction
