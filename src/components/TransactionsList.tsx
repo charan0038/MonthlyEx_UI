@@ -78,13 +78,13 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
       className="transactions-card"
       style={{
         borderRadius: '20px',
-        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
-        borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '4px solid #005A9C',
-        background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#A0E0EF',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+        borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+        background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#ffffff',
         backdropFilter: 'blur(20px)',
         boxShadow: isDark
           ? '0 12px 32px rgba(0, 0, 0, 0.45)'
-          : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
+          : '0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',
         overflow: 'hidden',
         marginBottom: '28px',
         transition: 'all 0.25s ease',
@@ -94,7 +94,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
         className="transactions-header"
         style={{
           padding: '22px 24px 18px 24px',
-          borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.07)' : '1px solid rgba(96, 193, 229, 0.4)',
+          borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.07)' : '1px solid #f1f5f9',
         }}
       >
         <div
@@ -109,7 +109,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', margin: 0 }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a', margin: 0 }}>
               Transactions
             </h2>
             <span
@@ -118,9 +118,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                 alignItems: 'center',
                 padding: '2px 8px',
                 borderRadius: '999px',
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.85)',
-                border: isDark ? 'none' : '1px solid rgba(96, 193, 229, 0.5)',
-                color: isDark ? '#8A99AD' : '#005A9C',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : '#f1f5f9',
+                border: isDark ? 'none' : '1px solid #e2e8f0',
+                color: isDark ? '#8A99AD' : '#475569',
                 fontSize: '11px',
                 fontFamily: 'ui-monospace, monospace',
                 fontWeight: 600,
@@ -143,9 +143,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                   gap: '6px',
                   padding: '6px 12px',
                   borderRadius: '10px',
-                  border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid rgba(225, 29, 72, 0.45)',
-                  backgroundColor: isDark ? 'rgba(244, 63, 94, 0.08)' : 'rgba(255, 255, 255, 0.85)',
-                  color: isDark ? '#fb7185' : '#9f1239',
+                  border: isDark ? '1px solid rgba(244, 63, 94, 0.35)' : '1px solid #fecdd3',
+                  backgroundColor: isDark ? 'rgba(244, 63, 94, 0.08)' : '#fff1f2',
+                  color: isDark ? '#fb7185' : '#be123c',
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -168,9 +168,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                   gap: '6px',
                   padding: '6px 12px',
                   borderRadius: '10px',
-                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(96, 193, 229, 0.6)',
-                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.85)',
-                  color: isDark ? '#cbd5e1' : '#005A9C',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #e2e8f0',
+                  backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#f8fafc',
+                  color: isDark ? '#cbd5e1' : '#334155',
                   fontSize: '12px',
                   fontWeight: 600,
                   cursor: 'pointer',
@@ -192,9 +192,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                 gap: '6px',
                 padding: '6px 12px',
                 borderRadius: '10px',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(96, 193, 229, 0.6)',
-                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.85)',
-                color: isDark ? '#8A99AD' : '#005A9C',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #e2e8f0',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.04)' : '#f8fafc',
+                color: isDark ? '#8A99AD' : '#64748b',
                 fontSize: '12px',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -205,8 +205,8 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                 e.currentTarget.style.color = '#f43f5e';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(96, 193, 229, 0.6)';
-                e.currentTarget.style.color = isDark ? '#8A99AD' : '#005A9C';
+                e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#e2e8f0';
+                e.currentTarget.style.color = isDark ? '#8A99AD' : '#64748b';
               }}
             >
               <Trash2 size={14} /> Clear Month
@@ -239,7 +239,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                 left: '14px',
                 top: '50%',
                 transform: 'translateY(-50%)',
-                color: isDark ? '#8A99AD' : '#005A9C',
+                color: isDark ? '#8A99AD' : '#94a3b8',
                 pointerEvents: 'none',
               }}
             />
@@ -251,21 +251,21 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
               onChange={(e) => onSearchChange(e.target.value)}
               style={{
                 width: '100%',
-                background: isDark ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.65)',
+                background: isDark ? 'rgba(5, 11, 20, 0.85)' : '#ffffff',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
                 borderRadius: '999px',
                 padding: '9px 16px 9px 38px',
                 fontSize: '13px',
-                color: isDark ? '#ffffff' : '#005A9C',
+                color: isDark ? '#ffffff' : '#0f172a',
                 outline: 'none',
                 transition: 'border-color 0.2s, box-shadow 0.2s',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = '#005A9C';
-                e.target.style.boxShadow = '0 0 0 3px rgba(96, 193, 229, 0.35)';
+                e.target.style.borderColor = isDark ? '#FF5722' : '#2563eb';
+                e.target.style.boxShadow = isDark ? '0 0 0 3px rgba(255, 87, 34, 0.25)' : '0 0 0 3px rgba(37, 99, 235, 0.15)';
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(96, 193, 229, 0.65)';
+                e.target.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.1)' : '#cbd5e1';
                 e.target.style.boxShadow = 'none';
               }}
             />
@@ -277,12 +277,12 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             onChange={(e) => onCategoryChange(e.target.value)}
             aria-label="Filter by Category"
             style={{
-              background: isDark ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.65)',
+              background: isDark ? 'rgba(5, 11, 20, 0.85)' : '#ffffff',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
               borderRadius: '999px',
               padding: '9px 16px',
               fontSize: '12.5px',
-              color: isDark ? '#e2e8f0' : '#005A9C',
+              color: isDark ? '#e2e8f0' : '#1e293b',
               outline: 'none',
               cursor: 'pointer',
             }}
@@ -310,12 +310,12 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             onChange={(e) => onTypeChange(e.target.value)}
             aria-label="Filter by Type"
             style={{
-              background: isDark ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.65)',
+              background: isDark ? 'rgba(5, 11, 20, 0.85)' : '#ffffff',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
               borderRadius: '999px',
               padding: '9px 16px',
               fontSize: '12.5px',
-              color: isDark ? '#e2e8f0' : '#005A9C',
+              color: isDark ? '#e2e8f0' : '#1e293b',
               outline: 'none',
               cursor: 'pointer',
             }}
@@ -331,12 +331,12 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             onChange={(e) => onPaymentChange(e.target.value)}
             aria-label="Filter by Payment Method"
             style={{
-              background: isDark ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.65)',
+              background: isDark ? 'rgba(5, 11, 20, 0.85)' : '#ffffff',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
               borderRadius: '999px',
               padding: '9px 16px',
               fontSize: '12.5px',
-              color: isDark ? '#e2e8f0' : '#005A9C',
+              color: isDark ? '#e2e8f0' : '#1e293b',
               outline: 'none',
               cursor: 'pointer',
             }}
@@ -353,12 +353,12 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             onChange={(e) => onSortByChange(e.target.value)}
             aria-label="Sort Transactions"
             style={{
-              background: isDark ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.9)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.65)',
+              background: isDark ? 'rgba(5, 11, 20, 0.85)' : '#ffffff',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #cbd5e1',
               borderRadius: '999px',
               padding: '9px 16px',
               fontSize: '12.5px',
-              color: isDark ? '#e2e8f0' : '#005A9C',
+              color: isDark ? '#e2e8f0' : '#1e293b',
               outline: 'none',
               cursor: 'pointer',
             }}
@@ -376,7 +376,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             style={{
               background: 'transparent',
               border: 'none',
-              color: isDark ? '#8A99AD' : '#005A9C',
+              color: isDark ? '#8A99AD' : '#64748b',
               fontSize: '12.5px',
               fontWeight: 600,
               padding: '8px 12px',
@@ -387,7 +387,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
               transition: 'color 0.18s ease',
             }}
             onMouseEnter={(e) => (e.currentTarget.style.color = '#f43f5e')}
-            onMouseLeave={(e) => (e.currentTarget.style.color = isDark ? '#8A99AD' : '#005A9C')}
+            onMouseLeave={(e) => (e.currentTarget.style.color = isDark ? '#8A99AD' : '#64748b')}
           >
             <RotateCcw size={13} /> Reset
           </button>
@@ -411,10 +411,10 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '16px 24px',
-                  borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(96, 193, 229, 0.45)',
+                  borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid #f1f5f9',
                   transition: 'background-color 0.15s ease',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.035)' : 'rgba(255, 255, 255, 0.45)')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.035)' : '#f8fafc')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
@@ -440,7 +440,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                       style={{
                         fontSize: '14px',
                         fontWeight: 600,
-                        color: isDark ? '#ffffff' : '#005A9C',
+                        color: isDark ? '#ffffff' : '#0f172a',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap',
@@ -456,7 +456,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                         alignItems: 'center',
                         gap: '8px',
                         fontSize: '12px',
-                        color: isDark ? '#8A99AD' : '#1E4D61',
+                        color: isDark ? '#8A99AD' : '#64748b',
                         marginTop: '3px',
                         flexWrap: 'wrap',
                       }}
@@ -465,7 +465,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                       {tx.subcategory && (
                         <>
                           <span style={{ opacity: 0.4 }}>›</span>
-                          <span style={{ color: isDark ? '#e2e8f0' : '#005A9C', fontWeight: 500 }}>{tx.subcategory}</span>
+                          <span style={{ color: isDark ? '#e2e8f0' : '#1e293b', fontWeight: 500 }}>{tx.subcategory}</span>
                         </>
                       )}
                       <span>•</span>
@@ -477,9 +477,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                           gap: '4px',
                           padding: '1px 7px',
                           borderRadius: '6px',
-                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.85)',
-                          border: isDark ? 'none' : '1px solid rgba(96, 193, 229, 0.5)',
-                          color: isDark ? '#cbd5e1' : '#005A9C',
+                          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.06)' : '#f1f5f9',
+                          border: isDark ? 'none' : '1px solid #e2e8f0',
+                          color: isDark ? '#cbd5e1' : '#475569',
                           fontSize: '10.5px',
                         }}
                       >
@@ -503,7 +503,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                       fontSize: '15.5px',
                       fontWeight: 700,
                       letterSpacing: '-0.2px',
-                      color: isIncome ? (isDark ? '#34D399' : '#065F46') : (isDark ? '#FB7185' : '#9F1239'),
+                      color: isIncome ? (isDark ? '#34D399' : '#059669') : (isDark ? '#FB7185' : '#dc2626'),
                     }}
                   >
                     {isIncome ? '+ ' : '- '}
@@ -521,9 +521,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                         width: '32px',
                         height: '32px',
                         borderRadius: '8px',
-                        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)',
-                        color: isDark ? '#8A99AD' : '#005A9C',
+                        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#f8fafc',
+                        color: isDark ? '#8A99AD' : '#64748b',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -531,14 +531,14 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                         transition: 'all 0.15s ease',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.6)' : 'rgba(0, 90, 156, 0.7)';
-                        e.currentTarget.style.color = isDark ? '#0284c7' : '#005A9C';
-                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.95)' : '#ffffff';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.6)' : '#2563eb';
+                        e.currentTarget.style.color = isDark ? '#0284c7' : '#2563eb';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(96, 193, 229, 0.65)';
-                        e.currentTarget.style.color = isDark ? '#8A99AD' : '#005A9C';
-                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#e2e8f0';
+                        e.currentTarget.style.color = isDark ? '#8A99AD' : '#64748b';
+                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : '#f8fafc';
                       }}
                     >
                       <Edit3 size={14} />
@@ -554,9 +554,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                         width: '32px',
                         height: '32px',
                         borderRadius: '8px',
-                        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
-                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)',
-                        color: isDark ? '#8A99AD' : '#005A9C',
+                        border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+                        backgroundColor: isDark ? 'rgba(255, 255, 255, 0.03)' : '#f8fafc',
+                        color: isDark ? '#8A99AD' : '#64748b',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -564,14 +564,14 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                         transition: 'all 0.15s ease',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = 'rgba(244, 63, 94, 0.6)';
-                        e.currentTarget.style.color = '#e11d48';
-                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.95)' : '#ffffff';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(244, 63, 94, 0.6)' : '#fca5a5';
+                        e.currentTarget.style.color = isDark ? '#e11d48' : '#dc2626';
+                        e.currentTarget.style.backgroundColor = '#ffffff';
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(96, 193, 229, 0.65)';
-                        e.currentTarget.style.color = isDark ? '#8A99AD' : '#005A9C';
-                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)';
+                        e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#e2e8f0';
+                        e.currentTarget.style.color = isDark ? '#8A99AD' : '#64748b';
+                        e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : '#f8fafc';
                       }}
                     >
                       <Trash2 size={14} />
@@ -599,23 +599,23 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
               width: '64px',
               height: '64px',
               borderRadius: '20px',
-              backgroundColor: isDark ? 'rgba(255, 87, 34, 0.1)' : 'rgba(96, 193, 229, 0.25)',
-              border: isDark ? '1px solid rgba(255, 87, 34, 0.25)' : '1px solid rgba(96, 193, 229, 0.65)',
+              backgroundColor: isDark ? 'rgba(255, 87, 34, 0.1)' : '#f1f5f9',
+              border: isDark ? '1px solid rgba(255, 87, 34, 0.25)' : '1px solid #e2e8f0',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: isDark ? '#FF5722' : '#005A9C',
+              color: isDark ? '#FF5722' : '#2563eb',
               marginBottom: '16px',
-              boxShadow: isDark ? '0 0 24px rgba(255, 87, 34, 0.2)' : '0 4px 16px rgba(0, 90, 156, 0.25)',
+              boxShadow: isDark ? '0 0 24px rgba(255, 87, 34, 0.2)' : 'none',
             }}
           >
             <Plus size={28} />
           </div>
 
-          <h3 style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', marginBottom: '6px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a', marginBottom: '6px' }}>
             No transactions found
           </h3>
-          <p style={{ fontSize: '13px', color: isDark ? '#8A99AD' : '#1E4D61', maxWidth: '380px', marginBottom: '20px' }}>
+          <p style={{ fontSize: '13px', color: isDark ? '#8A99AD' : '#64748b', maxWidth: '380px', marginBottom: '20px' }}>
             No transactions found for this month or filter. Add your first transaction to get started.
           </p>
 
@@ -624,11 +624,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             className="btn-primary"
             onClick={onOpenAddModal}
             style={{
-              background: isDark
-                ? 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)'
-                : 'linear-gradient(135deg, #005A9C 0%, #60C1E5 100%)',
-              boxShadow: isDark ? '0 0 20px rgba(255, 87, 34, 0.4)' : '0 4px 16px rgba(0, 90, 156, 0.35)',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(96, 193, 229, 0.6)',
+              background: 'linear-gradient(135deg, #FF5722 0%, #FF7A45 100%)',
+              boxShadow: isDark ? '0 0 20px rgba(255, 87, 34, 0.4)' : '0 4px 14px rgba(255, 87, 34, 0.35)',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(255, 87, 34, 0.4)',
               color: '#ffffff',
               fontWeight: 700,
               borderRadius: '12px',

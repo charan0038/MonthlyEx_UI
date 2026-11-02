@@ -28,8 +28,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
   theme,
 }) => {
   const isDark = theme === 'dark';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 90, 156, 0.12)';
-  const textColor = isDark ? '#8A99AD' : '#005A9C';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : '#e2e8f0';
+  const textColor = isDark ? '#8A99AD' : '#64748b';
 
   // 1. Doughnut chart configuration
   const hasCategoryData = categoryBreakdown.length > 0;
@@ -45,7 +45,7 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       {
         data: doughnutData,
         backgroundColor: doughnutColors,
-        borderColor: isDark ? '#0A1326' : '#A0E0EF',
+        borderColor: isDark ? '#0A1326' : '#ffffff',
         borderWidth: 3,
         hoverOffset: 6,
       },
@@ -91,8 +91,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
       {
         label: 'Daily Spending (₹)',
         data: barValues,
-        backgroundColor: isDark ? 'rgba(255, 87, 34, 0.85)' : '#005A9C',
-        hoverBackgroundColor: isDark ? '#FF7A45' : '#60C1E5',
+        backgroundColor: isDark ? 'rgba(255, 87, 34, 0.85)' : '#2563eb',
+        hoverBackgroundColor: isDark ? '#FF7A45' : '#1d4ed8',
         borderRadius: 6,
         borderSkipped: false,
       },
@@ -137,13 +137,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         className="chart-card chart-card-doughnut"
         style={{
           borderRadius: '20px',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
-          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '3px solid #005A9C',
-          background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#A0E0EF',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+          background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#ffffff',
           backdropFilter: 'blur(20px)',
           boxShadow: isDark
             ? '0 12px 32px rgba(0, 0, 0, 0.45)'
-            : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
+            : '0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',
           padding: '24px',
           transition: 'all 0.25s ease',
         }}
@@ -156,8 +156,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
                   width: '28px',
                   height: '28px',
                   borderRadius: '8px',
-                  backgroundColor: isDark ? 'rgba(6, 182, 212, 0.15)' : 'rgba(255, 255, 255, 0.85)',
-                  color: isDark ? '#22d3ee' : '#005A9C',
+                  backgroundColor: isDark ? 'rgba(6, 182, 212, 0.15)' : '#eff6ff',
+                  color: isDark ? '#22d3ee' : '#2563eb',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -165,11 +165,11 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
               >
                 <PieChart size={16} />
               </div>
-              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', margin: 0 }}>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a', margin: 0 }}>
                 Spending by Category
               </h2>
             </div>
-            <p className="chart-subtitle" style={{ fontSize: '12px', color: isDark ? '#8A99AD' : '#1E4D61', margin: '4px 0 0 36px' }}>
+            <p className="chart-subtitle" style={{ fontSize: '12px', color: isDark ? '#8A99AD' : '#64748b', margin: '4px 0 0 36px' }}>
               Breakdown of this month's expenses
             </p>
           </div>
@@ -179,8 +179,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
             <Doughnut data={doughnutChartData} options={doughnutOptions} />
           ) : (
             <div className="chart-empty-state">
-              <PieChart size={36} style={{ opacity: 0.35, color: isDark ? '#8A99AD' : '#1E4D61' }} />
-              <span style={{ color: isDark ? '#8A99AD' : '#1E4D61', fontSize: '13px' }}>No expense data to display</span>
+              <PieChart size={36} style={{ opacity: 0.35, color: isDark ? '#8A99AD' : '#94a3b8' }} />
+              <span style={{ color: isDark ? '#8A99AD' : '#94a3b8', fontSize: '13px' }}>No expense data to display</span>
             </div>
           )}
         </div>
@@ -191,13 +191,13 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
         className="chart-card chart-card-daily"
         style={{
           borderRadius: '20px',
-          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.65)',
-          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '3px solid #005A9C',
-          background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#A0E0EF',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+          borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #e2e8f0',
+          background: isDark ? 'rgba(10, 19, 38, 0.85)' : '#ffffff',
           backdropFilter: 'blur(20px)',
           boxShadow: isDark
             ? '0 12px 32px rgba(0, 0, 0, 0.45)'
-            : '0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
+            : '0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',
           padding: '24px',
           transition: 'all 0.25s ease',
         }}
@@ -210,8 +210,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
                   width: '28px',
                   height: '28px',
                   borderRadius: '8px',
-                  backgroundColor: isDark ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 255, 255, 0.85)',
-                  color: isDark ? '#FF5722' : '#005A9C',
+                  backgroundColor: isDark ? 'rgba(255, 87, 34, 0.15)' : '#fff7ed',
+                  color: isDark ? '#FF5722' : '#ea580c',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -219,11 +219,11 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
               >
                 <BarChart2 size={16} />
               </div>
-              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#005A9C', margin: 0 }}>
+              <h2 className="chart-title" style={{ fontSize: '17px', fontWeight: 700, color: isDark ? '#ffffff' : '#0f172a', margin: 0 }}>
                 Daily Spending Trend
               </h2>
             </div>
-            <p className="chart-subtitle" style={{ fontSize: '12px', color: isDark ? '#8A99AD' : '#1E4D61', margin: '4px 0 0 36px' }}>
+            <p className="chart-subtitle" style={{ fontSize: '12px', color: isDark ? '#8A99AD' : '#64748b', margin: '4px 0 0 36px' }}>
               Day-by-day expense distribution
             </p>
           </div>
@@ -233,8 +233,8 @@ export const ChartsSection: React.FC<ChartsSectionProps> = ({
             <Bar data={barChartData} options={barOptions} />
           ) : (
             <div className="chart-empty-state">
-              <BarChart2 size={36} style={{ opacity: 0.35, color: '#8A99AD' }} />
-              <span style={{ color: '#8A99AD', fontSize: '13px' }}>No daily expenses recorded yet</span>
+              <BarChart2 size={36} style={{ opacity: 0.35, color: isDark ? '#8A99AD' : '#94a3b8' }} />
+              <span style={{ color: isDark ? '#8A99AD' : '#94a3b8', fontSize: '13px' }}>No daily expenses recorded yet</span>
             </div>
           )}
         </div>

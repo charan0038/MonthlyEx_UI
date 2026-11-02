@@ -66,16 +66,15 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
         position: 'relative',
         overflow: 'hidden',
         borderRadius: '20px',
-        border: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid rgba(96, 193, 229, 0.65)',
-        borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '4px solid #005A9C',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.09)' : '1px solid #e2e8f0',
         background: isDark
           ? 'linear-gradient(180deg, rgba(10, 19, 38, 0.92) 0%, rgba(6, 12, 24, 0.88) 100%)'
-          : '#A0E0EF',
+          : '#ffffff',
         padding: '24px 26px',
         backdropFilter: 'blur(24px)',
         boxShadow: isDark
           ? '0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 1px rgba(255, 255, 255, 0.1)'
-          : '0 12px 30px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25)',
+          : '0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04)',
         marginBottom: '24px',
         transition: 'all 0.25s ease',
       }}
@@ -90,8 +89,8 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
           height: '200px',
           borderRadius: '50%',
           background: isDanger
-            ? isDark ? 'rgba(244, 63, 94, 0.14)' : 'rgba(244, 63, 94, 0.15)'
-            : isDark ? 'rgba(255, 87, 34, 0.12)' : 'rgba(96, 193, 229, 0.2)',
+            ? isDark ? 'rgba(244, 63, 94, 0.14)' : 'rgba(244, 63, 94, 0.08)'
+            : isDark ? 'rgba(255, 87, 34, 0.12)' : 'rgba(37, 99, 235, 0.08)',
           filter: 'blur(50px)',
           pointerEvents: 'none',
         }}
@@ -114,7 +113,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
               fontSize: '18px',
               fontWeight: 800,
               letterSpacing: '-0.3px',
-              color: isDark ? '#ffffff' : '#005A9C',
+              color: isDark ? '#ffffff' : '#0f172a',
               margin: 0,
               transition: 'color 0.2s ease',
             }}
@@ -130,9 +129,9 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 gap: '5px',
                 padding: '3px 10px',
                 borderRadius: '999px',
-                background: isDark ? 'rgba(148, 163, 184, 0.12)' : 'rgba(255, 255, 255, 0.75)',
-                color: isDark ? '#94a3b8' : '#1E4D61',
-                border: isDark ? '1px solid rgba(148, 163, 184, 0.25)' : '1px solid rgba(74, 182, 206, 0.45)',
+                background: isDark ? 'rgba(148, 163, 184, 0.12)' : '#f1f5f9',
+                color: isDark ? '#94a3b8' : '#475569',
+                border: isDark ? '1px solid rgba(148, 163, 184, 0.25)' : '1px solid #cbd5e1',
                 fontSize: '11.5px',
                 fontWeight: 600,
               }}
@@ -147,12 +146,12 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 gap: '6px',
                 padding: '3px 10px',
                 borderRadius: '999px',
-                background: isDark ? 'rgba(244, 63, 94, 0.15)' : 'rgba(255, 255, 255, 0.85)',
-                color: isDark ? '#fda4af' : '#9F1239',
-                border: isDark ? '1px solid rgba(244, 63, 94, 0.45)' : '1px solid rgba(159, 18, 57, 0.35)',
+                background: isDark ? 'rgba(244, 63, 94, 0.15)' : '#fff1f2',
+                color: isDark ? '#fda4af' : '#be123c',
+                border: isDark ? '1px solid rgba(244, 63, 94, 0.45)' : '1px solid #fecdd3',
                 fontSize: '11.5px',
                 fontWeight: 700,
-                boxShadow: isDark ? '0 0 16px rgba(244, 63, 94, 0.35)' : '0 2px 8px rgba(244, 63, 94, 0.2)',
+                boxShadow: isDark ? '0 0 16px rgba(244, 63, 94, 0.35)' : 'none',
               }}
             >
               <span
@@ -174,9 +173,9 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 gap: '5px',
                 padding: '3px 10px',
                 borderRadius: '999px',
-                background: isDark ? 'rgba(245, 158, 11, 0.15)' : 'rgba(255, 255, 255, 0.85)',
-                color: isDark ? '#fcd34d' : '#92400E',
-                border: isDark ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(146, 64, 14, 0.35)',
+                background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#fffbeb',
+                color: isDark ? '#fcd34d' : '#b45309',
+                border: isDark ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid #fde68a',
                 fontSize: '11.5px',
                 fontWeight: 600,
               }}
@@ -191,12 +190,12 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 gap: '5px',
                 padding: '3px 10px',
                 borderRadius: '999px',
-                background: isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.85)',
-                color: isDark ? '#6ee7b7' : '#065F46',
-                border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(6, 95, 70, 0.35)',
+                background: isDark ? 'rgba(16, 185, 129, 0.15)' : '#ecfdf5',
+                color: isDark ? '#6ee7b7' : '#047857',
+                border: isDark ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid #a7f3d0',
                 fontSize: '11.5px',
                 fontWeight: 600,
-                boxShadow: isDark ? '0 0 12px rgba(16, 185, 129, 0.25)' : '0 1px 4px rgba(16, 185, 129, 0.15)',
+                boxShadow: isDark ? '0 0 12px rgba(16, 185, 129, 0.25)' : 'none',
               }}
             >
               <ShieldCheck size={13} /> On Track
@@ -206,11 +205,11 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
 
         {/* Right Telemetry & Settings Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-          <div style={{ fontSize: '13px', color: isDark ? '#8A99AD' : '#1E4D61' }}>
+          <div style={{ fontSize: '13px', color: isDark ? '#8A99AD' : '#64748b' }}>
             Telemetry:{' '}
             <strong
               style={{
-                color: isDark ? '#ffffff' : '#005A9C',
+                color: isDark ? '#ffffff' : '#0f172a',
                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                 fontSize: '14px',
                 fontWeight: 700,
@@ -230,26 +229,26 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
               gap: '6px',
               padding: '6px 13px',
               borderRadius: '10px',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(96, 193, 229, 0.65)',
-              background: isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.85)',
-              color: isDark ? '#e2e8f0' : '#005A9C',
+              border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #cbd5e1',
+              background: isDark ? 'rgba(255, 255, 255, 0.04)' : '#f8fafc',
+              color: isDark ? '#e2e8f0' : '#1e293b',
               fontSize: '12px',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.18s ease',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#005A9C';
-              e.currentTarget.style.backgroundColor = '#ffffff';
-              e.currentTarget.style.color = '#005A9C';
+              e.currentTarget.style.borderColor = isDark ? '#FF5722' : '#2563eb';
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 87, 34, 0.12)' : '#ffffff';
+              e.currentTarget.style.color = isDark ? '#FF5722' : '#2563eb';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(96, 193, 229, 0.65)';
-              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.85)';
-              e.currentTarget.style.color = isDark ? '#e2e8f0' : '#005A9C';
+              e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#cbd5e1';
+              e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.04)' : '#f8fafc';
+              e.currentTarget.style.color = isDark ? '#e2e8f0' : '#1e293b';
             }}
           >
-            <Settings2 size={13} color={isDark ? '#FF5722' : '#005A9C'} />
+            <Settings2 size={13} color={isDark ? '#FF5722' : '#2563eb'} />
             <span>Set Budget</span>
           </button>
         </div>
@@ -264,21 +263,21 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             width: '100%',
             overflow: 'hidden',
             borderRadius: '999px',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(96, 193, 229, 0.55)',
-            backgroundColor: isDark ? 'rgba(0, 0, 0, 0.65)' : 'rgba(255, 255, 255, 0.75)',
-            boxShadow: isDark ? 'inset 0 2px 6px rgba(0, 0, 0, 0.7)' : 'inset 0 2px 4px rgba(0, 90, 156, 0.1)',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #e2e8f0',
+            backgroundColor: isDark ? 'rgba(0, 0, 0, 0.65)' : '#f1f5f9',
+            boxShadow: isDark ? 'inset 0 2px 6px rgba(0, 0, 0, 0.7)' : 'inset 0 1px 3px rgba(0, 0, 0, 0.06)',
             padding: '2px',
             display: 'flex',
           }}
         >
-          {/* Safe Zone (Palette Gradient: Deep Blue to Cyan) */}
+          {/* Safe Zone */}
           <div
             style={{
               width: `${baseBarPercent}%`,
               height: '100%',
               borderRadius: '999px',
-              background: isDark ? 'linear-gradient(90deg, #0284c7 0%, #059669 100%)' : 'linear-gradient(90deg, #005A9C 0%, #60C1E5 100%)',
-              boxShadow: isDark ? '0 0 14px rgba(16, 185, 129, 0.4)' : '0 2px 8px rgba(0, 90, 156, 0.3)',
+              background: isDark ? 'linear-gradient(90deg, #0284c7 0%, #059669 100%)' : 'linear-gradient(90deg, #2563eb 0%, #10b981 100%)',
+              boxShadow: isDark ? '0 0 14px rgba(16, 185, 129, 0.4)' : '0 2px 6px rgba(37, 99, 235, 0.25)',
               transition: 'width 0.4s ease',
             }}
           />
@@ -290,7 +289,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 width: `${excessBarPercent}%`,
                 height: '100%',
                 borderRadius: '999px',
-                boxShadow: isDark ? '0 0 20px rgba(244, 63, 94, 0.65)' : '0 2px 10px rgba(244, 63, 94, 0.4)',
+                boxShadow: isDark ? '0 0 20px rgba(244, 63, 94, 0.65)' : '0 2px 8px rgba(244, 63, 94, 0.35)',
                 transition: 'width 0.4s ease',
               }}
             />
@@ -311,18 +310,18 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
             {!isBudgetSet ? (
-              <span style={{ color: isDark ? '#8A99AD' : '#1E4D61' }}>Click "Set Budget" to define monthly spending limit</span>
+              <span style={{ color: isDark ? '#8A99AD' : '#64748b' }}>Click "Set Budget" to define monthly spending limit</span>
             ) : isDanger ? (
-              <span style={{ color: isDark ? '#FB7185' : '#9F1239', display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <span style={{ color: isDark ? '#FB7185' : '#dc2626', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <AlertTriangle size={13} color="#F43F5E" />
                 Exceeded by: {formatINR(excessAmount)}
               </span>
             ) : (
-              <span style={{ color: isDark ? '#34D399' : '#065F46' }}>Remaining: {formatINR(budgetLeft)}</span>
+              <span style={{ color: isDark ? '#34D399' : '#047857' }}>Remaining: {formatINR(budgetLeft)}</span>
             )}
           </div>
 
-          <div style={{ color: isDanger ? (isDark ? '#FB7185' : '#9F1239') : (isDark ? '#8A99AD' : '#1E4D61'), fontWeight: 700 }}>
+          <div style={{ color: isDanger ? (isDark ? '#FB7185' : '#dc2626') : (isDark ? '#8A99AD' : '#64748b'), fontWeight: 700 }}>
             {isBudgetSet ? `${Math.round(usedPercentage)}% used` : '0% used'}
           </div>
         </div>
@@ -334,7 +333,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
           style={{
             marginTop: '16px',
             paddingTop: '16px',
-            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.55)',
+            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid #f1f5f9',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -342,18 +341,18 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             gap: '12px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#8A99AD' : '#1E4D61' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#8A99AD' : '#475569' }}>
             <div
               style={{
                 width: '22px',
                 height: '22px',
                 borderRadius: '50%',
-                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.8)',
-                color: isDark ? '#34d399' : '#065F46',
+                backgroundColor: isDark ? 'rgba(16, 185, 129, 0.2)' : '#ecfdf5',
+                color: isDark ? '#34d399' : '#059669',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: isDark ? 'none' : '0 1px 4px rgba(6, 95, 70, 0.2)',
+                boxShadow: isDark ? 'none' : '0 1px 3px rgba(5, 150, 105, 0.15)',
               }}
             >
               <CheckCircle2 size={14} />
@@ -361,7 +360,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             <span>Net Balance surplus:</span>
             <strong
               style={{
-                color: isDark ? '#34D399' : '#065F46',
+                color: isDark ? '#34D399' : '#047857',
                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                 fontSize: '14px',
                 fontWeight: 700,
@@ -382,23 +381,23 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                   gap: '6px',
                   padding: '7px 14px',
                   borderRadius: '10px',
-                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(96, 193, 229, 0.65)',
-                  background: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)',
-                  color: isDark ? '#cbd5e1' : '#005A9C',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid #fde68a',
+                  background: isDark ? 'rgba(255, 255, 255, 0.03)' : '#fffbeb',
+                  color: isDark ? '#cbd5e1' : '#92400e',
                   fontSize: '11.5px',
                   fontWeight: 600,
                   cursor: 'pointer',
                   transition: 'all 0.18s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.25)' : '#005A9C';
-                  e.currentTarget.style.backgroundColor = '#ffffff';
-                  e.currentTarget.style.color = '#005A9C';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.25)' : '#d97706';
+                  e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.08)' : '#fef3c7';
+                  e.currentTarget.style.color = isDark ? '#ffffff' : '#78350f';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(96, 193, 229, 0.65)';
-                  e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.85)';
-                  e.currentTarget.style.color = isDark ? '#cbd5e1' : '#005A9C';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '1px solid #fde68a';
+                  e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.03)' : '#fffbeb';
+                  e.currentTarget.style.color = isDark ? '#cbd5e1' : '#92400e';
                 }}
               >
                 <Coins size={13} color="#f59e0b" />
@@ -416,29 +415,29 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                   gap: '6px',
                   padding: '7px 14px',
                   borderRadius: '10px',
-                  border: isDark ? '1px solid rgba(6, 182, 212, 0.45)' : '1px solid rgba(96, 193, 229, 0.7)',
+                  border: isDark ? '1px solid rgba(6, 182, 212, 0.45)' : '1px solid #bfdbfe',
                   background: isDark
                     ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)'
-                    : 'linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.9) 100%)',
-                  color: isDark ? '#67e8f9' : '#005A9C',
+                    : '#eff6ff',
+                  color: isDark ? '#67e8f9' : '#1d4ed8',
                   fontSize: '11.5px',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  boxShadow: isDark ? '0 0 16px rgba(6, 182, 212, 0.25)' : '0 2px 10px rgba(0, 90, 156, 0.15)',
+                  boxShadow: isDark ? '0 0 16px rgba(6, 182, 212, 0.25)' : '0 1px 4px rgba(37, 99, 235, 0.12)',
                   transition: 'all 0.18s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.8)' : '#005A9C';
-                  e.currentTarget.style.boxShadow = '0 4px 18px rgba(0, 90, 156, 0.25)';
-                  e.currentTarget.style.color = isDark ? '#ffffff' : '#005A9C';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.8)' : '#2563eb';
+                  e.currentTarget.style.backgroundColor = isDark ? 'rgba(6, 182, 212, 0.25)' : '#dbeafe';
+                  e.currentTarget.style.color = isDark ? '#ffffff' : '#1e40af';
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.45)' : 'rgba(96, 193, 229, 0.7)';
-                  e.currentTarget.style.boxShadow = isDark ? '0 0 16px rgba(6, 182, 212, 0.25)' : '0 2px 10px rgba(0, 90, 156, 0.15)';
-                  e.currentTarget.style.color = isDark ? '#67e8f9' : '#005A9C';
+                  e.currentTarget.style.borderColor = isDark ? 'rgba(6, 182, 212, 0.45)' : '#bfdbfe';
+                  e.currentTarget.style.backgroundColor = isDark ? 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%)' : '#eff6ff';
+                  e.currentTarget.style.color = isDark ? '#67e8f9' : '#1d4ed8';
                 }}
               >
-                <Sparkles size={13} color="#22d3ee" />
+                <Sparkles size={13} color={isDark ? '#22d3ee' : '#2563eb'} />
                 <span>Add to Next Month Opening Balance ({formatINR(netBalance)})</span>
                 <ArrowRight size={13} />
               </button>
