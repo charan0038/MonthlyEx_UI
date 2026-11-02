@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   X,
   Plus,
@@ -9,6 +9,8 @@ import {
   ArrowUpRight,
   Lock,
   Layers,
+  Search,
+  Zap,
 } from 'lucide-react';
 import type { CategoryMeta, CreateCategoryInput } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -24,38 +26,50 @@ interface CategoryModalProps {
   onRefreshCategories?: () => void;
 }
 
-const AVAILABLE_ICONS = [
-  { name: 'Utensils', label: 'Food' },
-  { name: 'Coffee', label: 'Coffee' },
-  { name: 'Car', label: 'Transport' },
-  { name: 'Fuel', label: 'Fuel' },
-  { name: 'Home', label: 'Rent' },
-  { name: 'Receipt', label: 'Bills' },
-  { name: 'ShoppingBag', label: 'Shopping' },
-  { name: 'Gift', label: 'Gift' },
-  { name: 'HeartPulse', label: 'Health' },
-  { name: 'Film', label: 'Movies' },
-  { name: 'Tv', label: 'Streaming' },
-  { name: 'Dumbbell', label: 'Gym' },
-  { name: 'Gamepad2', label: 'Gaming' },
-  { name: 'Plane', label: 'Travel' },
-  { name: 'Book', label: 'Books' },
-  { name: 'GraduationCap', label: 'Education' },
-  { name: 'Music', label: 'Music' },
-  { name: 'Briefcase', label: 'Work' },
-  { name: 'PiggyBank', label: 'Savings' },
-  { name: 'Shield', label: 'Insurance' },
-  { name: 'Smile', label: 'Fun' },
-  { name: 'Dog', label: 'Pets' },
-  { name: 'Wifi', label: 'Internet' },
-  { name: 'Smartphone', label: 'Mobile' },
-  { name: 'Zap', label: 'Electricity' },
-  { name: 'Banknote', label: 'Salary' },
-  { name: 'Laptop', label: 'Freelance' },
-  { name: 'TrendingUp', label: 'Invest' },
-  { name: 'Wallet', label: 'Wallet' },
-  { name: 'CreditCard', label: 'Card' },
-  { name: 'Sparkles', label: 'Other' },
+interface AvailableIcon {
+  name: string;
+  label: string;
+  group: 'all' | 'food' | 'living' | 'travel' | 'leisure' | 'work' | 'finance';
+}
+
+const AVAILABLE_ICONS: AvailableIcon[] = [
+  // Food & Drinks
+  { name: 'Utensils', label: 'Food', group: 'food' },
+  { name: 'Coffee', label: 'Coffee', group: 'food' },
+  // Living & Utilities
+  { name: 'Home', label: 'Rent', group: 'living' },
+  { name: 'Receipt', label: 'Bills', group: 'living' },
+  { name: 'Zap', label: 'Electricity', group: 'living' },
+  { name: 'Wifi', label: 'Internet', group: 'living' },
+  { name: 'Smartphone', label: 'Mobile', group: 'living' },
+  { name: 'Dog', label: 'Pets', group: 'living' },
+  // Travel & Transport
+  { name: 'Car', label: 'Transport', group: 'travel' },
+  { name: 'Fuel', label: 'Fuel', group: 'travel' },
+  { name: 'Plane', label: 'Travel', group: 'travel' },
+  // Leisure & Health
+  { name: 'ShoppingBag', label: 'Shopping', group: 'leisure' },
+  { name: 'Gift', label: 'Gift', group: 'leisure' },
+  { name: 'HeartPulse', label: 'Health', group: 'leisure' },
+  { name: 'Dumbbell', label: 'Gym', group: 'leisure' },
+  { name: 'Film', label: 'Movies', group: 'leisure' },
+  { name: 'Tv', label: 'Streaming', group: 'leisure' },
+  { name: 'Gamepad2', label: 'Gaming', group: 'leisure' },
+  { name: 'Music', label: 'Music', group: 'leisure' },
+  { name: 'Smile', label: 'Fun', group: 'leisure' },
+  { name: 'Book', label: 'Books', group: 'leisure' },
+  // Work & Education
+  { name: 'Briefcase', label: 'Work', group: 'work' },
+  { name: 'Laptop', label: 'Freelance', group: 'work' },
+  { name: 'GraduationCap', label: 'Education', group: 'work' },
+  // Finance & Income
+  { name: 'Banknote', label: 'Salary', group: 'finance' },
+  { name: 'TrendingUp', label: 'Invest', group: 'finance' },
+  { name: 'PiggyBank', label: 'Savings', group: 'finance' },
+  { name: 'Wallet', label: 'Wallet', group: 'finance' },
+  { name: 'CreditCard', label: 'Card', group: 'finance' },
+  { name: 'Shield', label: 'Insurance', group: 'finance' },
+  { name: 'Sparkles', label: 'Other', group: 'all' },
 ];
 
 const PRESET_COLORS = [
@@ -75,6 +89,37 @@ const PRESET_COLORS = [
   '#64748b', // Slate
 ];
 
+// 1-Tap Quick Suggestions
+const EXPENSE_SUGGESTIONS = [
+  { name: 'Gym & Fitness', icon: 'Dumbbell', color: '#8b5cf6' },
+  { name: 'Coffee & Snacks', icon: 'Coffee', color: '#f97316' },
+  { name: 'Groceries', icon: 'Utensils', color: '#10b981' },
+  { name: 'Fuel & Petrol', icon: 'Fuel', color: '#ef4444' },
+  { name: 'Subscriptions', icon: 'Tv', color: '#06b6d4' },
+  { name: 'Pet Care', icon: 'Dog', color: '#eab308' },
+  { name: 'Health & Pharmacy', icon: 'HeartPulse', color: '#ec4899' },
+  { name: 'Travel & Trips', icon: 'Plane', color: '#3b82f6' },
+];
+
+const INCOME_SUGGESTIONS = [
+  { name: 'Salary', icon: 'Banknote', color: '#10b981' },
+  { name: 'Freelance Work', icon: 'Laptop', color: '#6366f1' },
+  { name: 'Investments', icon: 'TrendingUp', color: '#0ea5e9' },
+  { name: 'Rental Income', icon: 'Home', color: '#f97316' },
+  { name: 'Side Business', icon: 'Briefcase', color: '#8b5cf6' },
+  { name: 'Bonus / Gift', icon: 'Gift', color: '#ec4899' },
+];
+
+const ICON_GROUPS = [
+  { id: 'all', label: 'All' },
+  { id: 'food', label: 'Food' },
+  { id: 'living', label: 'Living' },
+  { id: 'travel', label: 'Travel' },
+  { id: 'leisure', label: 'Leisure' },
+  { id: 'work', label: 'Work' },
+  { id: 'finance', label: 'Finance' },
+];
+
 export const CategoryModal: React.FC<CategoryModalProps> = ({
   isOpen,
   initialType = 'expense',
@@ -87,13 +132,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
   const [name, setName] = useState('');
   const [type, setType] = useState<'expense' | 'income'>(initialType);
-  const [iconName, setIconName] = useState('Sparkles');
-  const [color, setColor] = useState('#6366f1');
+  const [iconName, setIconName] = useState('ShoppingBag');
+  const [color, setColor] = useState('#ec4899');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [addingSubcatForId, setAddingSubcatForId] = useState<number | null>(null);
   const [newSubcatName, setNewSubcatName] = useState('');
   const [isSubcatSubmitting, setIsSubcatSubmitting] = useState(false);
+
+  // Icon group filtering state
+  const [selectedIconGroup, setSelectedIconGroup] = useState<string>('all');
+
+  // Manage tab search & filter
+  const [manageSearch, setManageSearch] = useState('');
+  const [manageFilter, setManageFilter] = useState<'all' | 'expense' | 'income' | 'custom'>('all');
 
   useEffect(() => {
     if (isOpen) {
@@ -105,10 +157,11 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       setActiveTab('create');
       setAddingSubcatForId(null);
       setNewSubcatName('');
+      setSelectedIconGroup('all');
+      setManageSearch('');
+      setManageFilter('all');
     }
   }, [isOpen, initialType]);
-
-  if (!isOpen) return null;
 
   const handleTypeChange = (newType: 'expense' | 'income') => {
     setType(newType);
@@ -211,8 +264,41 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     }
   };
 
-  const customCategories = categories.filter((c) => !c.isDefault);
-  const defaultCategories = categories.filter((c) => c.isDefault);
+  // Filter icons based on selected group
+  const filteredIcons = useMemo(() => {
+    if (selectedIconGroup === 'all') return AVAILABLE_ICONS;
+    return AVAILABLE_ICONS.filter(
+      (ico) => ico.group === selectedIconGroup || ico.group === 'all'
+    );
+  }, [selectedIconGroup]);
+
+  // Categories breakdown
+  const customCategories = useMemo(() => categories.filter((c) => !c.isDefault), [categories]);
+
+  // Filtered categories for manage tab
+  const filteredManageCategories = useMemo(() => {
+    let list = categories;
+    if (manageFilter === 'expense') {
+      list = list.filter((c) => !c.type || c.type.toLowerCase() === 'expense');
+    } else if (manageFilter === 'income') {
+      list = list.filter((c) => c.type?.toLowerCase() === 'income');
+    } else if (manageFilter === 'custom') {
+      list = list.filter((c) => !c.isDefault);
+    }
+
+    if (manageSearch.trim()) {
+      const q = manageSearch.toLowerCase().trim();
+      list = list.filter(
+        (c) =>
+          c.label.toLowerCase().includes(q) ||
+          c.subcategories?.some((s) => s.name.toLowerCase().includes(q))
+      );
+    }
+
+    return list;
+  }, [categories, manageFilter, manageSearch]);
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -224,9 +310,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       }}
     >
       <div className="modal-card category-modal-card">
+        {/* Mobile touch sheet drag indicator */}
+        <div className="cat-sheet-drag-handle" />
+
         {/* Modal Header */}
         <div className="modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div className="cat-modal-header-icon">
               <Sparkles size={18} />
             </div>
@@ -259,288 +348,266 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         </div>
 
         {activeTab === 'create' ? (
-          <form className="modal-body" onSubmit={handleCreateSubmit}>
-            {errorMessage && (
-              <div className="cat-modal-error-alert" role="alert">
-                {errorMessage}
-              </div>
-            )}
-
-            {/* Type Switcher */}
-            <div className="type-switcher" role="tablist">
-              <button
-                type="button"
-                className={`type-tab ${type === 'expense' ? 'tab-expense active' : ''}`}
-                onClick={() => handleTypeChange('expense')}
-              >
-                <ArrowDownRight size={16} /> Expense Category
-              </button>
-              <button
-                type="button"
-                className={`type-tab ${type === 'income' ? 'tab-income active' : ''}`}
-                onClick={() => handleTypeChange('income')}
-              >
-                <ArrowUpRight size={16} /> Income Category
-              </button>
-            </div>
-
-            {/* Category Name */}
-            <div className="form-group">
-              <label className="form-label" htmlFor="catNameInput">
-                Category Name *
-              </label>
-              <input
-                id="catNameInput"
-                type="text"
-                className="form-control"
-                placeholder="e.g. Gym & Fitness, Pet Care, Crypto, Subscriptions..."
-                maxLength={40}
-                required
-                autoFocus
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (errorMessage) setErrorMessage('');
-                }}
-              />
-            </div>
-
-            {/* Color Palette Picker */}
-            <div className="form-group">
-              <label className="form-label">Category Color</label>
-              <div className="cat-color-palette">
-                {PRESET_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    className={`cat-color-swatch ${color === c ? 'selected' : ''}`}
-                    style={{ backgroundColor: c }}
-                    onClick={() => setColor(c)}
-                    title={c}
-                    aria-label={`Select color ${c}`}
-                  >
-                    {color === c && <Check size={14} className="cat-color-check" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Icon Picker */}
-            <div className="form-group">
-              <label className="form-label">Category Icon</label>
-              <div className="cat-icon-picker-grid">
-                {AVAILABLE_ICONS.map((ico) => {
-                  const isSelected = iconName.toLowerCase() === ico.name.toLowerCase();
-                  return (
-                    <button
-                      key={ico.name}
-                      type="button"
-                      className={`cat-icon-pick-btn ${isSelected ? 'selected' : ''}`}
-                      onClick={() => setIconName(ico.name)}
-                      title={ico.label}
-                    >
-                      <div
-                        className="cat-icon-symbol"
-                        style={{
-                          backgroundColor: isSelected ? color : 'var(--bg-card)',
-                          color: isSelected ? '#ffffff' : 'var(--text-main)',
-                        }}
-                      >
-                        <CategoryIcon name={ico.name} size={16} />
-                      </div>
-                      <span className="cat-icon-caption">{ico.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Live Badge Preview */}
-            <div className="cat-preview-box">
-              <span className="cat-preview-label">Live Preview:</span>
-              <div className="cat-live-pill" style={{ borderColor: color }}>
-                <div className="cat-live-icon" style={{ backgroundColor: color }}>
-                  <CategoryIcon name={iconName} size={15} />
+          <form className="cat-form-container" onSubmit={handleCreateSubmit}>
+            <div className="cat-scroll-content">
+              {errorMessage && (
+                <div className="cat-modal-error-alert" role="alert">
+                  {errorMessage}
                 </div>
-                <div className="cat-live-details">
-                  <span className="cat-live-name">{name.trim() || 'New Category'}</span>
-                  <span className="cat-live-type">
-                    {type === 'expense' ? 'Expense' : 'Income'}
+              )}
+
+              {/* Type Switcher */}
+              <div className="type-switcher" role="tablist">
+                <button
+                  type="button"
+                  className={`type-tab ${type === 'expense' ? 'tab-expense active' : ''}`}
+                  onClick={() => handleTypeChange('expense')}
+                >
+                  <ArrowDownRight size={16} /> Expense Category
+                </button>
+                <button
+                  type="button"
+                  className={`type-tab ${type === 'income' ? 'tab-income active' : ''}`}
+                  onClick={() => handleTypeChange('income')}
+                >
+                  <ArrowUpRight size={16} /> Income Category
+                </button>
+              </div>
+
+              {/* 1-Tap Quick Suggestions */}
+              <div className="cat-suggestions-section">
+                <div className="cat-section-header">
+                  <span className="cat-section-title">
+                    <Zap size={13} color="var(--primary, #2563eb)" /> Quick 1-Tap Suggestions
+                  </span>
+                  <span className="cat-section-hint">Auto-fills name, icon & color</span>
+                </div>
+                <div className="cat-suggestions-chips">
+                  {(type === 'expense' ? EXPENSE_SUGGESTIONS : INCOME_SUGGESTIONS).map((sug) => (
+                    <button
+                      key={sug.name}
+                      type="button"
+                      className={`cat-suggestion-chip ${name === sug.name ? 'active' : ''}`}
+                      onClick={() => {
+                        setName(sug.name);
+                        setIconName(sug.icon);
+                        setColor(sug.color);
+                        setErrorMessage('');
+                      }}
+                      title={`Tap to select ${sug.name}`}
+                    >
+                      <div className="cat-sug-icon" style={{ backgroundColor: sug.color }}>
+                        <CategoryIcon name={sug.icon} size={11} />
+                      </div>
+                      <span>{sug.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Interactive Hero Card: Avatar Preview + Name Input */}
+              <div className="cat-hero-card">
+                <div
+                  className="cat-hero-avatar"
+                  style={{ backgroundColor: color }}
+                  title="Live Category Preview"
+                >
+                  <CategoryIcon name={iconName} size={24} />
+                </div>
+
+                <div className="cat-hero-input-wrap">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <label className="form-label" htmlFor="catNameInput" style={{ margin: 0 }}>
+                      Category Name *
+                    </label>
+                    <span
+                      style={{
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        padding: '1px 6px',
+                        borderRadius: '6px',
+                        backgroundColor: type === 'expense' ? 'rgba(244, 63, 94, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                        color: type === 'expense' ? '#f43f5e' : '#10b981',
+                        border: type === 'expense' ? '1px solid rgba(244, 63, 94, 0.25)' : '1px solid rgba(16, 185, 129, 0.25)',
+                      }}
+                    >
+                      {type}
+                    </span>
+                  </div>
+                  <input
+                    id="catNameInput"
+                    type="text"
+                    className="form-control"
+                    placeholder={type === 'expense' ? 'e.g. Gym, Pet Care, Subscriptions...' : 'e.g. Salary, Consulting, Bonus...'}
+                    maxLength={40}
+                    required
+                    autoFocus
+                    value={name}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Category Color Palette */}
+              <div className="cat-selector-card">
+                <div className="cat-section-header">
+                  <span className="cat-section-title">Category Color</span>
+                  <span className="cat-selected-color-pill" style={{ backgroundColor: color }}>
+                    {color}
                   </span>
                 </div>
+                <div className="cat-color-palette-scroll">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      className={`cat-color-swatch ${color === c ? 'selected' : ''}`}
+                      style={{ backgroundColor: c }}
+                      onClick={() => setColor(c)}
+                      title={c}
+                      aria-label={`Select color ${c}`}
+                    >
+                      {color === c && <Check size={14} className="cat-color-check" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Category Icon Picker with Filter Tabs */}
+              <div className="cat-selector-card">
+                <div className="cat-section-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
+                  <span className="cat-section-title">Category Icon</span>
+                  <div className="cat-icon-group-pills">
+                    {ICON_GROUPS.map((g) => (
+                      <button
+                        key={g.id}
+                        type="button"
+                        className={`cat-group-pill ${selectedIconGroup === g.id ? 'active' : ''}`}
+                        onClick={() => setSelectedIconGroup(g.id)}
+                      >
+                        {g.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="cat-icon-picker-grid">
+                  {filteredIcons.map((ico) => {
+                    const isSelected = iconName.toLowerCase() === ico.name.toLowerCase();
+                    return (
+                      <button
+                        key={ico.name}
+                        type="button"
+                        className={`cat-icon-pick-btn ${isSelected ? 'selected' : ''}`}
+                        onClick={() => setIconName(ico.name)}
+                        title={ico.label}
+                      >
+                        <div
+                          className="cat-icon-symbol"
+                          style={{
+                            backgroundColor: isSelected ? color : undefined,
+                            color: isSelected ? '#ffffff' : undefined,
+                          }}
+                        >
+                          <CategoryIcon name={ico.name} size={17} />
+                        </div>
+                        <span className="cat-icon-caption">{ico.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
-            {/* Modal Footer Actions */}
-            <div className="modal-footer" style={{ padding: 0, border: 'none', marginTop: '20px' }}>
+            {/* Sticky Action Footer */}
+            <div className="cat-sticky-footer">
               <button
                 type="button"
-                className="btn-outline"
+                className="btn-outline cat-footer-btn-cancel"
                 onClick={onClose}
                 disabled={isSubmitting}
               >
                 Cancel
               </button>
-              <button type="submit" className="btn-primary" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="btn-primary cat-footer-btn-submit"
+                disabled={isSubmitting}
+              >
                 <Plus size={16} /> {isSubmitting ? 'Creating...' : 'Create Category'}
               </button>
             </div>
           </form>
         ) : (
           /* Manage Tab */
-          <div className="cat-manage-body">
-            {customCategories.length > 0 && (
-              <div className="cat-group-section">
-                <h4 className="cat-section-title">
-                  Your Custom Categories ({customCategories.length})
-                </h4>
-                <div className="cat-list-items">
-                  {customCategories.map((c) => (
-                    <div key={c.dbId || c.id} className="cat-manage-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                        <div className="cat-manage-left">
-                          <div className="cat-manage-icon" style={{ backgroundColor: c.color }}>
-                            <CategoryIcon name={c.iconName} size={16} />
-                          </div>
-                          <div>
-                            <div className="cat-manage-name">{c.label}</div>
-                            <span
-                              className={`cat-manage-type-tag ${
-                                c.type === 'income' ? 'tag-income' : 'tag-expense'
-                              }`}
-                            >
-                              {c.type === 'income' ? 'Income' : 'Expense'}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          className="cat-delete-btn"
-                          onClick={() => handleDelete(c)}
-                          title={`Delete ${c.label}`}
-                          aria-label={`Delete ${c.label}`}
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-
-                      {/* Subcategories */}
-                      <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
-                        {(c.subcategories || []).map((sub) => (
-                          <span
-                            key={sub.id}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '4px',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              fontSize: '11px',
-                              backgroundColor: 'rgba(255,255,255,0.06)',
-                              color: 'var(--text-secondary, #cbd5e1)',
-                              border: '1px solid rgba(255,255,255,0.08)'
-                            }}
-                          >
-                            {sub.name}
-                            {!sub.isDefault && (
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); handleDeleteSubcategory(sub.id); }}
-                                style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'inline-flex' }}
-                                title="Delete subcategory"
-                              >
-                                <X size={11} />
-                              </button>
-                            )}
-                          </span>
-                        ))}
-
-                        {c.dbId && (
-                          addingSubcatForId === c.dbId ? (
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                              <input
-                                type="text"
-                                value={newSubcatName}
-                                onChange={(e) => setNewSubcatName(e.target.value)}
-                                placeholder="Subcategory..."
-                                style={{
-                                  padding: '2px 6px',
-                                  fontSize: '11px',
-                                  borderRadius: '6px',
-                                  background: 'rgba(0,0,0,0.3)',
-                                  border: '1px solid var(--primary, #6366f1)',
-                                  color: '#fff',
-                                  width: '100px'
-                                }}
-                                autoFocus
-                                disabled={isSubcatSubmitting}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.preventDefault();
-                                    handleSaveSubcategory(c.dbId!);
-                                  } else if (e.key === 'Escape') {
-                                    setAddingSubcatForId(null);
-                                    setNewSubcatName('');
-                                  }
-                                }}
-                              />
-                              <button
-                                type="button"
-                                disabled={isSubcatSubmitting}
-                                onClick={() => handleSaveSubcategory(c.dbId!)}
-                                style={{ background: 'var(--primary, #6366f1)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', cursor: 'pointer' }}
-                              >
-                                Save
-                              </button>
-                              <button
-                                type="button"
-                                disabled={isSubcatSubmitting}
-                                onClick={() => { setAddingSubcatForId(null); setNewSubcatName(''); }}
-                                style={{ background: 'transparent', color: '#94a3b8', border: 'none', fontSize: '10px', cursor: 'pointer' }}
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAddingSubcatForId(c.dbId!);
-                                setNewSubcatName('');
-                              }}
-                              style={{
-                                padding: '2px 7px',
-                                borderRadius: '10px',
-                                fontSize: '10px',
-                                border: '1px dashed rgba(255,255,255,0.2)',
-                                background: 'transparent',
-                                color: 'var(--text-secondary, #94a3b8)',
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '3px'
-                              }}
-                            >
-                              <Plus size={10} /> Add
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+          <div className="cat-manage-container">
+            {/* Search and Filters Bar */}
+            <div className="cat-manage-toolbar">
+              <div className="cat-manage-search-wrap">
+                <Search size={14} className="cat-search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search categories or subcategories..."
+                  value={manageSearch}
+                  onChange={(e) => setManageSearch(e.target.value)}
+                  className="cat-search-input"
+                />
+                {manageSearch && (
+                  <button
+                    type="button"
+                    onClick={() => setManageSearch('')}
+                    className="cat-search-clear"
+                  >
+                    <X size={12} />
+                  </button>
+                )}
               </div>
-            )}
 
-            <div className="cat-group-section">
-              <h4 className="cat-section-title">
-                Default System Categories ({defaultCategories.length})
-              </h4>
-              <div className="cat-list-items">
-                {defaultCategories.map((c) => (
-                  <div key={c.id + (c.type || '')} className="cat-manage-item default-item" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <div className="cat-manage-filter-pills">
+                <button
+                  type="button"
+                  className={`cat-filter-pill ${manageFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setManageFilter('all')}
+                >
+                  All ({categories.length})
+                </button>
+                <button
+                  type="button"
+                  className={`cat-filter-pill ${manageFilter === 'expense' ? 'active' : ''}`}
+                  onClick={() => setManageFilter('expense')}
+                >
+                  Expense
+                </button>
+                <button
+                  type="button"
+                  className={`cat-filter-pill ${manageFilter === 'income' ? 'active' : ''}`}
+                  onClick={() => setManageFilter('income')}
+                >
+                  Income
+                </button>
+                <button
+                  type="button"
+                  className={`cat-filter-pill ${manageFilter === 'custom' ? 'active' : ''}`}
+                  onClick={() => setManageFilter('custom')}
+                >
+                  Custom ({customCategories.length})
+                </button>
+              </div>
+            </div>
+
+            {/* Scrollable Categories List */}
+            <div className="cat-manage-list">
+              {filteredManageCategories.length > 0 ? (
+                filteredManageCategories.map((c) => (
+                  <div
+                    key={c.dbId || `${c.id}-${c.type}`}
+                    className={`cat-manage-item ${c.isDefault ? 'default-item' : 'custom-item'}`}
+                  >
+                    <div className="cat-item-top-row">
                       <div className="cat-manage-left">
                         <div className="cat-manage-icon" style={{ backgroundColor: c.color }}>
                           <CategoryIcon name={c.iconName} size={16} />
@@ -557,35 +624,37 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         </div>
                       </div>
 
-                      <span className="cat-default-badge" title="Built-in default category">
-                        <Lock size={12} /> Default
-                      </span>
+                      {c.isDefault ? (
+                        <span className="cat-default-badge" title="Built-in default category">
+                          <Lock size={12} /> Default
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          className="cat-delete-btn"
+                          onClick={() => handleDelete(c)}
+                          title={`Delete ${c.label}`}
+                          aria-label={`Delete ${c.label}`}
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </div>
 
-                    {/* Subcategories for default categories */}
-                    <div style={{ marginTop: '8px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                    {/* Subcategories Shelf */}
+                    <div className="cat-subcategories-shelf">
                       {(c.subcategories || []).map((sub) => (
-                        <span
-                          key={sub.id}
-                          style={{
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px',
-                            padding: '2px 8px',
-                            borderRadius: '12px',
-                            fontSize: '11px',
-                            backgroundColor: 'rgba(255,255,255,0.06)',
-                            color: 'var(--text-secondary, #cbd5e1)',
-                            border: '1px solid rgba(255,255,255,0.08)'
-                          }}
-                        >
+                        <span key={sub.id} className="cat-subcat-chip">
                           {sub.name}
                           {!sub.isDefault && (
                             <button
                               type="button"
-                              onClick={(e) => { e.stopPropagation(); handleDeleteSubcategory(sub.id); }}
-                              style={{ background: 'none', border: 'none', color: '#f87171', cursor: 'pointer', padding: 0, display: 'inline-flex' }}
-                              title="Delete custom subcategory"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSubcategory(sub.id);
+                              }}
+                              className="cat-subcat-del-btn"
+                              title="Delete subcategory"
                             >
                               <X size={11} />
                             </button>
@@ -595,21 +664,13 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
                       {c.dbId && (
                         addingSubcatForId === c.dbId ? (
-                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          <div className="cat-add-subcat-form">
                             <input
                               type="text"
                               value={newSubcatName}
                               onChange={(e) => setNewSubcatName(e.target.value)}
                               placeholder="Subcategory..."
-                              style={{
-                                padding: '2px 6px',
-                                fontSize: '11px',
-                                borderRadius: '6px',
-                                background: 'rgba(0,0,0,0.3)',
-                                border: '1px solid var(--primary, #6366f1)',
-                                color: '#fff',
-                                width: '100px'
-                              }}
+                              className="cat-inline-subcat-input"
                               autoFocus
                               disabled={isSubcatSubmitting}
                               onKeyDown={(e) => {
@@ -626,15 +687,18 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                               type="button"
                               disabled={isSubcatSubmitting}
                               onClick={() => handleSaveSubcategory(c.dbId!)}
-                              style={{ background: 'var(--primary, #6366f1)', color: '#fff', border: 'none', borderRadius: '4px', padding: '2px 6px', fontSize: '10px', cursor: 'pointer' }}
+                              className="cat-inline-save-btn"
                             >
                               Save
                             </button>
                             <button
                               type="button"
                               disabled={isSubcatSubmitting}
-                              onClick={() => { setAddingSubcatForId(null); setNewSubcatName(''); }}
-                              style={{ background: 'transparent', color: '#94a3b8', border: 'none', fontSize: '10px', cursor: 'pointer' }}
+                              onClick={() => {
+                                setAddingSubcatForId(null);
+                                setNewSubcatName('');
+                              }}
+                              className="cat-inline-cancel-btn"
                             >
                               Cancel
                             </button>
@@ -646,27 +710,34 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                               setAddingSubcatForId(c.dbId!);
                               setNewSubcatName('');
                             }}
-                            style={{
-                              padding: '2px 7px',
-                              borderRadius: '10px',
-                              fontSize: '10px',
-                              border: '1px dashed rgba(255,255,255,0.2)',
-                              background: 'transparent',
-                              color: 'var(--text-secondary, #94a3b8)',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '3px'
-                            }}
+                            className="cat-add-subcat-btn"
                           >
-                            <Plus size={10} /> Add
+                            <Plus size={11} /> Add Subcategory
                           </button>
                         )
                       )}
                     </div>
                   </div>
-                ))}
-              </div>
+                ))
+              ) : (
+                <div className="cat-manage-empty">
+                  <Layers size={32} style={{ opacity: 0.4, marginBottom: '8px' }} />
+                  <p style={{ fontWeight: 600, margin: '0 0 4px 0' }}>No categories found</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', margin: 0 }}>
+                    {manageSearch ? 'Try a different search query' : 'Create your first custom category above'}
+                  </p>
+                  {!manageSearch && (
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => setActiveTab('create')}
+                      style={{ marginTop: '12px', padding: '7px 14px', fontSize: '12px' }}
+                    >
+                      <Plus size={14} /> Create Category
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
