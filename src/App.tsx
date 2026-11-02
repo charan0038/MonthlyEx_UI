@@ -921,6 +921,7 @@ export function App() {
               isMonthBudgetExplicit(monthYearKey, budget) || (summary?.totalIncome ?? 0) > 0 || (summary?.budgetLimit ?? 0) > 0 || budget.amount > 0
             }
             isEndOfMonth={isEndOfMonth}
+            theme={theme}
             onOpenBudgetModal={() => setIsBudgetOpen(true)}
             onCashCheckout={handleCashCheckout}
             onRolloverBalance={handleRolloverBalance}
@@ -938,10 +939,11 @@ export function App() {
             isBudgetSet={
               isMonthBudgetExplicit(monthYearKey, budget) || (summary?.totalIncome ?? 0) > 0 || (summary?.budgetLimit ?? 0) > 0 || budget.amount > 0
             }
+            theme={theme}
           />
 
           {/* Smart Insight Banner */}
-          <InsightsCard insightMessage={summary?.insightMessage ?? ''} />
+          <InsightsCard insightMessage={summary?.insightMessage ?? ''} theme={theme} />
 
           {/* Charts Section */}
           <ChartsSection
@@ -959,6 +961,7 @@ export function App() {
             type={type}
             payment={payment}
             sortBy={sortBy}
+            theme={theme}
             onSearchChange={setSearch}
             onCategoryChange={setCategory}
             onTypeChange={setType}

@@ -108,7 +108,15 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '22px', fontWeight: 800, letterSpacing: '-0.5px', color: '#ffffff' }}>
+              <span
+                style={{
+                  fontSize: '22px',
+                  fontWeight: 800,
+                  letterSpacing: '-0.5px',
+                  color: theme === 'dark' ? '#ffffff' : '#0f172a',
+                  transition: 'color 0.2s ease',
+                }}
+              >
                 Vessel
               </span>
               <span
@@ -118,15 +126,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   gap: '6px',
                   padding: '2px 8px',
                   borderRadius: '999px',
-                  border: '1px solid rgba(6, 182, 212, 0.45)',
-                  backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                  color: '#22d3ee',
+                  border: theme === 'dark' ? '1px solid rgba(6, 182, 212, 0.45)' : '1px solid rgba(6, 182, 212, 0.35)',
+                  backgroundColor: theme === 'dark' ? 'rgba(6, 182, 212, 0.1)' : 'rgba(6, 182, 212, 0.12)',
+                  color: theme === 'dark' ? '#22d3ee' : '#0891b2',
                   fontSize: '10px',
                   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                   fontWeight: 700,
                   letterSpacing: '0.8px',
                   textTransform: 'uppercase',
-                  boxShadow: '0 0 12px rgba(6, 182, 212, 0.25)',
+                  boxShadow: theme === 'dark' ? '0 0 12px rgba(6, 182, 212, 0.25)' : '0 2px 8px rgba(6, 182, 212, 0.12)',
                 }}
               >
                 <span
@@ -135,14 +143,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                     width: '6px',
                     height: '6px',
                     borderRadius: '50%',
-                    backgroundColor: '#22d3ee',
-                    boxShadow: '0 0 8px #22d3ee',
+                    backgroundColor: theme === 'dark' ? '#22d3ee' : '#06b6d4',
+                    boxShadow: theme === 'dark' ? '0 0 8px #22d3ee' : '0 0 6px #06b6d4',
                   }}
                 />
                 TRACKS EVERY LEAK
               </span>
             </div>
-            <p style={{ fontSize: '12px', color: '#8A99AD', margin: '2px 0 0 0', fontWeight: 500 }}>
+            <p
+              style={{
+                fontSize: '12px',
+                color: theme === 'dark' ? '#8A99AD' : '#64748b',
+                margin: '2px 0 0 0',
+                fontWeight: 500,
+                transition: 'color 0.2s ease',
+              }}
+            >
               Smart Monthly Personal Finances
             </p>
           </div>
@@ -512,8 +528,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               gap: '8px',
               padding: '4px 10px 4px 5px',
               borderRadius: '999px',
-              backgroundColor: 'rgba(5, 11, 20, 0.85)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
+              backgroundColor: theme === 'dark' ? 'rgba(5, 11, 20, 0.85)' : 'rgba(255, 255, 255, 0.95)',
+              border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(226, 232, 240, 0.95)',
+              boxShadow: theme === 'dark' ? 'none' : '0 2px 10px rgba(15, 23, 42, 0.05)',
               backdropFilter: 'blur(12px)',
             }}
           >
@@ -545,7 +562,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               style={{ cursor: onOpenProfile ? 'pointer' : 'default', display: 'flex', flexDirection: 'column' }}
               title={onOpenProfile ? 'Click for Profile & Password Settings' : undefined}
             >
-              <span className="user-name-text" style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
+              <span
+                className="user-name-text"
+                style={{
+                  fontSize: '12px',
+                  fontWeight: 700,
+                  color: theme === 'dark' ? '#ffffff' : '#0f172a',
+                  lineHeight: 1.2,
+                }}
+              >
                 {user.fullName}
               </span>
               <span
@@ -588,7 +613,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 marginLeft: '4px',
                 background: 'none',
                 border: 'none',
-                color: '#8A99AD',
+                color: theme === 'dark' ? '#8A99AD' : '#64748b',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
@@ -597,7 +622,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 transition: 'color 0.2s',
               }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#f43f5e')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#8A99AD')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = theme === 'dark' ? '#8A99AD' : '#64748b')}
             >
               <LogOut size={15} />
             </button>
