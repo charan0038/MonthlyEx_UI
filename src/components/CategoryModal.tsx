@@ -11,6 +11,7 @@ import {
   Layers,
   Search,
   Zap,
+  ArrowLeft,
 } from 'lucide-react';
 import type { CategoryMeta, CreateCategoryInput } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -302,7 +303,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
   return (
     <div
-      className="modal-backdrop active"
+      className="modal-backdrop active cat-modal-backdrop"
       role="dialog"
       aria-modal="true"
       onClick={(e) => {
@@ -310,22 +311,39 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       }}
     >
       <div className="modal-card category-modal-card">
-        {/* Mobile touch sheet drag indicator */}
+        {/* Mobile touch sheet drag indicator (hidden on full-screen mobile) */}
         <div className="cat-sheet-drag-handle" />
 
-        {/* Modal Header */}
-        <div className="modal-header">
+        {/* Modal / Screen Header */}
+        <div className="modal-header cat-mobile-screen-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Native Mobile Screen Back Arrow (shown on mobile) */}
+            <button
+              type="button"
+              className="cat-screen-back-btn"
+              onClick={onClose}
+              aria-label="Back"
+              title="Go Back"
+            >
+              <ArrowLeft size={19} />
+            </button>
+
             <div className="cat-modal-header-icon">
               <Sparkles size={18} />
             </div>
             <div>
-              <h3 className="modal-title">Categories</h3>
-              <p className="modal-subtitle">Dynamic Expense & Income Categories</p>
+              <h3 className="modal-title">
+                {activeTab === 'create' ? 'Create Category' : 'All Categories'}
+              </h3>
+              <p className="modal-subtitle">
+                {activeTab === 'create'
+                  ? 'Dynamic Expense & Income Categories'
+                  : `${categories.length} total categories`}
+              </p>
             </div>
           </div>
           <button className="modal-close-btn" onClick={onClose} aria-label="Close Modal">
-            <X size={16} />
+            <X size={17} />
           </button>
         </div>
 
