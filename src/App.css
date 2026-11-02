@@ -1367,9 +1367,7 @@ button, input, select, textarea {
 }
 
 @media (max-width: 480px) {
-  .summary-grid { grid-template-columns: 1fr; }
-  .category-grid { grid-template-columns: repeat(2, 1fr); }
-  .payment-methods-row { grid-template-columns: 1fr; }
+  .payment-methods-row { grid-template-columns: repeat(3, 1fr); gap: 6px; }
 }
 
 /* ==========================================================================
@@ -3715,6 +3713,14 @@ button, input, select, textarea {
     white-space: nowrap;
   }
 
+  .navbar-yearly-badge {
+    flex: 1;
+    justify-content: center;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+    white-space: nowrap;
+  }
+
   /* Hide desktop Add button and user pill on mobile */
   .btn-desktop-add,
   .user-profile-pill,
@@ -3777,6 +3783,36 @@ button, input, select, textarea {
     margin-top: 6px !important;
   }
 
+  /* Budget Bottom Settlement Controls on Mobile */
+  .budget-settlement-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    padding-top: 12px !important;
+    margin-top: 12px !important;
+  }
+
+  .budget-surplus-info {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .budget-settlement-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .budget-action-btn-cash,
+  .budget-action-btn-rollover {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 9px 12px !important;
+    font-size: 12px !important;
+    box-sizing: border-box !important;
+  }
+
   /* 4 Summary Cards -> Gorgeous 2x2 Grid on Mobile */
   .summary-grid {
     display: grid !important;
@@ -3785,13 +3821,35 @@ button, input, select, textarea {
     margin-bottom: 14px !important;
   }
 
-  .stat-card {
-    padding: 12px 12px !important;
+  .stat-card,
+  .spotlight-card {
+    padding: 12px 10px !important;
     border-radius: var(--radius-md) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important;
     min-height: 98px !important;
+  }
+
+  .spotlight-card div[style*="font-size: 28px"] {
+    font-size: clamp(16px, 4.5vw, 20px) !important;
+    margin-top: 6px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .spotlight-card div[style*="width: 36px"] {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: 8px !important;
+  }
+
+  .spotlight-card div[style*="width: 36px"] svg {
+    width: 15px !important;
+    height: 15px !important;
   }
 
   .stat-card-header {
@@ -4117,7 +4175,9 @@ button, input, select, textarea {
     -webkit-backdrop-filter: blur(14px) !important;
   }
 
-  .modal-card {
+  .modal-card,
+  .profile-modal-card,
+  .confirm-modal-card {
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     border-top-left-radius: 26px !important;
@@ -4125,11 +4185,39 @@ button, input, select, textarea {
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    max-height: 88vh !important;
+    max-height: 90dvh !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
     animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
     box-shadow: var(--shadow-modal) !important;
+  }
+
+  .confirm-modal-card {
+    padding: 24px 18px !important;
+    padding-bottom: max(24px, env(safe-area-inset-bottom)) !important;
+  }
+
+  .confirm-modal-actions {
+    display: flex !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .confirm-modal-actions .profile-btn-cancel,
+  .confirm-modal-actions .profile-btn-save {
+    flex: 1 !important;
+    justify-content: center !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+
+  .confirm-flow-row {
+    padding: 12px 8px !important;
+    gap: 6px !important;
+  }
+
+  .flow-step-val {
+    font-size: 12px !important;
   }
 
   .category-modal-card {
@@ -4529,6 +4617,21 @@ button, input, select, textarea {
     min-width: 0;
   }
   .dashboard-tab-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .dashboard-switcher-btn {
+    padding: 6px 5px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .dashboard-switcher-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+  .dashboard-tab-badge {
     display: none;
   }
 }

@@ -330,6 +330,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
       {/* Bottom Settlement Row */}
       {netBalance > 0 && (onCashCheckout || onRolloverBalance) && (
         <div
+          className="budget-settlement-row"
           style={{
             marginTop: '16px',
             paddingTop: '16px',
@@ -341,7 +342,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             gap: '12px',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#8A99AD' : '#475569' }}>
+          <div className="budget-surplus-info" style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: isDark ? '#8A99AD' : '#475569' }}>
             <div
               style={{
                 width: '22px',
@@ -370,10 +371,11 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             </strong>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <div className="budget-settlement-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {onCashCheckout && (
               <button
                 type="button"
+                className="budget-action-btn-cash"
                 onClick={onCashCheckout}
                 style={{
                   display: 'inline-flex',
@@ -408,6 +410,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
             {onRolloverBalance && (
               <button
                 type="button"
+                className="budget-action-btn-rollover"
                 onClick={onRolloverBalance}
                 style={{
                   display: 'inline-flex',

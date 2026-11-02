@@ -109,6 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <span
+                className="brand-title"
                 style={{
                   fontSize: '22px',
                   fontWeight: 800,
@@ -120,6 +121,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Vessel
               </span>
               <span
+                className="brand-badge"
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -151,6 +153,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </span>
             </div>
             <p
+              className="brand-subtitle"
               style={{
                 fontSize: '12px',
                 color: theme === 'dark' ? '#8A99AD' : '#64748b',

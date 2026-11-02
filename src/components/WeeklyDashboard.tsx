@@ -354,58 +354,64 @@ export const WeeklyDashboard: React.FC<WeeklyDashboardProps> = ({
       {/* Control Header Bar */}
       <div className="weekly-controls-bar">
         <div className="weekly-selector-group">
-          <button
-            type="button"
-            className="weekly-nav-btn"
-            onClick={handlePrevWeek}
-            title="Previous Week"
-            aria-label="Previous Week"
-          >
-            <ChevronLeft size={18} />
-          </button>
+          {/* Main Navigation Cluster: Prev + Title + Next (never breaks apart) */}
+          <div className="weekly-nav-cluster">
+            <button
+              type="button"
+              className="weekly-nav-btn"
+              onClick={handlePrevWeek}
+              title="Previous Week"
+              aria-label="Previous Week"
+            >
+              <ChevronLeft size={18} />
+            </button>
 
-          <div className="weekly-title-card">
-            <div className="weekly-title-row">
-              <span className="weekly-badge">Week {summary?.weekNumber || '—'}</span>
-              <span className="weekly-range-text">
-                {summary?.formattedRange || 'Loading week...'}
+            <div className="weekly-title-card">
+              <div className="weekly-title-row">
+                <span className="weekly-badge">Week {summary?.weekNumber || '—'}</span>
+                <span className="weekly-range-text">
+                  {summary?.formattedRange || 'Loading week...'}
+                </span>
+              </div>
+              <span className="weekly-year-text">
+                {summary ? `Year ${summary.year} • 7 Days Performance` : 'Calculating...'}
               </span>
             </div>
-            <span className="weekly-year-text">
-              {summary ? `Year ${summary.year} • 7 Days Performance` : 'Calculating...'}
-            </span>
+
+            <button
+              type="button"
+              className="weekly-nav-btn"
+              onClick={handleNextWeek}
+              title="Next Week"
+              aria-label="Next Week"
+            >
+              <ChevronRight size={18} />
+            </button>
           </div>
 
-          <button
-            type="button"
-            className="weekly-nav-btn"
-            onClick={handleNextWeek}
-            title="Next Week"
-            aria-label="Next Week"
-          >
-            <ChevronRight size={18} />
-          </button>
+          {/* Secondary Controls: This Week & Date Jump */}
+          <div className="weekly-secondary-controls">
+            <button
+              type="button"
+              className="weekly-quick-today-btn"
+              onClick={handleCurrentWeek}
+              title="Jump to current week"
+            >
+              This Week
+            </button>
 
-          <button
-            type="button"
-            className="weekly-quick-today-btn"
-            onClick={handleCurrentWeek}
-            title="Jump to current week"
-          >
-            This Week
-          </button>
-
-          {/* Jump to specific Date */}
-          <div className="weekly-date-jump" title="Select a date to jump directly to its week">
-            <label htmlFor="weekly-jump-input">
-              <Calendar size={13} /> Jump:
-            </label>
-            <input
-              id="weekly-jump-input"
-              type="date"
-              className="weekly-date-input"
-              onChange={handleDateJump}
-            />
+            {/* Jump to specific Date */}
+            <div className="weekly-date-jump" title="Select a date to jump directly to its week">
+              <label htmlFor="weekly-jump-input">
+                <Calendar size={13} /> Jump:
+              </label>
+              <input
+                id="weekly-jump-input"
+                type="date"
+                className="weekly-date-input"
+                onChange={handleDateJump}
+              />
+            </div>
           </div>
         </div>
 

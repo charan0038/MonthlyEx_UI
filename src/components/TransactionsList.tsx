@@ -417,8 +417,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = isDark ? 'rgba(255, 255, 255, 0.035)' : '#f8fafc')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
+                <div className="tx-left" style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0 }}>
                   <div
+                    className="tx-category-icon"
                     style={{
                       width: '42px',
                       height: '42px',
@@ -435,8 +436,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                     <CategoryIcon name={meta.iconName} size={20} />
                   </div>
 
-                  <div style={{ minWidth: 0 }}>
+                  <div className="tx-details" style={{ minWidth: 0 }}>
                     <div
+                      className="tx-note"
                       style={{
                         fontSize: '14px',
                         fontWeight: 600,
@@ -451,6 +453,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                     </div>
 
                     <div
+                      className="tx-meta"
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -471,6 +474,7 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                       <span>•</span>
                       <span>{formatDateDisplay(tx.date)}</span>
                       <span
+                        className="tx-chip"
                         style={{
                           display: 'inline-flex',
                           alignItems: 'center',
@@ -496,8 +500,9 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+                <div className="tx-right" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
                   <div
+                    className="tx-amount"
                     style={{
                       fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
                       fontSize: '15.5px',

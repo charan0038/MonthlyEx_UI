@@ -142,6 +142,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 1. TOTAL INCOME */}
       <SpotlightCard
         theme={theme}
+        className="stat-card"
         spotlightColor={isDark ? 'rgba(16, 185, 129, 0.16)' : 'rgba(5, 150, 105, 0.08)'}
       >
         <div>
@@ -213,6 +214,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 2. TOTAL EXPENSES */}
       <SpotlightCard
         theme={theme}
+        className="stat-card"
         spotlightColor={isDark ? 'rgba(244, 63, 94, 0.16)' : 'rgba(220, 38, 38, 0.08)'}
       >
         <div>
@@ -284,6 +286,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 3. NET BALANCE */}
       <SpotlightCard
         theme={theme}
+        className="stat-card"
         spotlightColor={
           netBalance >= 0
             ? isDark ? 'rgba(52, 211, 153, 0.16)' : 'rgba(5, 150, 105, 0.08)'
@@ -390,6 +393,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
       {/* 4. BUDGET LEFT */}
       <SpotlightCard
         theme={theme}
+        className="stat-card"
         spotlightColor={
           budgetLeft < 0
             ? isDark ? 'rgba(244, 63, 94, 0.2)' : 'rgba(220, 38, 38, 0.08)'
