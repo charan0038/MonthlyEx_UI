@@ -29,7 +29,7 @@ import {
 } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import type { WeeklySummary, User, CategoryMeta } from '../types';
-import { api } from '../services/api';
+import { api, isNetworkFailure } from '../services/api';
 import { formatINR } from '../utils/formatters';
 import { exportWeeklyPdfReport } from '../utils/pdfExport';
 import { CategoryIcon } from './CategoryIcon';
@@ -82,8 +82,10 @@ export const WeeklyDashboard: React.FC<WeeklyDashboardProps> = ({
       const data = await api.getWeeklySummary(date);
       setSummary(data);
     } catch (err: any) {
-      console.error('Error fetching weekly summary:', err);
-      onToast?.(err.message || 'Failed to load weekly report', 'error');
+      console.warn('Weekly summary sync notice:', err);
+      if (!isNetworkFailure(err)) {
+        onToast?.(err.message || 'Failed to load weekly report', 'error');
+      }
     } finally {
       setIsLoading(false);
     }

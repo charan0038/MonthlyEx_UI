@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import type {
   Transaction,
   MonthlySummary,
@@ -8,10 +8,9 @@ import type {
   CategoryMeta,
   SubcategoryItem,
 } from './types';
-import { api } from './services/api';
-import type { FilterParams } from './services/api';
+import { api, isNetworkFailure } from './services/api';
 import { getMonthKey, getMonthName, formatINR } from './utils/formatters';
-import { setDynamicCategoriesCache } from './constants/categories';
+import { getCategoryMeta, setDynamicCategoriesCache } from './constants/categories';
 import { exportMonthlyPdfReport, exportYearlyPdfReport } from './utils/pdfExport';
 import {
   isMonthBudgetExplicit,
@@ -58,7 +57,7 @@ export function App() {
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
 
   // Data states
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [rawTransactions, setRawTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<CategoryMeta[]>([]);
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [budget, setBudget] = useState<MonthlyBudget>({
@@ -104,12 +103,15 @@ export function App() {
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  // Server cold-start status
+  // Server cold-start and connection status
   const [isServerWakingUp, setIsServerWakingUp] = useState<boolean>(false);
+  const [isOfflineOrWaking, setIsOfflineOrWaking] = useState<boolean>(false);
 
-  // Warm up the backend & Neon DB as soon as App loads
+  // Warm up the backend & Neon DB as soon as App loads + start periodic keep-alive
   useEffect(() => {
     api.warmup();
+    const stopKeepAlive = api.startKeepAlive(7);
+    return () => stopKeepAlive();
   }, []);
 
   const addToast = (message: string, toastType: 'success' | 'error' | 'info' = 'success') => {
@@ -175,7 +177,7 @@ export function App() {
       if (cachedStr) {
         const cached = JSON.parse(cachedStr);
         if (Array.isArray(cached.transactions) && cached.transactions.length > 0) {
-          setTransactions(cached.transactions);
+          setRawTransactions(cached.transactions);
         }
         if (cached.summary) {
           setSummary(cached.summary);
@@ -189,10 +191,83 @@ export function App() {
     }
   }, [user?.id, monthYearKey]);
 
+  // Instant client-side filtering (0ms latency, 100% offline-ready, immune to network drops)
+  const displayedTransactions = useMemo(() => {
+    let list = [...rawTransactions];
+
+    // Filter by search
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      list = list.filter((t) => {
+        const catKey = t.categoryId || (typeof t.category === 'object' ? t.category?.name : t.category);
+        const meta = getCategoryMeta(catKey, t.type);
+        const catName = typeof t.category === 'object' ? (t.category?.name || '') : (t.category || '');
+        const paymentStr = t.paymentMethod || (t as any).payment || '';
+        const noteStr = t.note || '';
+        const subcatStr = t.subcategory || '';
+        const amountStr = t.amount !== undefined ? t.amount.toString() : '';
+
+        return (
+          noteStr.toLowerCase().includes(q) ||
+          meta.label.toLowerCase().includes(q) ||
+          catName.toLowerCase().includes(q) ||
+          subcatStr.toLowerCase().includes(q) ||
+          paymentStr.toLowerCase().includes(q) ||
+          amountStr.includes(q)
+        );
+      });
+    }
+
+    // Filter by category (matches by label name, dbId, categoryId, or raw category string)
+    if (category && category !== 'ALL') {
+      const target = category.trim().toLowerCase();
+      list = list.filter((t) => {
+        const catKey = t.categoryId || (typeof t.category === 'object' ? t.category?.name : t.category);
+        const meta = getCategoryMeta(catKey, t.type);
+        const catName = typeof t.category === 'object' ? (t.category?.name || '') : (t.category || '');
+
+        return (
+          meta.label.toLowerCase() === target ||
+          meta.id.toLowerCase() === target ||
+          (meta.dbId !== undefined && meta.dbId.toString() === target) ||
+          catName.toLowerCase() === target ||
+          (t.categoryId !== undefined && t.categoryId !== null && t.categoryId.toString() === target)
+        );
+      });
+    }
+
+    // Filter by type
+    if (type && type !== 'ALL') {
+      const targetType = type.trim().toLowerCase();
+      list = list.filter((t) => (t.type || '').toLowerCase() === targetType);
+    }
+
+    // Filter by payment (matches paymentMethod or payment)
+    if (payment && payment !== 'ALL') {
+      const targetPayment = payment.trim().toLowerCase();
+      list = list.filter((t) => {
+        const p = (t.paymentMethod || (t as any).payment || '').toLowerCase();
+        return p === targetPayment;
+      });
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      if (sortBy === 'date-asc') return dateA - dateB;
+      if (sortBy === 'amount-desc') return (Number(b.amount) || 0) - (Number(a.amount) || 0);
+      if (sortBy === 'amount-asc') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
+      return dateB - dateA;
+    });
+
+    return list;
+  }, [rawTransactions, search, category, type, payment, sortBy]);
+
   // Load monthly summary and transactions from .NET backend
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (isSilent = false) => {
     if (!api.isAuthenticated() || !user) {
-      setTransactions([]);
+      setRawTransactions([]);
       setSummary(null);
       return;
     }
@@ -203,17 +278,8 @@ export function App() {
     }, 2500);
 
     try {
-      const filterParams: FilterParams = {
-        monthYear: monthYearKey,
-        search,
-        category,
-        type,
-        payment,
-        sortBy,
-      };
-
       const [txs, sum, bgt] = await Promise.all([
-        api.getTransactions(filterParams),
+        api.getTransactions({ monthYear: monthYearKey }),
         api.getMonthlySummary(monthYearKey),
         api.getBudget(monthYearKey).catch(() => null),
       ]);
@@ -232,9 +298,10 @@ export function App() {
 
       const effectiveBudget = isExplicit && bgt ? bgt : { monthYear: monthYearKey, amount: 0 };
 
-      setTransactions(cleanTxs);
+      setRawTransactions(cleanTxs);
       setSummary(sum);
       setBudget(effectiveBudget);
+      setIsOfflineOrWaking(false);
 
       // Save to localStorage cache so next app opening is instantaneous (0ms)
       try {
@@ -252,21 +319,42 @@ export function App() {
         // Ignore storage quota errors
       }
     } catch (err: any) {
-      console.error('Error fetching data from API:', err);
+      console.warn('Backend sync notice:', err);
       // Suppress unauthorized error toast if user logged out
       if (!api.isAuthenticated()) return;
-      addToast(err.message || 'Error connecting to backend API', 'error');
+
+      if (isNetworkFailure(err)) {
+        setIsOfflineOrWaking(true);
+        // Do NOT show an aggressive red "Failed to fetch" toast!
+        // Only show an info toast if the user has zero data cached
+        if (rawTransactions.length === 0 && !isSilent) {
+          addToast('Connecting to cloud server... Cloud server is waking up', 'info');
+        }
+      } else {
+        addToast(err.message || 'Error connecting to backend API', 'error');
+      }
     } finally {
       clearTimeout(wakeTimer);
       setIsServerWakingUp(false);
     }
-  }, [monthYearKey, search, category, type, payment, sortBy, user]);
+  }, [monthYearKey, user, rawTransactions.length]);
 
   useEffect(() => {
     if (user && api.isAuthenticated()) {
       refreshData();
     }
   }, [refreshData, user]);
+
+  // Auto-revalidate when browser connection is restored
+  useEffect(() => {
+    const handleOnline = () => {
+      if (api.isAuthenticated()) {
+        refreshData(true);
+      }
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [refreshData]);
 
   // Load dynamic categories
   const refreshCategories = useCallback(async () => {
@@ -368,7 +456,7 @@ export function App() {
   const handleLogout = async () => {
     await api.logout();
     setUser(null);
-    setTransactions([]);
+    setRawTransactions([]);
     setSummary(null);
     setCategories([]);
     addToast('Logged out', 'info');
@@ -388,18 +476,25 @@ export function App() {
   };
 
   const handleSaveTransaction = async (data: CreateTransactionInput, id?: string) => {
-    if (id) {
-      await api.updateTransaction(id, data);
-      addToast('Transaction updated successfully!', 'success');
-    } else {
-      await api.createTransaction(data);
-      addToast('Transaction created successfully!', 'success');
+    try {
+      if (id) {
+        await api.updateTransaction(id, data);
+        addToast('Transaction updated successfully!', 'success');
+      } else {
+        await api.createTransaction(data);
+        addToast('Transaction created successfully!', 'success');
+      }
+      await refreshData();
+    } catch (err: any) {
+      const msg = isNetworkFailure(err)
+        ? 'Could not save transaction: Cloud server is waking up or offline. Please retry in a moment.'
+        : (err.message || 'Failed to save transaction');
+      addToast(msg, 'error');
     }
-    await refreshData();
   };
 
   const handleDelete = (id: string) => {
-    const tx = transactions.find((t) => t.id === id);
+    const tx = rawTransactions.find((t) => t.id === id);
     setConfirmModal({
       isOpen: true,
       type: 'danger',
@@ -420,7 +515,10 @@ export function App() {
           await refreshData();
         } catch (err: any) {
           setConfirmModal((prev) => ({ ...prev, isLoading: false }));
-          addToast(err.message || 'Failed to delete transaction', 'error');
+          const msg = isNetworkFailure(err)
+            ? 'Could not delete transaction: Cloud server is waking up or offline. Please retry.'
+            : (err.message || 'Failed to delete transaction');
+          addToast(msg, 'error');
         }
       },
     });
@@ -543,7 +641,7 @@ export function App() {
         // Fetch authoritative fresh data for this month (unfiltered by UI search/category)
         let exportSummary = summary;
         let exportBudgetAmount = budget.amount;
-        let exportTransactions = transactions;
+        let exportTransactions: Transaction[] = rawTransactions;
 
         try {
           const [freshSum, freshBgt, allTxs] = await Promise.all([
@@ -564,11 +662,11 @@ export function App() {
         // If exportSummary has 0s or is null but transactions exist, recalculate totals directly
         if (exportTransactions.length > 0) {
           const inc = exportTransactions
-            .filter((t) => t.type?.toLowerCase() === 'income')
-            .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+            .filter((t: Transaction) => t.type?.toLowerCase() === 'income')
+            .reduce((s: number, t: Transaction) => s + (Number(t.amount) || 0), 0);
           const exp = exportTransactions
-            .filter((t) => t.type?.toLowerCase() === 'expense')
-            .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+            .filter((t: Transaction) => t.type?.toLowerCase() === 'expense')
+            .reduce((s: number, t: Transaction) => s + (Number(t.amount) || 0), 0);
           const net = inc - exp;
           const bLeft = exportBudgetAmount - exp;
 
@@ -610,13 +708,13 @@ export function App() {
   };
 
   const handleClearMonth = async () => {
-    if (transactions.length === 0) {
+    if (rawTransactions.length === 0) {
       addToast('No transactions found for this month', 'info');
       return;
     }
     if (
       !window.confirm(
-        `Are you sure you want to delete all ${transactions.length} transactions for ${monthYearKey}?`
+        `Are you sure you want to delete all ${rawTransactions.length} transactions for ${monthYearKey}?`
       )
     ) {
       return;
@@ -661,6 +759,9 @@ export function App() {
         currentMonth={currentMonth}
         theme={theme}
         user={user}
+        activeDashboard={activeDashboard}
+        isOfflineOrWaking={isOfflineOrWaking || isServerWakingUp}
+        onReconnect={() => refreshData()}
         onPrevMonth={handlePrevMonth}
         onNextMonth={handleNextMonth}
         onJumpToday={handleJumpToday}
@@ -670,7 +771,6 @@ export function App() {
         }}
         onToggleTheme={toggleTheme}
         onExportPdf={handleExportPdf}
-        activeDashboard={activeDashboard}
         onOpenCategories={() => handleOpenCategoryModal('expense')}
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthOpen(true)}
@@ -679,7 +779,7 @@ export function App() {
       />
 
       {/* Cloud Server Cold-Start Warmup Notice */}
-      {isServerWakingUp && (
+      {(isServerWakingUp || isOfflineOrWaking) && (
         <div
           style={{
             maxWidth: '1280px',
@@ -691,10 +791,10 @@ export function App() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px',
+            gap: '12px',
             fontSize: '0.86rem',
             color: '#f59e0b',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}
         >
           <div
@@ -707,7 +807,28 @@ export function App() {
               borderTopColor: 'transparent',
             }}
           />
-          <span>Connecting to cloud server (Render & Neon DB waking up from idle)... Showing offline cached data.</span>
+          <span>
+            {isServerWakingUp
+              ? 'Waking up cloud server (Render & Neon DB)...'
+              : 'Using offline cached data. Server may be spinning up.'}
+          </span>
+          <button
+            type="button"
+            onClick={() => refreshData()}
+            style={{
+              background: 'rgba(245, 158, 11, 0.25)',
+              border: '1px solid rgba(245, 158, 11, 0.45)',
+              color: '#fcd34d',
+              borderRadius: '6px',
+              padding: '3px 10px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'background 0.15s ease',
+            }}
+          >
+            Retry Sync
+          </button>
         </div>
       )}
 
@@ -821,7 +942,7 @@ export function App() {
 
           {/* Transactions List & Filter Toolbar */}
           <TransactionsList
-            transactions={transactions}
+            transactions={displayedTransactions}
             categories={categories}
             search={search}
             category={category}

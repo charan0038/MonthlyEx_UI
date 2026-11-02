@@ -23,6 +23,8 @@ interface NavbarProps {
   theme: 'dark' | 'light';
   user: User | null;
   activeDashboard?: 'monthly' | 'weekly' | 'yearly';
+  isOfflineOrWaking?: boolean;
+  onReconnect?: () => void;
   onPrevMonth: () => void;
   onNextMonth: () => void;
   onJumpToday: () => void;
@@ -47,6 +49,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   theme,
   user,
   activeDashboard = 'monthly',
+  isOfflineOrWaking = false,
+  onReconnect,
   onPrevMonth,
   onNextMonth,
   onJumpToday,
@@ -544,9 +548,35 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="user-name-text" style={{ fontSize: '12px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>
                 {user.fullName}
               </span>
-              <span className="user-meta-text" style={{ fontSize: '10px', color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px', lineHeight: 1.2 }}>
-                <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#34d399', boxShadow: '0 0 6px #34d399' }} />
-                Active
+              <span
+                className="user-meta-text"
+                style={{
+                  fontSize: '10px',
+                  color: isOfflineOrWaking ? '#fbbf24' : '#34d399',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  lineHeight: 1.2,
+                  cursor: isOfflineOrWaking && onReconnect ? 'pointer' : 'default',
+                }}
+                onClick={(e) => {
+                  if (isOfflineOrWaking && onReconnect) {
+                    e.stopPropagation();
+                    onReconnect();
+                  }
+                }}
+                title={isOfflineOrWaking ? 'Server waking up. Click to retry connecting' : 'Connected to cloud server'}
+              >
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: isOfflineOrWaking ? '#fbbf24' : '#34d399',
+                    boxShadow: isOfflineOrWaking ? '0 0 6px #fbbf24' : '0 0 6px #34d399',
+                  }}
+                />
+                {isOfflineOrWaking ? 'Syncing...' : 'Active'}
               </span>
             </div>
             <button

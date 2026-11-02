@@ -58,6 +58,57 @@ export class RateLimitError extends Error {
   }
 }
 
+// Custom error for Network Failures / Cold-Start timeouts
+export class NetworkError extends Error {
+  isNetworkError: boolean;
+
+  constructor(message: string = 'Unable to reach backend server. Server may be waking up or device is offline.') {
+    super(message);
+    this.name = 'NetworkError';
+    this.isNetworkError = true;
+  }
+}
+
+export function isNetworkFailure(err: any): boolean {
+  if (!err) return false;
+  if (err instanceof NetworkError || err.isNetworkError) return true;
+  const msg = (err.message || '').toLowerCase();
+  return (
+    err.name === 'TypeError' ||
+    err.name === 'NetworkError' ||
+    msg.includes('failed to fetch') ||
+    msg.includes('load failed') ||
+    msg.includes('networkerror') ||
+    msg.includes('network request failed') ||
+    msg.includes('err_connection') ||
+    msg.includes('aborted')
+  );
+}
+
+// Resilient fetch with exponential backoff for Render cold starts & transient Wi-Fi glitches
+async function fetchWithRetry(
+  url: string,
+  options: RequestInit = {},
+  retries: number = 2,
+  baseDelayMs: number = 1200
+): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (err: any) {
+      if (isNetworkFailure(err) && attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, baseDelayMs * (attempt + 1)));
+        continue;
+      }
+      if (isNetworkFailure(err)) {
+        throw new NetworkError('Unable to connect to cloud server (server waking up or offline).');
+      }
+      throw err;
+    }
+  }
+  throw new NetworkError('Unable to connect to cloud server (server waking up or offline).');
+}
+
 // Token helper methods
 export const tokenStorage = {
   getAccessToken(): string | null {
@@ -110,7 +161,7 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  let res = await fetch(url, { ...options, headers });
+  let res = await fetchWithRetry(url, { ...options, headers });
 
   // Handle Rate Limiting (429 Too Many Requests)
   if (res.status === 429) {
@@ -131,11 +182,11 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+        const refreshRes = await fetchWithRetry(`${API_BASE}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),
-        });
+        }, 1, 1000);
 
         if (refreshRes.ok) {
           const authData: AuthResponse = await refreshRes.json();
@@ -145,23 +196,35 @@ async function authFetch(url: string, options: RequestInit = {}): Promise<Respon
 
           // Retry current request with new token
           headers.set('Authorization', `Bearer ${authData.accessToken}`);
-          return fetch(url, { ...options, headers });
-        } else {
+          return fetchWithRetry(url, { ...options, headers });
+        } else if (refreshRes.status === 401 || refreshRes.status === 403) {
+          // Refresh token has truly expired or is invalid on backend
           isRefreshing = false;
           tokenStorage.clearAuth();
+          return res;
+        } else {
+          // Server error (500/502) - keep auth token, don't force logout
+          isRefreshing = false;
           return res;
         }
       } catch (err) {
         isRefreshing = false;
-        tokenStorage.clearAuth();
-        return res;
+        // Do NOT wipe auth tokens on transient Wi-Fi drops or Render cold-start hangs!
+        if (!isNetworkFailure(err)) {
+          tokenStorage.clearAuth();
+        }
+        throw err;
       }
     } else {
       // Wait for ongoing refresh and retry
-      return new Promise<Response>((resolve) => {
+      return new Promise<Response>((resolve, reject) => {
         refreshSubscribers.push(async (newToken) => {
-          headers.set('Authorization', `Bearer ${newToken}`);
-          resolve(fetch(url, { ...options, headers }));
+          try {
+            headers.set('Authorization', `Bearer ${newToken}`);
+            resolve(await fetchWithRetry(url, { ...options, headers }));
+          } catch (err) {
+            reject(err);
+          }
         });
       });
     }
@@ -616,5 +679,15 @@ export const api = {
     } catch {
       // ignore
     }
+  },
+
+  // Start periodic keep-alive heartbeat (every 5-8 minutes) to prevent Render from going to sleep while user is active
+  startKeepAlive(intervalMinutes: number = 7): () => void {
+    const ping = () => {
+      fetch(`${API_BASE}/health`).catch(() => {});
+    };
+    ping();
+    const timer = setInterval(ping, intervalMinutes * 60 * 1000);
+    return () => clearInterval(timer);
   },
 };

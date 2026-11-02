@@ -282,14 +282,14 @@ export const TransactionsList: React.FC<TransactionsListProps> = ({
             <option value="ALL">All Categories</option>
             <optgroup label="Expense Categories">
               {expenseCats.map((c) => (
-                <option key={`exp-${c.label}`} value={c.dbId?.toString() || c.label}>
+                <option key={`exp-${c.label}`} value={c.label}>
                   {c.label}
                 </option>
               ))}
             </optgroup>
             <optgroup label="Income Categories">
               {incomeCats.map((c) => (
-                <option key={`inc-${c.label}`} value={c.dbId?.toString() || c.label}>
+                <option key={`inc-${c.label}`} value={c.label}>
                   {c.label}
                 </option>
               ))}
