@@ -152,6 +152,11 @@
 }
 
 [data-theme="light"] .card,
+[data-theme="light"] .budget-banner-card,
+[data-theme="light"] .spotlight-card,
+[data-theme="light"] .insights-card,
+[data-theme="light"] .chart-card,
+[data-theme="light"] .transactions-card,
 [data-theme="light"] .weekly-controls-bar,
 [data-theme="light"] .weekly-kpi-card,
 [data-theme="light"] .weekly-txs-card,
@@ -162,6 +167,11 @@
   border-top: 3px solid #005A9C !important;
   box-shadow: 0 8px 24px -4px rgba(0, 90, 156, 0.12), 0 2px 8px rgba(96, 193, 229, 0.25) !important;
   color: #005A9C;
+}
+
+[data-theme="light"] .budget-banner-card,
+[data-theme="light"] .transactions-card {
+  border-top: 4px solid #005A9C !important;
 }
 
 [data-theme="dark"] {

@@ -334,7 +334,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
           style={{
             marginTop: '16px',
             paddingTop: '16px',
-            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(74, 182, 206, 0.4)',
+            borderTop: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(96, 193, 229, 0.55)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
