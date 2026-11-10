@@ -56,6 +56,13 @@ export const isAutoBudgetTransaction = (tx: Transaction): boolean => {
   );
 };
 
+export const isRolloverTransferOutTransaction = (tx: Transaction): boolean => {
+  const note = (tx.note || '').trim().toLowerCase();
+  return (
+    note.startsWith('transferred to') && note.includes('opening balance')
+  );
+};
+
 export const computeMonthlySummary = (
   monthYear: string,
   txs: Transaction[],
@@ -64,8 +71,12 @@ export const computeMonthlySummary = (
   const isExplicit = isMonthBudgetExplicit(monthYear, budget);
 
   // Filter out any ghost budget transaction if user never explicitly clicked "Set Budget"
+  // and filter out any rollover transfer-out transactions so they NEVER count as personal expenses!
   const cleanTxs = txs.filter((t) => {
     if (!isExplicit && isAutoBudgetTransaction(t)) {
+      return false;
+    }
+    if (isRolloverTransferOutTransaction(t)) {
       return false;
     }
     return true;

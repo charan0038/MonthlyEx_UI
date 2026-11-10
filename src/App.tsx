@@ -16,6 +16,7 @@ import {
   isMonthBudgetExplicit,
   markMonthBudgetExplicit,
   isAutoBudgetTransaction,
+  isRolloverTransferOutTransaction,
   computeMonthlySummary,
 } from './utils/budgetHelper';
 
@@ -169,6 +170,12 @@ export function App() {
   const isMonthEnd = isCurrentMonth && currentActualDay >= daysInViewMonth - 3;
   const isEndOfMonth = isPastMonth || isMonthEnd;
 
+  // Track if surplus balance has already been rolled over to next month
+  const isRolloverTransferred = useMemo(() => {
+    if (!user) return false;
+    return localStorage.getItem(`kharcha_rollover_done_${user.id}_${monthYearKey}`) === 'true';
+  }, [user?.id, monthYearKey]);
+
   // Hydrate from localStorage cache immediately on month or user change (Instant 0ms display)
   useEffect(() => {
     if (!user) return;
@@ -292,10 +299,21 @@ export function App() {
       const isExplicit = isMonthBudgetExplicit(monthYearKey, bgt);
 
       // Filter out auto-created ghost budget transactions if user never explicitly clicked "Set Budget"
+      // and purge legacy rollover transfer-out fake expense transactions so user expenses are purely real spending!
       const cleanTxs = txs.filter((t) => {
         if (!isExplicit && isAutoBudgetTransaction(t)) {
           // Asynchronously purge ghost transaction from backend database
           api.deleteTransaction(t.id).catch(() => {});
+          return false;
+        }
+        if (isRolloverTransferOutTransaction(t)) {
+          // Asynchronously purge legacy fake expense rollover transaction from backend database!
+          api.deleteTransaction(t.id).catch(() => {});
+          if (user) {
+            try {
+              localStorage.setItem(`kharcha_rollover_done_${user.id}_${monthYearKey}`, 'true');
+            } catch {}
+          }
           return false;
         }
         return true;
@@ -619,6 +637,11 @@ export function App() {
         try {
           setConfirmModal((prev) => ({ ...prev, isLoading: true }));
           await api.rolloverBalance(monthYearKey, remaining);
+          if (user) {
+            try {
+              localStorage.setItem(`kharcha_rollover_done_${user.id}_${monthYearKey}`, 'true');
+            } catch {}
+          }
           addToast(
             `Transferred ${formatINR(remaining)} to ${nextMonthName} as opening income!`,
             'success'
@@ -927,6 +950,7 @@ export function App() {
               isMonthBudgetExplicit(monthYearKey, budget) || (summary?.totalIncome ?? 0) > 0 || (summary?.budgetLimit ?? 0) > 0 || budget.amount > 0
             }
             isEndOfMonth={isEndOfMonth}
+            isRolloverTransferred={isRolloverTransferred}
             theme={theme}
             onOpenBudgetModal={() => setIsBudgetOpen(true)}
             onCashCheckout={handleCashCheckout}

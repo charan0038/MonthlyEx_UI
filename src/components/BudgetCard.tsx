@@ -19,6 +19,7 @@ interface BudgetCardProps {
   netBalance?: number;
   isBudgetSet?: boolean;
   isEndOfMonth?: boolean;
+  isRolloverTransferred?: boolean;
   theme?: 'dark' | 'light';
   onOpenBudgetModal: () => void;
   onCashCheckout?: () => void;
@@ -33,6 +34,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
   netBalance = 0,
   isBudgetSet = true,
   isEndOfMonth: _isEndOfMonth = false,
+  isRolloverTransferred = false,
   theme = 'dark',
   onOpenBudgetModal,
   onCashCheckout,
@@ -407,7 +409,26 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
               </button>
             )}
 
-            {onRolloverBalance && (
+            {isRolloverTransferred ? (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '7px 14px',
+                  borderRadius: '10px',
+                  border: isDark ? '1px solid rgba(16, 185, 129, 0.45)' : '1px solid #bbf7d0',
+                  background: isDark ? 'rgba(16, 185, 129, 0.12)' : '#f0fdf4',
+                  color: isDark ? '#34d399' : '#15803d',
+                  fontSize: '11.5px',
+                  fontWeight: 700,
+                  boxShadow: isDark ? '0 0 14px rgba(16, 185, 129, 0.2)' : '0 1px 3px rgba(16, 185, 129, 0.12)',
+                }}
+              >
+                <CheckCircle2 size={13} />
+                <span>Transferred to Next Month Opening Balance ({formatINR(netBalance)})</span>
+              </div>
+            ) : onRolloverBalance ? (
               <button
                 type="button"
                 className="budget-action-btn-rollover"
@@ -444,7 +465,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
                 <span>Add to Next Month Opening Balance ({formatINR(netBalance)})</span>
                 <ArrowRight size={13} />
               </button>
-            )}
+            ) : null}
           </div>
         </div>
       )}

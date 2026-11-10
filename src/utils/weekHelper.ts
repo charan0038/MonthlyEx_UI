@@ -1,5 +1,5 @@
 import type { WeeklySummary, DaySpendingSummary, Transaction, CategoryBreakdown } from '../types';
-import { isAutoBudgetTransaction } from './budgetHelper';
+import { isAutoBudgetTransaction, isRolloverTransferOutTransaction } from './budgetHelper';
 
 /**
  * Get Monday (start of week) for a given date
@@ -97,7 +97,7 @@ export function computeWeeklySummary(
   // Filter out transactions that don't belong to this week
   const weekTxs = allTransactions.filter((t) => {
     if (!t.date) return false;
-    if (isAutoBudgetTransaction(t)) return false;
+    if (isAutoBudgetTransaction(t) || isRolloverTransferOutTransaction(t)) return false;
     return t.date >= startDate && t.date <= endDate;
   });
 
@@ -173,7 +173,7 @@ export function computeWeeklySummary(
 
   if (priorWeekTransactions && priorWeekTransactions.length > 0) {
     prevWeekExpense = priorWeekTransactions
-      .filter((t) => t.type?.toLowerCase() === 'expense' && !isAutoBudgetTransaction(t))
+      .filter((t) => t.type?.toLowerCase() === 'expense' && !isAutoBudgetTransaction(t) && !isRolloverTransferOutTransaction(t))
       .reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
 
     if (prevWeekExpense > 0) {
