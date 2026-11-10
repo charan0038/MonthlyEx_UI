@@ -443,6 +443,17 @@ export function App() {
     addToast('Category deleted successfully', 'info');
   };
 
+  const handleCategoryUpdated = (updatedCat: CategoryMeta) => {
+    setCategories((prev) => {
+      const next = prev.map((c) => (c.dbId === updatedCat.dbId ? updatedCat : c));
+      setDynamicCategoriesCache(next);
+      return next;
+    });
+    refreshCategories();
+    refreshData();
+    addToast(`Category "${updatedCat.label}" updated successfully!`, 'success');
+  };
+
   // Month navigation
   const handlePrevMonth = () => {
     if (currentMonth === 0) {
@@ -1037,6 +1048,7 @@ export function App() {
         onClose={() => setIsCategoryModalOpen(false)}
         onCategoryCreated={handleCategoryCreated}
         onCategoryDeleted={handleCategoryDeleted}
+        onCategoryUpdated={handleCategoryUpdated}
         onRefreshCategories={refreshCategories}
       />
 

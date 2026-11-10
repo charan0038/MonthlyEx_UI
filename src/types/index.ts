@@ -101,6 +101,12 @@ export interface CreateCategoryInput {
   color: string;
 }
 
+export interface UpdateCategoryInput {
+  name: string;
+  iconName: string;
+  color: string;
+}
+
 export interface User {
   id: string | number;
   fullName: string;

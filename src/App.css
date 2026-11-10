@@ -240,10 +240,17 @@
   color: #64748b !important;
 }
 
+[data-theme="light"] .cat-edit-btn,
 [data-theme="light"] .cat-delete-btn {
   background: #f8fafc !important;
   border: 1px solid #e2e8f0 !important;
   color: #64748b !important;
+}
+
+[data-theme="light"] .cat-edit-btn:hover {
+  background: #eff6ff !important;
+  border-color: #3b82f6 !important;
+  color: #2563eb !important;
 }
 
 [data-theme="light"] ::-webkit-scrollbar-track {
@@ -3042,6 +3049,13 @@ button, input, select, textarea {
   border: 1px solid var(--border-color);
 }
 
+.cat-manage-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cat-edit-btn,
 .cat-delete-btn {
   width: 32px;
   height: 32px;
@@ -3054,6 +3068,12 @@ button, input, select, textarea {
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-fast);
+}
+
+.cat-edit-btn:hover {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
 }
 
 .cat-delete-btn:hover {

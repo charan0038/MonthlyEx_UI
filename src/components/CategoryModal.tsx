@@ -12,6 +12,7 @@ import {
   Search,
   Zap,
   ArrowLeft,
+  Pencil,
 } from 'lucide-react';
 import type { CategoryMeta, CreateCategoryInput } from '../types';
 import { CategoryIcon } from './CategoryIcon';
@@ -24,6 +25,7 @@ interface CategoryModalProps {
   onClose: () => void;
   onCategoryCreated: (newCat: CategoryMeta) => void;
   onCategoryDeleted: (dbId: number) => void;
+  onCategoryUpdated?: (updatedCat: CategoryMeta) => void;
   onRefreshCategories?: () => void;
 }
 
@@ -128,9 +130,11 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onClose,
   onCategoryCreated,
   onCategoryDeleted,
+  onCategoryUpdated,
   onRefreshCategories,
 }) => {
   const [activeTab, setActiveTab] = useState<'create' | 'manage'>('create');
+  const [editingCategory, setEditingCategory] = useState<CategoryMeta | null>(null);
   const [name, setName] = useState('');
   const [type, setType] = useState<'expense' | 'income'>(initialType);
   const [iconName, setIconName] = useState('ShoppingBag');
@@ -156,6 +160,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       setColor(initialType === 'expense' ? '#ec4899' : '#10b981');
       setErrorMessage('');
       setActiveTab('create');
+      setEditingCategory(null);
       setAddingSubcatForId(null);
       setNewSubcatName('');
       setSelectedIconGroup('all');
@@ -163,6 +168,25 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       setManageFilter('all');
     }
   }, [isOpen, initialType]);
+
+  const handleStartEdit = (cat: CategoryMeta) => {
+    setEditingCategory(cat);
+    setName(cat.label || cat.name || '');
+    setType(cat.type || 'expense');
+    setIconName(cat.iconName || (cat.type === 'income' ? 'Banknote' : 'ShoppingBag'));
+    setColor(cat.color || (cat.type === 'income' ? '#10b981' : '#ec4899'));
+    setErrorMessage('');
+    setActiveTab('create');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCategory(null);
+    setName('');
+    setIconName(type === 'expense' ? 'ShoppingBag' : 'Banknote');
+    setColor(type === 'expense' ? '#ec4899' : '#10b981');
+    setErrorMessage('');
+    setActiveTab('manage');
+  };
 
   const handleTypeChange = (newType: 'expense' | 'income') => {
     setType(newType);
@@ -215,7 +239,48 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       return;
     }
 
-    // Check duplicate locally
+    if (editingCategory) {
+      if (!editingCategory.dbId) return;
+
+      // Check duplicate locally, excluding the category being edited
+      const exists = categories.some(
+        (c) =>
+          c.dbId !== editingCategory.dbId &&
+          c.label.toLowerCase() === cleanName.toLowerCase() &&
+          c.type?.toLowerCase() === type.toLowerCase()
+      );
+      if (exists) {
+        setErrorMessage(`A category named "${cleanName}" already exists for ${type}.`);
+        return;
+      }
+
+      try {
+        setIsSubmitting(true);
+        const updatedCat = await api.updateCategory(editingCategory.dbId, {
+          name: cleanName,
+          iconName,
+          color,
+        });
+
+        if (onCategoryUpdated) {
+          onCategoryUpdated(updatedCat);
+        }
+        if (onRefreshCategories) {
+          onRefreshCategories();
+        }
+
+        setEditingCategory(null);
+        setName('');
+        setActiveTab('manage');
+      } catch (err: any) {
+        setErrorMessage(err.message || 'Failed to update category');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    // Check duplicate locally for create
     const exists = categories.some(
       (c) =>
         c.label.toLowerCase() === cleanName.toLowerCase() &&
@@ -321,7 +386,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             <button
               type="button"
               className="cat-screen-back-btn"
-              onClick={onClose}
+              onClick={editingCategory ? handleCancelEdit : onClose}
               aria-label="Back"
               title="Go Back"
             >
@@ -329,14 +394,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             </button>
 
             <div className="cat-modal-header-icon">
-              <Sparkles size={18} />
+              {editingCategory ? <Pencil size={18} /> : <Sparkles size={18} />}
             </div>
             <div>
               <h3 className="modal-title">
-                {activeTab === 'create' ? 'Create Category' : 'All Categories'}
+                {editingCategory
+                  ? 'Edit Category'
+                  : activeTab === 'create'
+                  ? 'Create Category'
+                  : 'All Categories'}
               </h3>
               <p className="modal-subtitle">
-                {activeTab === 'create'
+                {editingCategory
+                  ? `Update name, icon & color for "${editingCategory.label}"`
+                  : activeTab === 'create'
                   ? 'Dynamic Expense & Income Categories'
                   : `${categories.length} total categories`}
               </p>
@@ -352,14 +423,32 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           <button
             type="button"
             className={`cat-modal-tab ${activeTab === 'create' ? 'active' : ''}`}
-            onClick={() => setActiveTab('create')}
+            onClick={() => {
+              if (activeTab !== 'create') {
+                setActiveTab('create');
+              }
+            }}
           >
-            <Plus size={15} /> Create Category
+            {editingCategory ? (
+              <>
+                <Pencil size={15} /> Edit Category
+              </>
+            ) : (
+              <>
+                <Plus size={15} /> Create Category
+              </>
+            )}
           </button>
           <button
             type="button"
             className={`cat-modal-tab ${activeTab === 'manage' ? 'active' : ''}`}
-            onClick={() => setActiveTab('manage')}
+            onClick={() => {
+              if (editingCategory) {
+                setEditingCategory(null);
+                setName('');
+              }
+              setActiveTab('manage');
+            }}
           >
             <Layers size={15} /> All Categories ({categories.length})
           </button>
@@ -374,54 +463,103 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 </div>
               )}
 
-              {/* Type Switcher */}
-              <div className="type-switcher" role="tablist">
-                <button
-                  type="button"
-                  className={`type-tab ${type === 'expense' ? 'tab-expense active' : ''}`}
-                  onClick={() => handleTypeChange('expense')}
+              {/* Type Switcher / Edit Notice */}
+              {editingCategory ? (
+                <div
+                  className="cat-edit-mode-banner"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '10px 14px',
+                    borderRadius: '10px',
+                    marginBottom: '14px',
+                    backgroundColor:
+                      type === 'income' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)',
+                    border: `1px solid ${
+                      type === 'income' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(244, 63, 94, 0.25)'
+                    }`,
+                  }}
                 >
-                  <ArrowDownRight size={16} /> Expense Category
-                </button>
-                <button
-                  type="button"
-                  className={`type-tab ${type === 'income' ? 'tab-income active' : ''}`}
-                  onClick={() => handleTypeChange('income')}
-                >
-                  <ArrowUpRight size={16} /> Income Category
-                </button>
-              </div>
-
-              {/* 1-Tap Quick Suggestions */}
-              <div className="cat-suggestions-section">
-                <div className="cat-section-header">
-                  <span className="cat-section-title">
-                    <Zap size={13} color="var(--primary, #2563eb)" /> Quick 1-Tap Suggestions
-                  </span>
-                  <span className="cat-section-hint">Auto-fills name, icon & color</span>
-                </div>
-                <div className="cat-suggestions-chips">
-                  {(type === 'expense' ? EXPENSE_SUGGESTIONS : INCOME_SUGGESTIONS).map((sug) => (
-                    <button
-                      key={sug.name}
-                      type="button"
-                      className={`cat-suggestion-chip ${name === sug.name ? 'active' : ''}`}
-                      onClick={() => {
-                        setName(sug.name);
-                        setIconName(sug.icon);
-                        setColor(sug.color);
-                        setErrorMessage('');
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Pencil size={15} color={type === 'income' ? '#10b981' : '#f43f5e'} />
+                    <span
+                      style={{
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        color: type === 'income' ? '#10b981' : '#f43f5e',
                       }}
-                      title={`Tap to select ${sug.name}`}
                     >
-                      <div className="cat-sug-icon" style={{ backgroundColor: sug.color }}>
-                        <CategoryIcon name={sug.icon} size={11} />
-                      </div>
-                      <span>{sug.name}</span>
-                    </button>
-                  ))}
+                      Editing {type === 'income' ? 'Income' : 'Expense'} Category: <strong>{editingCategory.label}</strong>
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    style={{
+                      fontSize: '12px',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Cancel Edit
+                  </button>
                 </div>
-              </div>
+              ) : (
+                /* Type Switcher */
+                <div className="type-switcher" role="tablist">
+                  <button
+                    type="button"
+                    className={`type-tab ${type === 'expense' ? 'tab-expense active' : ''}`}
+                    onClick={() => handleTypeChange('expense')}
+                  >
+                    <ArrowDownRight size={16} /> Expense Category
+                  </button>
+                  <button
+                    type="button"
+                    className={`type-tab ${type === 'income' ? 'tab-income active' : ''}`}
+                    onClick={() => handleTypeChange('income')}
+                  >
+                    <ArrowUpRight size={16} /> Income Category
+                  </button>
+                </div>
+              )}
+
+              {/* 1-Tap Quick Suggestions (only shown when creating new category) */}
+              {!editingCategory && (
+                <div className="cat-suggestions-section">
+                  <div className="cat-section-header">
+                    <span className="cat-section-title">
+                      <Zap size={13} color="var(--primary, #2563eb)" /> Quick 1-Tap Suggestions
+                    </span>
+                    <span className="cat-section-hint">Auto-fills name, icon & color</span>
+                  </div>
+                  <div className="cat-suggestions-chips">
+                    {(type === 'expense' ? EXPENSE_SUGGESTIONS : INCOME_SUGGESTIONS).map((sug) => (
+                      <button
+                        key={sug.name}
+                        type="button"
+                        className={`cat-suggestion-chip ${name === sug.name ? 'active' : ''}`}
+                        onClick={() => {
+                          setName(sug.name);
+                          setIconName(sug.icon);
+                          setColor(sug.color);
+                          setErrorMessage('');
+                        }}
+                        title={`Tap to select ${sug.name}`}
+                      >
+                        <div className="cat-sug-icon" style={{ backgroundColor: sug.color }}>
+                          <CategoryIcon name={sug.icon} size={11} />
+                        </div>
+                        <span>{sug.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Interactive Hero Card: Avatar Preview + Name Input */}
               <div className="cat-hero-card">
@@ -546,17 +684,27 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               <button
                 type="button"
                 className="btn-outline cat-footer-btn-cancel"
-                onClick={onClose}
+                onClick={editingCategory ? handleCancelEdit : onClose}
                 disabled={isSubmitting}
               >
-                Cancel
+                {editingCategory ? 'Cancel' : 'Close'}
               </button>
               <button
                 type="submit"
                 className="btn-primary cat-footer-btn-submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !name.trim()}
               >
-                <Plus size={16} /> {isSubmitting ? 'Creating...' : 'Create Category'}
+                {isSubmitting ? (
+                  'Saving...'
+                ) : editingCategory ? (
+                  <>
+                    <Check size={16} /> Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} /> Create Category
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -647,15 +795,26 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                           <Lock size={12} /> Default
                         </span>
                       ) : (
-                        <button
-                          type="button"
-                          className="cat-delete-btn"
-                          onClick={() => handleDelete(c)}
-                          title={`Delete ${c.label}`}
-                          aria-label={`Delete ${c.label}`}
-                        >
-                          <Trash2 size={15} />
-                        </button>
+                        <div className="cat-manage-actions">
+                          <button
+                            type="button"
+                            className="cat-edit-btn"
+                            onClick={() => handleStartEdit(c)}
+                            title={`Edit ${c.label}`}
+                            aria-label={`Edit ${c.label}`}
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            className="cat-delete-btn"
+                            onClick={() => handleDelete(c)}
+                            title={`Delete ${c.label}`}
+                            aria-label={`Delete ${c.label}`}
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       )}
                     </div>
 

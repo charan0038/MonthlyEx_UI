@@ -12,6 +12,7 @@ import type {
   ForgotPasswordInput,
   CategoryMeta,
   CreateCategoryInput,
+  UpdateCategoryInput,
   UpdateProfileInput,
   YearlySummary,
   WeeklySummary,
@@ -673,6 +674,38 @@ export const api = {
       isDefault: Boolean(c.isDefault),
       createdBy: c.createdBy,
       subcategories: [],
+    };
+  },
+
+  async updateCategory(id: number, input: UpdateCategoryInput): Promise<CategoryMeta> {
+    clearInFlightCache();
+    const res = await authFetch(`${API_BASE}/categories/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to update category');
+    }
+    const c = await res.json();
+    return {
+      id: c.name,
+      dbId: c.id,
+      label: c.name,
+      name: c.name,
+      type: c.type as 'expense' | 'income',
+      iconName: c.iconName || 'Sparkles',
+      color: c.color || '#6366f1',
+      isDefault: Boolean(c.isDefault),
+      createdBy: c.createdBy,
+      subcategories: (c.subcategories || []).map((s: any) => ({
+        id: s.id,
+        name: s.name,
+        categoryId: s.categoryId,
+        isDefault: Boolean(s.isDefault),
+        userId: s.userId,
+      })),
     };
   },
 
