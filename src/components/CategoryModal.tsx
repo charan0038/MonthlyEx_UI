@@ -36,35 +36,53 @@ interface AvailableIcon {
 }
 
 const AVAILABLE_ICONS: AvailableIcon[] = [
-  // Food & Drinks
+  // Food & Dining
   { name: 'Utensils', label: 'Food', group: 'food' },
   { name: 'Coffee', label: 'Coffee', group: 'food' },
+  { name: 'ShoppingBasket', label: 'Groceries', group: 'food' },
+  { name: 'Pizza', label: 'Fast Food', group: 'food' },
+  { name: 'Wine', label: 'Drinks', group: 'food' },
+  { name: 'Apple', label: 'Produce', group: 'food' },
+
   // Living & Utilities
   { name: 'Home', label: 'Rent', group: 'living' },
   { name: 'Receipt', label: 'Bills', group: 'living' },
   { name: 'Zap', label: 'Electricity', group: 'living' },
   { name: 'Wifi', label: 'Internet', group: 'living' },
-  { name: 'Smartphone', label: 'Mobile', group: 'living' },
-  { name: 'Dog', label: 'Pets', group: 'living' },
+  { name: 'Droplets', label: 'Water', group: 'living' },
+  { name: 'Wrench', label: 'Repairs', group: 'living' },
+  { name: 'Key', label: 'Deposit', group: 'living' },
+
   // Travel & Transport
   { name: 'Car', label: 'Transport', group: 'travel' },
   { name: 'Fuel', label: 'Fuel', group: 'travel' },
   { name: 'Plane', label: 'Travel', group: 'travel' },
-  // Leisure & Health
+  { name: 'Bus', label: 'Bus', group: 'travel' },
+  { name: 'CarTaxiFront', label: 'Taxi', group: 'travel' },
+  { name: 'Train', label: 'Metro', group: 'travel' },
+  { name: 'Bike', label: 'Bicycle', group: 'travel' },
+
+  // Work & Tech
+  { name: 'Smartphone', label: 'Mobile', group: 'work' },
+  { name: 'Briefcase', label: 'Work', group: 'work' },
+  { name: 'Laptop', label: 'Freelance', group: 'work' },
+  { name: 'GraduationCap', label: 'Education', group: 'work' },
+  { name: 'BadgePercent', label: 'Sales', group: 'work' },
+  { name: 'Monitor', label: 'Tech', group: 'work' },
+
+  // Leisure & Personal
+  { name: 'Dog', label: 'Pets', group: 'leisure' },
   { name: 'ShoppingBag', label: 'Shopping', group: 'leisure' },
-  { name: 'Gift', label: 'Gift', group: 'leisure' },
   { name: 'HeartPulse', label: 'Health', group: 'leisure' },
   { name: 'Dumbbell', label: 'Gym', group: 'leisure' },
   { name: 'Film', label: 'Movies', group: 'leisure' },
   { name: 'Tv', label: 'Streaming', group: 'leisure' },
   { name: 'Gamepad2', label: 'Gaming', group: 'leisure' },
+  { name: 'Gift', label: 'Gift', group: 'leisure' },
   { name: 'Music', label: 'Music', group: 'leisure' },
   { name: 'Smile', label: 'Fun', group: 'leisure' },
   { name: 'Book', label: 'Books', group: 'leisure' },
-  // Work & Education
-  { name: 'Briefcase', label: 'Work', group: 'work' },
-  { name: 'Laptop', label: 'Freelance', group: 'work' },
-  { name: 'GraduationCap', label: 'Education', group: 'work' },
+
   // Finance & Income
   { name: 'Banknote', label: 'Salary', group: 'finance' },
   { name: 'TrendingUp', label: 'Invest', group: 'finance' },
@@ -72,6 +90,7 @@ const AVAILABLE_ICONS: AvailableIcon[] = [
   { name: 'Wallet', label: 'Wallet', group: 'finance' },
   { name: 'CreditCard', label: 'Card', group: 'finance' },
   { name: 'Shield', label: 'Insurance', group: 'finance' },
+  { name: 'Landmark', label: 'Tax', group: 'finance' },
   { name: 'Sparkles', label: 'Other', group: 'all' },
 ];
 
@@ -145,8 +164,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   const [newSubcatName, setNewSubcatName] = useState('');
   const [isSubcatSubmitting, setIsSubcatSubmitting] = useState(false);
 
-  // Icon group filtering state
+  // Icon group filtering & search state
   const [selectedIconGroup, setSelectedIconGroup] = useState<string>('all');
+  const [iconSearch, setIconSearch] = useState('');
+  const [isIconGridExpanded, setIsIconGridExpanded] = useState(false);
 
   // Manage tab search & filter
   const [manageSearch, setManageSearch] = useState('');
@@ -164,6 +185,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
       setAddingSubcatForId(null);
       setNewSubcatName('');
       setSelectedIconGroup('all');
+      setIconSearch('');
+      setIsIconGridExpanded(false);
       setManageSearch('');
       setManageFilter('all');
     }
@@ -330,13 +353,26 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     }
   };
 
-  // Filter icons based on selected group
+  // Group counts for category icon filter pills
+  const iconGroupCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: AVAILABLE_ICONS.length };
+    AVAILABLE_ICONS.forEach((ico) => {
+      counts[ico.group] = (counts[ico.group] || 0) + 1;
+    });
+    return counts;
+  }, []);
+
+  // Filter icons based on selected group & quick search query
   const filteredIcons = useMemo(() => {
-    if (selectedIconGroup === 'all') return AVAILABLE_ICONS;
-    return AVAILABLE_ICONS.filter(
-      (ico) => ico.group === selectedIconGroup || ico.group === 'all'
-    );
-  }, [selectedIconGroup]);
+    return AVAILABLE_ICONS.filter((ico) => {
+      const matchesGroup =
+        selectedIconGroup === 'all' || ico.group === selectedIconGroup || ico.group === 'all';
+      const q = iconSearch.trim().toLowerCase();
+      const matchesSearch =
+        !q || ico.label.toLowerCase().includes(q) || ico.name.toLowerCase().includes(q);
+      return matchesGroup && matchesSearch;
+    });
+  }, [selectedIconGroup, iconSearch]);
 
   // Categories breakdown
   const customCategories = useMemo(() => categories.filter((c) => !c.isDefault), [categories]);
@@ -561,11 +597,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 </div>
               )}
 
-              {/* Interactive Hero Card: Avatar Preview + Name Input */}
-              <div className="cat-hero-card">
+              {/* Interactive Hero Card: Avatar Preview + Name Input with Dynamic Ambient Glow */}
+              <div
+                className="cat-hero-card"
+                style={{
+                  boxShadow: `0 10px 28px -6px ${color}33`,
+                  borderColor: `${color}40`,
+                }}
+              >
                 <div
                   className="cat-hero-avatar"
-                  style={{ backgroundColor: color }}
+                  style={{
+                    backgroundColor: color,
+                    boxShadow: `0 8px 22px -3px ${color}66`,
+                  }}
                   title="Live Category Preview"
                 >
                   <CategoryIcon name={iconName} size={24} />
@@ -611,7 +656,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
               {/* Category Color Palette */}
               <div className="cat-selector-card">
                 <div className="cat-section-header">
-                  <span className="cat-section-title">Category Color</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="cat-section-title">Category Color</span>
+                    <span className="cat-icon-count-badge">{PRESET_COLORS.length} tints</span>
+                  </div>
                   <span className="cat-selected-color-pill" style={{ backgroundColor: color }}>
                     {color}
                   </span>
@@ -633,48 +681,125 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 </div>
               </div>
 
-              {/* Category Icon Picker with Filter Tabs */}
-              <div className="cat-selector-card">
-                <div className="cat-section-header" style={{ flexWrap: 'wrap', gap: '8px' }}>
-                  <span className="cat-section-title">Category Icon</span>
-                  <div className="cat-icon-group-pills">
-                    {ICON_GROUPS.map((g) => (
+              {/* Category Icon Picker: Expandable, Searchable, High Design */}
+              <div className="cat-selector-card cat-icon-picker-card">
+                <div className="cat-icon-section-header">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="cat-section-title">Category Icon</span>
+                    <span className="cat-icon-count-badge">
+                      {filteredIcons.length} icons
+                    </span>
+                  </div>
+
+                  {/* Sleek Icon Quick Search */}
+                  <div className="cat-icon-search-wrap">
+                    <Search size={13} className="cat-icon-search-icon" />
+                    <input
+                      type="text"
+                      placeholder="Quick search icon..."
+                      value={iconSearch}
+                      onChange={(e) => setIconSearch(e.target.value)}
+                      className="cat-icon-search-input"
+                    />
+                    {iconSearch && (
                       <button
-                        key={g.id}
                         type="button"
-                        className={`cat-group-pill ${selectedIconGroup === g.id ? 'active' : ''}`}
-                        onClick={() => setSelectedIconGroup(g.id)}
+                        onClick={() => setIconSearch('')}
+                        className="cat-icon-search-clear"
+                        aria-label="Clear icon search"
                       >
-                        {g.label}
+                        <X size={11} />
                       </button>
-                    ))}
+                    )}
                   </div>
                 </div>
 
-                <div className="cat-icon-picker-grid">
-                  {filteredIcons.map((ico) => {
-                    const isSelected = iconName.toLowerCase() === ico.name.toLowerCase();
-                    return (
-                      <button
-                        key={ico.name}
-                        type="button"
-                        className={`cat-icon-pick-btn ${isSelected ? 'selected' : ''}`}
-                        onClick={() => setIconName(ico.name)}
-                        title={ico.label}
-                      >
-                        <div
-                          className="cat-icon-symbol"
-                          style={{
-                            backgroundColor: isSelected ? color : undefined,
-                            color: isSelected ? '#ffffff' : undefined,
-                          }}
+                {/* Filter Pills with Active Indicators & Count Badges */}
+                <div className="cat-icon-group-pills-wrap">
+                  <div className="cat-icon-group-pills">
+                    {ICON_GROUPS.map((g) => {
+                      const isActive = selectedIconGroup === g.id;
+                      const count = iconGroupCounts[g.id] ?? 0;
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          className={`cat-group-pill ${isActive ? 'active' : ''}`}
+                          onClick={() => setSelectedIconGroup(g.id)}
                         >
-                          <CategoryIcon name={ico.name} size={17} />
-                        </div>
-                        <span className="cat-icon-caption">{ico.label}</span>
+                          <span>{g.label}</span>
+                          <span className="cat-group-pill-count">{count}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Responsive & Expandable Icon Grid */}
+                <div className={`cat-icon-picker-grid ${isIconGridExpanded ? 'expanded' : ''}`}>
+                  {filteredIcons.length > 0 ? (
+                    filteredIcons.map((ico) => {
+                      const isSelected = iconName.toLowerCase() === ico.name.toLowerCase();
+                      return (
+                        <button
+                          key={ico.name}
+                          type="button"
+                          className={`cat-icon-pick-btn ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setIconName(ico.name)}
+                          title={ico.label}
+                        >
+                          <div
+                            className="cat-icon-symbol"
+                            style={{
+                              backgroundColor: isSelected ? color : undefined,
+                              color: isSelected ? '#ffffff' : undefined,
+                              boxShadow: isSelected ? `0 6px 16px -2px ${color}66` : undefined,
+                            }}
+                          >
+                            <CategoryIcon name={ico.name} size={18} />
+                            {isSelected && (
+                              <span className="cat-icon-selected-badge" style={{ backgroundColor: color }}>
+                                <Check size={8} strokeWidth={3} />
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className="cat-icon-caption"
+                            style={{
+                              color: isSelected ? color : undefined,
+                              fontWeight: isSelected ? 700 : undefined,
+                            }}
+                          >
+                            {ico.label}
+                          </span>
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <div className="cat-icons-empty">
+                      <span>No matching icons found</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIconSearch('');
+                          setSelectedIconGroup('all');
+                        }}
+                      >
+                        Reset filters
                       </button>
-                    );
-                  })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Expand / Collapse Toggle Bar */}
+                <div className="cat-icon-expand-bar">
+                  <button
+                    type="button"
+                    className="cat-icon-expand-btn"
+                    onClick={() => setIsIconGridExpanded(!isIconGridExpanded)}
+                  >
+                    {isIconGridExpanded ? '▲ Show Fewer Icons' : '▼ Show More Icons'}
+                  </button>
                 </div>
               </div>
             </div>

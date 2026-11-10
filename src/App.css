@@ -165,13 +165,43 @@
 }
 
 [data-theme="light"] .cat-icon-picker-grid {
-  background: #ffffff !important;
+  background: #f8fafc !important;
   border: 1px solid #e2e8f0 !important;
 }
 
 [data-theme="light"] .cat-icon-symbol {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .cat-icon-search-input {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .cat-icon-count-badge {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cat-group-pill {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+[data-theme="light"] .cat-group-pill.active {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .cat-group-pill-count {
+  background: rgba(0, 0, 0, 0.08) !important;
+  color: inherit !important;
 }
 
 [data-theme="light"] .cat-icon-caption {
@@ -179,7 +209,13 @@
 }
 
 [data-theme="light"] .cat-icon-pick-btn:hover {
-  background: #f8fafc !important;
+  background: #f1f5f9 !important;
+}
+
+[data-theme="light"] .cat-icon-expand-btn {
+  background: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+  color: #2563eb !important;
 }
 
 [data-theme="light"] .cat-sticky-footer {
@@ -2740,22 +2776,104 @@ button, input, select, textarea {
   filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5));
 }
 
-/* Icon Group Pills */
-.cat-icon-group-pills {
+/* Enhanced Category Icon Picker Section */
+.cat-icon-section-header {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.cat-icon-count-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  letter-spacing: 0.02em;
+}
+
+.cat-icon-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 175px;
+  max-width: 100%;
+}
+
+.cat-icon-search-icon {
+  position: absolute;
+  left: 9px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.cat-icon-search-input {
+  width: 100%;
+  font-size: 11px;
+  padding: 5px 24px 5px 28px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all var(--transition-fast);
+  outline: none;
+}
+
+.cat-icon-search-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.cat-icon-search-clear {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+.cat-icon-search-clear:hover {
+  color: var(--text-main);
+}
+
+/* Icon Group Pills */
+.cat-icon-group-pills-wrap {
   overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 8px;
   scrollbar-width: none;
 }
 
-.cat-icon-group-pills::-webkit-scrollbar {
+.cat-icon-group-pills-wrap::-webkit-scrollbar {
   display: none;
 }
 
+.cat-icon-group-pills {
+  display: flex;
+  gap: 5px;
+  white-space: nowrap;
+}
+
 .cat-group-pill {
-  padding: 3px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: transparent;
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   font-size: 11px;
@@ -2768,12 +2886,28 @@ button, input, select, textarea {
 .cat-group-pill:hover {
   color: var(--text-main);
   background: var(--bg-muted);
+  transform: translateY(-1px);
 }
 
 .cat-group-pill.active {
   background: var(--primary);
   border-color: var(--primary);
   color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.cat-group-pill-count {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  font-weight: 700;
+}
+
+.cat-group-pill:not(.active) .cat-group-pill-count {
+  background: var(--bg-muted);
+  color: var(--text-muted);
 }
 
 /* Icon Picker Grid */
@@ -2781,14 +2915,30 @@ button, input, select, textarea {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px 6px;
-  max-height: 140px;
+  max-height: 155px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px 6px;
+  padding: 10px 8px;
   background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   box-sizing: border-box;
+  transition: max-height 0.25s ease-in-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
+}
+
+.cat-icon-picker-grid.expanded {
+  max-height: 290px;
+}
+
+.cat-icon-picker-grid::-webkit-scrollbar {
+  width: 5px;
+}
+
+.cat-icon-picker-grid::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 10px;
 }
 
 .cat-icon-pick-btn {
@@ -2796,9 +2946,9 @@ button, input, select, textarea {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 6px 2px;
-  border-radius: var(--radius-sm);
+  gap: 5px;
+  padding: 6px 3px;
+  border-radius: 12px;
   background: transparent;
   border: 1px solid transparent;
   cursor: pointer;
@@ -2807,28 +2957,59 @@ button, input, select, textarea {
   width: 100%;
   box-sizing: border-box;
   text-align: center;
+  position: relative;
 }
 
 .cat-icon-pick-btn:hover {
   background: var(--bg-muted);
   border-color: var(--border-color);
+  transform: translateY(-2px);
 }
 
 .cat-icon-pick-btn.selected {
-  background: var(--primary-light);
+  background: rgba(37, 99, 235, 0.08);
   border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
 }
 
 .cat-icon-symbol {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 11px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all var(--transition-fast);
   margin: 0 auto;
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+}
+
+.cat-icon-pick-btn:hover .cat-icon-symbol {
+  transform: scale(1.08);
+}
+
+.cat-icon-selected-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-surface);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  animation: badgePop 0.15s ease-out;
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
 }
 
 .cat-icon-caption {
@@ -2842,6 +3023,55 @@ button, input, select, textarea {
   text-overflow: ellipsis;
   text-align: center;
   display: block;
+  transition: color var(--transition-fast);
+}
+
+/* Empty state */
+.cat-icons-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 10px;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.cat-icons-empty button {
+  background: transparent;
+  border: none;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+/* Expand toggle */
+.cat-icon-expand-bar {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.cat-icon-expand-btn {
+  background: var(--bg-muted);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.cat-icon-expand-btn:hover {
+  background: var(--bg-surface);
+  color: var(--primary);
+  border-color: var(--primary);
 }
 
 /* Sticky Action Footer */
@@ -4646,10 +4876,14 @@ button, input, select, textarea {
   .cat-icon-picker-grid {
     grid-template-columns: repeat(5, 1fr) !important;
     gap: 6px 4px !important;
-    max-height: 130px !important;
+    max-height: 140px !important;
     padding: 6px 4px !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
+  }
+
+  .cat-icon-picker-grid.expanded {
+    max-height: 250px !important;
   }
 
   .cat-icon-pick-btn {
