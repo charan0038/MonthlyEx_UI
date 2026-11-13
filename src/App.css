@@ -5234,6 +5234,8 @@ button, input, select, textarea {
   transition: all var(--transition-fast);
   user-select: none;
   white-space: nowrap;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 [data-theme="light"] .dashboard-switcher-btn {
@@ -5307,42 +5309,6 @@ button, input, select, textarea {
   }
 }
 
-@media (max-width: 640px) {
-  .dashboard-switcher-container {
-    margin: 2px 0 14px 0;
-  }
-  .dashboard-switcher-pills {
-    width: 100%;
-    justify-content: stretch;
-  }
-  .dashboard-switcher-btn {
-    flex: 1;
-    justify-content: center;
-    padding: 7px 10px;
-    font-size: 12.5px;
-    gap: 6px;
-    min-width: 0;
-  }
-  .dashboard-tab-sub {
-    display: none;
-  }
-}
-
-@media (max-width: 400px) {
-  .dashboard-switcher-btn {
-    padding: 6px 5px;
-    font-size: 11px;
-    gap: 4px;
-  }
-  .dashboard-switcher-btn svg {
-    width: 13px;
-    height: 13px;
-  }
-  .dashboard-tab-badge {
-    display: none;
-  }
-}
-
 .dashboard-tab-title-full {
   display: inline;
 }
@@ -5350,13 +5316,105 @@ button, input, select, textarea {
   display: none;
 }
 
-@media (max-width: 640px) {
+/* Medium Tablets & Laptops (<= 920px): Switch to short titles & hide decorative badges */
+@media (max-width: 920px) {
+  .dashboard-switcher-btn {
+    padding: 7px 12px;
+    font-size: 13px;
+    gap: 6px;
+  }
   .dashboard-tab-title-full {
-    display: none;
+    display: none !important;
   }
   .dashboard-tab-title-short {
-    display: inline;
+    display: inline !important;
     font-weight: 700;
+  }
+  .dashboard-tab-badge,
+  .dashboard-tab-sub {
+    display: none !important;
+  }
+}
+
+/* Mobile Screens (<= 640px): Full-width balanced 4-pill layout without any collision or overflow */
+@media (max-width: 640px) {
+  .dashboard-switcher-container {
+    margin: 2px 0 12px 0;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  .dashboard-switcher-pills {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: stretch;
+    gap: 4px;
+    padding: 4px;
+    box-sizing: border-box;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dashboard-switcher-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .dashboard-switcher-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 7px 6px;
+    font-size: 12px;
+    gap: 5px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .dashboard-switcher-btn svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+  .dashboard-tab-title-full {
+    display: none !important;
+  }
+  .dashboard-tab-title-short {
+    display: inline !important;
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dashboard-tab-badge,
+  .dashboard-tab-sub {
+    display: none !important;
+  }
+}
+
+/* Small Smart Phones (<= 380px): Compact typography for tiny screens */
+@media (max-width: 380px) {
+  .dashboard-switcher-pills {
+    gap: 2px;
+    padding: 3px;
+  }
+  .dashboard-switcher-btn {
+    padding: 6px 3px;
+    font-size: 11px;
+    gap: 3px;
+  }
+  .dashboard-switcher-btn svg {
+    width: 13px;
+    height: 13px;
+  }
+  .dashboard-tab-title-short {
+    font-size: 11px;
+  }
+  .dashboard-tab-badge,
+  .dashboard-tab-sub {
+    display: none !important;
   }
 }
 

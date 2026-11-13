@@ -1100,18 +1100,38 @@
 @media (max-width: 480px) {
   .emi-summary-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .emi-filter-pills {
     width: 100%;
-    justify-content: space-between;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    padding: 4px;
+  }
+
+  .emi-filter-pills::-webkit-scrollbar {
+    display: none;
   }
 
   .emi-pill-btn {
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     justify-content: center;
-    padding: 6px 8px;
-    font-size: 0.78rem;
+    padding: 7px 6px;
+    font-size: 0.76rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .emi-pill-count {
+    padding: 1px 5px;
+    font-size: 0.7rem;
   }
 
   .emi-header-bar {
