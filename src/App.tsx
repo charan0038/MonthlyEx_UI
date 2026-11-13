@@ -44,6 +44,7 @@ import { CalculatorModal } from './components/CalculatorModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ToastContainer } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
+import { showWhatsNewAlert } from './utils/sweetUpdateAlert';
 
 import './App.css';
 
@@ -158,6 +159,14 @@ export function App() {
     window.addEventListener('kharcha_auth_change', handleAuthChange);
     return () => window.removeEventListener('kharcha_auth_change', handleAuthChange);
   }, []);
+
+  // Auto-notify user of new system update with SweetAlert ONLY ONCE
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      showWhatsNewAlert(theme, false);
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
@@ -852,6 +861,7 @@ export function App() {
         onExportPdf={handleExportPdf}
         onOpenCategories={() => handleOpenCategoryModal('expense')}
         onOpenCalculator={() => setIsCalculatorOpen(true)}
+        onOpenWhatsNew={() => showWhatsNewAlert(theme, true)}
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}

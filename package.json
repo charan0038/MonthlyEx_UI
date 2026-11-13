@@ -17,7 +17,8 @@
     "motion": "^14.4.0",
     "react": "^19.2.8",
     "react-chartjs-2": "^5.3.1",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "sweetalert2": "^11.26.25"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",

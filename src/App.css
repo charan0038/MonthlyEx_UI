@@ -570,6 +570,47 @@ button, input, select, textarea {
   transform: translateY(-1px);
 }
 
+.mobile-whats-new-btn {
+  display: none !important;
+}
+
+.whats-new-btn {
+  position: relative !important;
+  color: #f97316 !important;
+}
+
+.whats-new-btn:hover {
+  background: rgba(249, 115, 22, 0.12) !important;
+  color: #fb923c !important;
+}
+
+.whats-new-badge-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 6px #f97316;
+  animation: pulseDot 2s infinite;
+}
+
+@keyframes pulseDot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.7);
+  }
+  70% {
+    transform: scale(1.15);
+    box-shadow: 0 0 0 6px rgba(249, 115, 22, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
+  }
+}
+
 .btn-primary {
   background: var(--primary);
   color: #ffffff;
@@ -4043,12 +4084,17 @@ button, input, select, textarea {
     white-space: nowrap;
   }
 
-  /* Hide desktop Add button and user pill on mobile */
+  /* Hide desktop Add button, user pill, and desktop update icon on mobile */
   .btn-desktop-add,
   .user-profile-pill,
+  .desktop-whats-new-btn,
   .header-actions .icon-action-btn:has(svg.lucide-sun),
   .header-actions .icon-action-btn:has(svg.lucide-moon) {
     display: none !important;
+  }
+
+  .mobile-whats-new-btn {
+    display: flex !important;
   }
 
   /* Monthly Budget Banner Card */

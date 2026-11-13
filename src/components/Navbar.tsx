@@ -14,6 +14,7 @@ import {
   Layers,
   Calculator,
   Landmark,
+  Sparkles,
 } from 'lucide-react';
 
 import { getMonthName, getShortMonthName } from '../utils/formatters';
@@ -35,6 +36,7 @@ interface NavbarProps {
   onExportPdf: () => void;
   onOpenCategories?: () => void;
   onOpenCalculator?: () => void;
+  onOpenWhatsNew?: () => void;
   onOpenAddModal: () => void;
   onOpenAuthModal: () => void;
   onOpenProfile?: () => void;
@@ -62,6 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExportPdf,
   onOpenCategories,
   onOpenCalculator,
+  onOpenWhatsNew,
   onOpenAddModal,
   onOpenAuthModal,
   onOpenProfile,
@@ -171,8 +174,20 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Quick mobile-only actions (Theme + User) */}
+        {/* Quick mobile-only actions (Theme + User + Updates) */}
         <div className="mobile-header-actions">
+          {onOpenWhatsNew && (
+            <button
+              className="icon-action-btn whats-new-btn mobile-whats-new-btn"
+              onClick={onOpenWhatsNew}
+              title="What's New in Vessel (Updates)"
+              aria-label="What's New"
+            >
+              <Sparkles size={16} />
+              <span className="whats-new-badge-dot" />
+            </button>
+          )}
+
           <button
             className="icon-action-btn mobile-theme-btn"
             onClick={onToggleTheme}
@@ -551,6 +566,19 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           <FileText size={18} />
         </button>
+
+        {/* What's New Updates Button */}
+        {onOpenWhatsNew && (
+          <button
+            className="icon-action-btn whats-new-btn desktop-whats-new-btn"
+            onClick={onOpenWhatsNew}
+            title="What's New in Vessel (Updates)"
+            aria-label="What's New"
+          >
+            <Sparkles size={18} />
+            <span className="whats-new-badge-dot" />
+          </button>
+        )}
 
         {/* Theme Toggle */}
         <button
