@@ -517,6 +517,19 @@ button, input, select, textarea {
   user-select: none;
 }
 
+.month-display-text-full {
+  display: inline;
+}
+.month-display-text-short {
+  display: none;
+}
+.today-text-full {
+  display: inline;
+}
+.today-text-short {
+  display: none;
+}
+
 .today-quick-btn {
   border: none;
   background: var(--bg-surface);
@@ -3943,31 +3956,83 @@ button, input, select, textarea {
     gap: 6px;
     width: 100%;
     flex-wrap: nowrap;
+    box-sizing: border-box;
   }
 
   .month-picker-pill {
-    flex: 1;
-    min-width: 140px;
-    padding: 6px 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 3px 6px;
     justify-content: space-between;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
   }
 
   .month-display {
+    min-width: 0 !important;
+    padding: 0 4px !important;
     font-size: 12px;
     font-weight: 700;
     white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .month-display-text-full {
+    display: none !important;
+  }
+  .month-display-text-short {
+    display: inline !important;
   }
 
   .month-nav-btn {
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .month-nav-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    flex-shrink: 0 !important;
   }
 
   .today-quick-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    white-space: nowrap;
+    padding: 6px 9px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    border-radius: var(--radius-full) !important;
+  }
+  .today-text-full {
+    display: none !important;
+  }
+  .today-text-short {
+    display: inline !important;
+  }
+
+  .header-actions .icon-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .header-actions .icon-action-btn svg {
+    width: 16px !important;
+    height: 16px !important;
   }
 
   .navbar-yearly-badge {
@@ -5060,17 +5125,44 @@ button, input, select, textarea {
     font-size: 9px !important;
   }
 
+  .header-actions {
+    gap: 4px !important;
+  }
+
   .month-picker-pill {
-    min-width: 120px !important;
+    min-width: 0 !important;
+    padding: 2px 4px !important;
   }
 
   .month-display {
     font-size: 11px !important;
+    padding: 0 2px !important;
+    gap: 3px !important;
+  }
+
+  .month-nav-btn {
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px !important;
+  }
+  .month-nav-btn svg {
+    width: 12px !important;
+    height: 12px !important;
   }
 
   .today-quick-btn {
-    padding: 5px 8px !important;
+    padding: 4px 6px !important;
     font-size: 10px !important;
+  }
+
+  .header-actions .icon-action-btn {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+  }
+  .header-actions .icon-action-btn svg {
+    width: 14px !important;
+    height: 14px !important;
   }
 
   .category-grid {

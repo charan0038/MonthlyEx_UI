@@ -18,6 +18,11 @@ export const getMonthName = (monthIndex: number, year: number): string => {
   return d.toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 };
 
+export const getShortMonthName = (monthIndex: number, year: number): string => {
+  const d = new Date(year, monthIndex, 1);
+  return d.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
+};
+
 export const formatDateDisplay = (dateStr: string): string => {
   if (!dateStr) return '';
   const [y, m, d] = dateStr.split('-');

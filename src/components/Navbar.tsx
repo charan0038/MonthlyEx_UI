@@ -16,7 +16,7 @@ import {
   Landmark,
 } from 'lucide-react';
 
-import { getMonthName } from '../utils/formatters';
+import { getMonthName, getShortMonthName } from '../utils/formatters';
 import type { User } from '../types';
 
 interface NavbarProps {
@@ -296,17 +296,21 @@ export const Navbar: React.FC<NavbarProps> = ({
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '6px',
+                  gap: '5px',
+                  minWidth: 0,
                 }}
               >
-                <CalendarDays size={14} style={{ color: 'var(--primary, #6366f1)', opacity: 0.85 }} />
-                <span>{getMonthName(currentMonth, currentYear)}</span>
+                <CalendarDays size={14} className="month-display-icon" style={{ color: 'var(--primary, #6366f1)', opacity: 0.85, flexShrink: 0 }} />
+                <span className="month-display-text-full">{getMonthName(currentMonth, currentYear)}</span>
+                <span className="month-display-text-short">{getShortMonthName(currentMonth, currentYear)}</span>
                 <ChevronDown
                   size={13}
+                  className="month-display-chevron"
                   style={{
                     opacity: 0.6,
                     transform: isMonthCalendarOpen ? 'rotate(180deg)' : 'none',
                     transition: 'transform 0.18s ease',
+                    flexShrink: 0,
                   }}
                 />
               </button>
@@ -508,7 +512,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             <button className="today-quick-btn" onClick={onJumpToday} title="Jump to this month">
-              This Month
+              <span className="today-text-full">This Month</span>
+              <span className="today-text-short">Today</span>
             </button>
           </>
         )}
