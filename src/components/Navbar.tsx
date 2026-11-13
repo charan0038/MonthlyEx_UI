@@ -269,7 +269,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
           >
             <Landmark size={14} />
-            <span>EMI & Loan Tracker</span>
+            <span>Dues & Commitments</span>
           </div>
         ) : (
           <>

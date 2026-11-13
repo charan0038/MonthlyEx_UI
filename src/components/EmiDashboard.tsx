@@ -82,8 +82,8 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
       const data = await api.getEmis();
       setEmis(data);
     } catch (err: any) {
-      console.error('Failed to load EMIs:', err);
-      onToastRef.current?.(err?.message || 'Failed to load EMI records', 'error');
+      console.error('Failed to load dues:', err);
+      onToastRef.current?.(err?.message || 'Failed to load dues and commitments', 'error');
     } finally {
       setIsLoading(false);
       isFetchingRef.current = false;
@@ -189,19 +189,19 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
 
     const name = formName.trim();
     if (!name) {
-      setFormError('Please enter a name for the EMI/Loan.');
+      setFormError('Please enter a name for the due/commitment.');
       return;
     }
 
     const totalAmt = parseFloat(formTotalAmount);
     if (isNaN(totalAmt) || totalAmt <= 0) {
-      setFormError('Please enter a valid total loan amount.');
+      setFormError('Please enter a valid total amount or target.');
       return;
     }
 
     const monthlyAmt = parseFloat(formMonthlyAmount);
     if (isNaN(monthlyAmt) || monthlyAmt <= 0) {
-      setFormError('Please enter a valid monthly EMI amount.');
+      setFormError('Please enter a valid monthly installment / due amount.');
       return;
     }
 
@@ -232,7 +232,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
           totalAmount: totalAmt,
           monthlyAmount: monthlyAmt,
           categoryId: categoryMode === 'existing' ? selectedCategoryId : 0,
-          newCategoryName: categoryMode === 'auto' ? (formNewCategoryName.trim() || `EMI - ${name}`) : undefined,
+          newCategoryName: categoryMode === 'auto' ? (formNewCategoryName.trim() || `Due - ${name}`) : undefined,
           newCategoryIcon: 'CreditCard',
           newCategoryColor: formNewCategoryColor,
           startDate: formStartDate,
@@ -242,13 +242,13 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         };
         const created = await api.createEmi(input);
         setEmis((prev) => [created, ...prev]);
-        onToastRef.current?.(`Created EMI "${created.name}" and linked to category "${created.categoryName}"`, 'success');
+        onToastRef.current?.(`Created commitment "${created.name}" and linked to category "${created.categoryName}"`, 'success');
         onCategoriesUpdated?.();
       }
 
       setIsModalOpen(false);
     } catch (err: any) {
-      setFormError(err?.message || 'Failed to save EMI record.');
+      setFormError(err?.message || 'Failed to save due record.');
     } finally {
       setIsSubmitting(false);
     }
@@ -256,7 +256,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
 
   // Handle delete EMI
   const handleDeleteEmi = async (emi: EmiLoan) => {
-    if (!window.confirm(`Are you sure you want to remove EMI tracker "${emi.name}"? Past expense transactions in category "${emi.categoryName}" will remain untouched.`)) {
+    if (!window.confirm(`Are you sure you want to remove commitment "${emi.name}"? Past expense transactions in category "${emi.categoryName}" will remain untouched.`)) {
       return;
     }
 
@@ -265,7 +265,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
       setEmis((prev) => prev.filter((item) => item.id !== emi.id));
       onToastRef.current?.(`Deleted "${emi.name}"`, 'info');
     } catch (err: any) {
-      onToastRef.current?.(err?.message || 'Failed to delete EMI', 'error');
+      onToastRef.current?.(err?.message || 'Failed to delete record', 'error');
     }
   };
 
@@ -279,10 +279,10 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
           </div>
           <div className="emi-header-titles">
             <h2 className="emi-main-title">
-              EMI & Loan Payoff Tracker
+              Dues & Commitments Tracker
             </h2>
             <p className="emi-subtitle">
-              Set total debt amounts & auto-deduct every time an expense is logged under the category
+              Track chit funds (cheetu), hand loans, EMIs & personal borrowings with auto-deduction
             </p>
           </div>
         </div>
@@ -292,7 +292,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
             type="button"
             className="emi-refresh-btn"
             onClick={loadEmis}
-            title="Refresh EMI Data"
+            title="Refresh Dues Data"
             disabled={isLoading}
           >
             <RefreshCw size={17} className={isLoading ? 'animate-spin' : ''} />
@@ -304,7 +304,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
             onClick={handleOpenCreate}
           >
             <Plus size={18} strokeWidth={2.5} />
-            <span>Add New EMI / Loan</span>
+            <span>Add Due / Cheetu / Loan</span>
           </button>
         </div>
       </div>
@@ -314,7 +314,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         {/* Total Debt Card */}
         <div className="emi-stat-card stat-debt">
           <div className="emi-stat-header">
-            <span className="emi-stat-title">Total Loan / Debt</span>
+            <span className="emi-stat-title">Total Commitment</span>
             <div className="emi-stat-icon">
               <Landmark size={18} />
             </div>
@@ -352,7 +352,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
           </div>
           <div className="emi-stat-value">{formatINR(stats.totalRemaining)}</div>
           <div className="emi-stat-meta">
-            <span>Outstanding principal to pay</span>
+            <span>Outstanding balance to pay</span>
           </div>
         </div>
 
@@ -367,7 +367,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
           <div className="emi-stat-value">{formatINR(stats.monthlyObligation)}</div>
           <div className="emi-stat-meta">
             <span className="emi-stat-badge badge-amber">
-              {stats.activeCount} Active EMIs
+              {stats.activeCount} Active Dues
             </span>
             <span>due each month</span>
           </div>
@@ -382,7 +382,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
             className={`emi-pill-btn ${filterTab === 'active' ? 'active' : ''}`}
             onClick={() => setFilterTab('active')}
           >
-            <span>Active EMIs</span>
+            <span>Active Dues</span>
             <span className="emi-pill-count">{stats.activeCount}</span>
           </button>
           <button
@@ -398,7 +398,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
             className={`emi-pill-btn ${filterTab === 'all' ? 'active' : ''}`}
             onClick={() => setFilterTab('all')}
           >
-            <span>All Loans</span>
+            <span>All Commitments</span>
             <span className="emi-pill-count">{emis.length}</span>
           </button>
         </div>
@@ -408,7 +408,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
       {isLoading && emis.length === 0 ? (
         <div className="emi-empty-state">
           <div className="btn-spinner" style={{ width: 32, height: 32 }} />
-          <p className="emi-empty-desc">Loading your EMI and loan records...</p>
+          <p className="emi-empty-desc">Loading your dues and commitment records...</p>
         </div>
       ) : filteredEmis.length === 0 ? (
         <div className="emi-empty-state">
@@ -417,13 +417,13 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
           </div>
           <h3 className="emi-empty-title">
             {filterTab === 'completed'
-              ? 'No Paid-Off EMIs Yet'
+              ? 'No Completed Dues Yet'
               : filterTab === 'active'
-              ? 'No Active EMIs'
-              : 'No EMI or Loan Records'}
+              ? 'No Active Dues or Commitments'
+              : 'No Dues or Commitments Found'}
           </h3>
           <p className="emi-empty-desc">
-            Save your total loan or gadget EMI amount here. Whenever you add an expense under its dedicated category,
+            Save your chit fund (cheetu), hand loan, or EMI target amount here. Whenever you add an expense under its linked category,
             the balance will automatically decrease in real time!
           </p>
           <button
@@ -433,7 +433,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
             style={{ marginTop: 8 }}
           >
             <Plus size={16} />
-            <span>Add Your First EMI / Loan</span>
+            <span>Add Your First Due / Cheetu / Loan</span>
           </button>
         </div>
       ) : (
@@ -477,7 +477,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                       type="button"
                       className="emi-icon-btn"
                       onClick={() => handleOpenEdit(emi)}
-                      title="Edit EMI details"
+                      title="Edit commitment details"
                     >
                       <Edit2 size={14} />
                     </button>
@@ -485,7 +485,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                       type="button"
                       className="emi-icon-btn btn-delete"
                       onClick={() => handleDeleteEmi(emi)}
-                      title="Delete EMI"
+                      title="Delete commitment"
                     >
                       <Trash2 size={14} />
                     </button>
@@ -496,7 +496,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 <div className="emi-progress-container">
                   <div className="emi-progress-labels">
                     <span className="emi-progress-pct">
-                      {isCompleted ? '100% Paid Off 🎉' : `${progress.toFixed(1)}% Paid`}
+                      {isCompleted ? '100% Cleared 🎉' : `${progress.toFixed(1)}% Cleared`}
                     </span>
                     <span className="emi-progress-counts">
                       {emi.paymentsCount || 0} payments made
@@ -525,11 +525,11 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                     </span>
                   </div>
                   <div className="emi-matrix-item">
-                    <span className="emi-matrix-label">Total Loan</span>
+                    <span className="emi-matrix-label">Total Target / Debt</span>
                     <span className="emi-matrix-val">{formatINR(emi.totalAmount)}</span>
                   </div>
                   <div className="emi-matrix-item">
-                    <span className="emi-matrix-label">Monthly EMI</span>
+                    <span className="emi-matrix-label">Monthly Due</span>
                     <span className="emi-matrix-val">{formatINR(emi.monthlyAmount)}</span>
                   </div>
                 </div>
@@ -567,7 +567,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                       title={`Add expense for ₹${emi.monthlyAmount}`}
                     >
                       <Receipt size={15} />
-                      <span>Pay EMI ({formatINR(emi.monthlyAmount)})</span>
+                      <span>Pay Due ({formatINR(emi.monthlyAmount)})</span>
                     </button>
                   )}
 
@@ -585,7 +585,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 {isHistoryOpen && (
                   <div className="emi-history-drawer">
                     <h4 className="emi-history-title">
-                      <span>Expenses Deducted ({historyItems.length})</span>
+                      <span>Payments Deducted ({historyItems.length})</span>
                       {loadingHistoryId === emi.id && (
                         <div className="btn-spinner" style={{ width: 12, height: 12 }} />
                       )}
@@ -593,7 +593,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
 
                     {historyItems.length === 0 ? (
                       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted, #94a3b8)', margin: 0 }}>
-                        No expenses logged under "{emi.categoryName}" yet. Click "Pay EMI" above or add an expense in this category to start deducting.
+                        No expenses logged under "{emi.categoryName}" yet. Click "Pay Due" above or add an expense in this category to start deducting.
                       </p>
                     ) : (
                       <div className="emi-history-list">
@@ -652,10 +652,10 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 </div>
                 <div>
                   <h3 className="emi-modal-title">
-                    {editingEmi ? 'Edit EMI / Loan Details' : 'Add New EMI / Loan'}
+                    {editingEmi ? 'Edit Due / Commitment Details' : 'Add New Due / Commitment'}
                   </h3>
                   <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-muted, #94a3b8)' }}>
-                    {editingEmi ? 'Update principal, monthly amount or dates' : 'Track principal & auto-deduct from expenses'}
+                    {editingEmi ? 'Update target, monthly due amount or dates' : 'Track chit funds (cheetu), hand loans, EMIs & personal debts'}
                   </p>
                 </div>
               </div>
@@ -692,12 +692,12 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 {/* Name */}
                 <div className="emi-form-group">
                   <label className="emi-form-label">
-                    <span>EMI / Loan Name *</span>
+                    <span>Due / Commitment Name *</span>
                   </label>
                   <input
                     type="text"
                     className="emi-form-input"
-                    placeholder="e.g. iPhone 16 Pro, Car Loan, HDFC Personal Loan"
+                    placeholder="e.g. Cheetu 50k, Ramesh Hand Loan, Bike EMI, iPhone"
                     value={formName}
                     onChange={(e) => {
                       setFormName(e.target.value);
@@ -713,14 +713,14 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 <div className="emi-form-row">
                   <div className="emi-form-group">
                     <label className="emi-form-label">
-                      <span>Total Loan Amount (₹) *</span>
+                      <span>Total Payable / Target Amount (₹) *</span>
                     </label>
                     <input
                       type="number"
                       step="any"
                       min="1"
                       className="emi-form-input"
-                      placeholder="e.g. 150000"
+                      placeholder="e.g. 50000"
                       value={formTotalAmount}
                       onChange={(e) => setFormTotalAmount(e.target.value)}
                       required
@@ -729,14 +729,14 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
 
                   <div className="emi-form-group">
                     <label className="emi-form-label">
-                      <span>Monthly EMI Amount (₹) *</span>
+                      <span>Monthly Due / Installment (₹) *</span>
                     </label>
                     <input
                       type="number"
                       step="any"
                       min="1"
                       className="emi-form-input"
-                      placeholder="e.g. 6250"
+                      placeholder="e.g. 5000"
                       value={formMonthlyAmount}
                       onChange={(e) => setFormMonthlyAmount(e.target.value)}
                       required
@@ -772,7 +772,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                         <input
                           type="text"
                           className="emi-form-input"
-                          placeholder={`Category name: ${formName ? `EMI - ${formName}` : 'e.g. EMI - iPhone'}`}
+                          placeholder={`Category name: ${formName ? `Due - ${formName}` : 'e.g. Cheetu - 50k, Due - Ramesh, EMI - iPhone'}`}
                           value={formNewCategoryName}
                           onChange={(e) => setFormNewCategoryName(e.target.value)}
                         />
@@ -853,7 +853,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
 
                   <div className="emi-form-group">
                     <label className="emi-form-label">
-                      <span>Total Tenor (Months)</span>
+                      <span>Total Tenor (Months / Dues)</span>
                     </label>
                     <input
                       type="number"
@@ -869,7 +869,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 {/* Start Date */}
                 <div className="emi-form-group">
                   <label className="emi-form-label">
-                    <span>Loan Start Date</span>
+                    <span>Start Date</span>
                   </label>
                   <input
                     type="date"
@@ -882,12 +882,12 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                 {/* Notes */}
                 <div className="emi-form-group">
                   <label className="emi-form-label">
-                    <span>Notes / Loan Account Number (Optional)</span>
+                    <span>Notes / Person or Cheetu Details (Optional)</span>
                   </label>
                   <textarea
                     rows={2}
                     className="emi-form-textarea"
-                    placeholder="e.g. Loan Ref #12345, 11.5% interest rate"
+                    placeholder="e.g. Hand loan from Ramesh Anna, 20-month chit fund, HDFC Loan #123"
                     value={formNotes}
                     onChange={(e) => setFormNotes(e.target.value)}
                   />
@@ -914,7 +914,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
                       <span>Saving...</span>
                     </>
                   ) : (
-                    <span>{editingEmi ? 'Update EMI' : 'Save EMI Record'}</span>
+                    <span>{editingEmi ? 'Update Due Record' : 'Save Due Record'}</span>
                   )}
                 </button>
               </div>

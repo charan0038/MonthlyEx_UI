@@ -526,7 +526,7 @@ export function App() {
     setForcedTxCategoryId(emi.categoryId);
     setForcedTxCategory(emi.categoryName);
     setCalculatorPrefillAmount(emi.monthlyAmount.toString());
-    setTxInitialNote(`${emi.name} - Monthly EMI`);
+    setTxInitialNote(`${emi.name} - Monthly Due`);
     setEditingTransaction(null);
     setIsAddEditOpen(true);
   };
@@ -952,9 +952,9 @@ export function App() {
             id="tab-emi-dashboard"
           >
             <Landmark size={15} />
-            <span className="dashboard-tab-title-full">EMI & Loan Tracker</span>
-            <span className="dashboard-tab-title-short">EMI</span>
-            <span className="dashboard-tab-badge">Payoff</span>
+            <span className="dashboard-tab-title-full">Dues & Commitments</span>
+            <span className="dashboard-tab-title-short">Dues</span>
+            <span className="dashboard-tab-badge">Cheetu & Loans</span>
           </button>
 
           <button

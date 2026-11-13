@@ -71,10 +71,10 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           onChangeDashboard('emi');
           scrollTo();
         }}
-        title="EMI & Loan Tracker"
+        title="Dues, Loans & Cheetu Tracker"
       >
         <Landmark size={19} />
-        <span>EMI</span>
+        <span>Dues</span>
       </button>
 
       <button
