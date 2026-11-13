@@ -7,6 +7,7 @@ import type {
   User,
   CategoryMeta,
   SubcategoryItem,
+  EmiLoan,
 } from './types';
 import { api, isNetworkFailure } from './services/api';
 import { getMonthKey, getMonthName, formatINR } from './utils/formatters';
@@ -20,7 +21,7 @@ import {
   computeMonthlySummary,
 } from './utils/budgetHelper';
 
-import { CalendarDays, BarChart3, CalendarRange } from 'lucide-react';
+import { CalendarDays, BarChart3, CalendarRange, Landmark } from 'lucide-react';
 
 import { Navbar } from './components/Navbar';
 import { BudgetCard } from './components/BudgetCard';
@@ -30,6 +31,7 @@ import { ChartsSection } from './components/ChartsSection';
 import { TransactionsList } from './components/TransactionsList';
 import { YearlyDashboard } from './components/YearlyDashboard';
 import { WeeklyDashboard } from './components/WeeklyDashboard';
+import { EmiDashboard } from './components/EmiDashboard';
 import { TransactionModal } from './components/TransactionModal';
 import { BudgetModal } from './components/BudgetModal';
 import { AuthModal } from './components/AuthModal';
@@ -48,7 +50,7 @@ import './App.css';
 export function App() {
   const [currentYear, setCurrentYear] = useState<number>(() => new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState<number>(() => new Date().getMonth());
-  const [activeDashboard, setActiveDashboard] = useState<'monthly' | 'weekly' | 'yearly'>('monthly');
+  const [activeDashboard, setActiveDashboard] = useState<'monthly' | 'weekly' | 'yearly' | 'emi'>('monthly');
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const saved = localStorage.getItem('kharcha_theme_v2');
     if (saved === 'light' || saved === 'dark') return saved;
@@ -82,6 +84,7 @@ export function App() {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
   const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
   const [calculatorPrefillAmount, setCalculatorPrefillAmount] = useState<string>('');
+  const [txInitialNote, setTxInitialNote] = useState<string>('');
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [categoryModalType, setCategoryModalType] = useState<'expense' | 'income'>('expense');
@@ -504,9 +507,18 @@ export function App() {
   const handleOpenAdd = (amountToPrefill?: string) => {
     setEditingTransaction(null);
     setForcedTxCategory(undefined);
+    setTxInitialNote('');
     if (typeof amountToPrefill === 'string') {
       setCalculatorPrefillAmount(amountToPrefill);
     }
+    setIsAddEditOpen(true);
+  };
+
+  const handlePayEmi = (emi: EmiLoan) => {
+    setForcedTxCategory(emi.categoryName);
+    setCalculatorPrefillAmount(emi.monthlyAmount.toString());
+    setTxInitialNote(`${emi.name} - Monthly EMI`);
+    setEditingTransaction(null);
     setIsAddEditOpen(true);
   };
 
@@ -925,6 +937,20 @@ export function App() {
           <button
             type="button"
             role="tab"
+            aria-selected={activeDashboard === 'emi'}
+            className={`dashboard-switcher-btn ${activeDashboard === 'emi' ? 'active' : ''}`}
+            onClick={() => setActiveDashboard('emi')}
+            id="tab-emi-dashboard"
+          >
+            <Landmark size={15} />
+            <span className="dashboard-tab-title-full">EMI & Loan Tracker</span>
+            <span className="dashboard-tab-title-short">EMI</span>
+            <span className="dashboard-tab-badge">Payoff</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
             aria-selected={activeDashboard === 'yearly'}
             className={`dashboard-switcher-btn ${activeDashboard === 'yearly' ? 'active' : ''}`}
             onClick={() => setActiveDashboard('yearly')}
@@ -961,6 +987,16 @@ export function App() {
               addToast(`Jumped to ${getMonthName(m, y)} ${y}`, 'info');
             }}
             onToast={addToast}
+          />
+        </main>
+      ) : activeDashboard === 'emi' ? (
+        <main className="dashboard-content-view emi-view" key="emi-dashboard-view">
+          <EmiDashboard
+            theme={theme}
+            categories={categories}
+            onToast={addToast}
+            onPayEmi={handlePayEmi}
+            onCategoriesUpdated={refreshCategories}
           />
         </main>
       ) : (
@@ -1054,9 +1090,12 @@ export function App() {
         categories={categories}
         forcedCategory={forcedTxCategory}
         initialAmount={calculatorPrefillAmount}
+        initialNote={txInitialNote}
         onClose={() => {
           setIsAddEditOpen(false);
           setCalculatorPrefillAmount('');
+          setTxInitialNote('');
+          setForcedTxCategory(undefined);
         }}
         onSave={handleSaveTransaction}
         onOpenCreateCategory={(t) => handleOpenCategoryModal(t)}

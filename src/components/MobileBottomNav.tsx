@@ -1,18 +1,17 @@
 import React from 'react';
-import { Calendar, CalendarRange, BarChart3, Plus, Receipt } from 'lucide-react';
+import { Calendar, CalendarRange, BarChart3, Plus, Landmark } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  activeDashboard: 'monthly' | 'weekly' | 'yearly';
-  onChangeDashboard: (dashboard: 'monthly' | 'weekly' | 'yearly') => void;
+  activeDashboard: 'monthly' | 'weekly' | 'yearly' | 'emi';
+  onChangeDashboard: (dashboard: 'monthly' | 'weekly' | 'yearly' | 'emi') => void;
   onOpenAddModal: () => void;
-  onOpenCategories: () => void;
+  onOpenCategories?: () => void;
 }
 
 export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   activeDashboard,
   onChangeDashboard,
   onOpenAddModal,
-  onOpenCategories,
 }) => {
   const scrollTo = (id?: string) => {
     if (!id) {
@@ -67,6 +66,19 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
 
       <button
         type="button"
+        className={`mobile-nav-item ${activeDashboard === 'emi' ? 'active' : ''}`}
+        onClick={() => {
+          onChangeDashboard('emi');
+          scrollTo();
+        }}
+        title="EMI & Loan Tracker"
+      >
+        <Landmark size={19} />
+        <span>EMI</span>
+      </button>
+
+      <button
+        type="button"
         className={`mobile-nav-item ${activeDashboard === 'yearly' ? 'active' : ''}`}
         onClick={() => {
           onChangeDashboard('yearly');
@@ -76,16 +88,6 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
       >
         <BarChart3 size={19} />
         <span>Annual</span>
-      </button>
-
-      <button
-        type="button"
-        className="mobile-nav-item"
-        onClick={onOpenCategories}
-        title="Manage Categories"
-      >
-        <Receipt size={19} />
-        <span>Categories</span>
       </button>
     </nav>
   );

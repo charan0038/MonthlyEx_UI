@@ -16,6 +16,10 @@ import type {
   UpdateProfileInput,
   YearlySummary,
   WeeklySummary,
+  EmiLoan,
+  CreateEmiInput,
+  UpdateEmiInput,
+  EmiPaymentItem,
 } from '../types';
 import {
   computeMonthlySummary,
@@ -743,6 +747,75 @@ export const api = {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Failed to delete subcategory');
     }
+  },
+
+  // -------------------------------------------------------------
+  // EMI & Loan Tracker endpoints
+  // -------------------------------------------------------------
+  async getEmis(): Promise<EmiLoan[]> {
+    const res = await authFetch(`${API_BASE}/emis`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to fetch EMIs');
+    }
+    return await res.json();
+  },
+
+  async getEmi(id: number): Promise<EmiLoan> {
+    const res = await authFetch(`${API_BASE}/emis/${id}`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to fetch EMI details');
+    }
+    return await res.json();
+  },
+
+  async createEmi(input: CreateEmiInput): Promise<EmiLoan> {
+    clearInFlightCache();
+    const res = await authFetch(`${API_BASE}/emis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to create EMI');
+    }
+    return await res.json();
+  },
+
+  async updateEmi(id: number, input: UpdateEmiInput): Promise<EmiLoan> {
+    clearInFlightCache();
+    const res = await authFetch(`${API_BASE}/emis/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to update EMI');
+    }
+    return await res.json();
+  },
+
+  async deleteEmi(id: number): Promise<void> {
+    clearInFlightCache();
+    const res = await authFetch(`${API_BASE}/emis/${id}`, {
+      method: 'DELETE',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to delete EMI');
+    }
+  },
+
+  async getEmiHistory(id: number): Promise<EmiPaymentItem[]> {
+    const res = await authFetch(`${API_BASE}/emis/${id}/history`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Failed to fetch EMI payment history');
+    }
+    return await res.json();
   },
 
   // Silently ping the backend health endpoint to wake up Render & Neon DB early

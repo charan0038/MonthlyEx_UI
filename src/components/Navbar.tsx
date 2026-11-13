@@ -13,6 +13,7 @@ import {
   LogOut,
   Layers,
   Calculator,
+  Landmark,
 } from 'lucide-react';
 
 import { getMonthName } from '../utils/formatters';
@@ -23,7 +24,7 @@ interface NavbarProps {
   currentMonth: number;
   theme: 'dark' | 'light';
   user: User | null;
-  activeDashboard?: 'monthly' | 'weekly' | 'yearly';
+  activeDashboard?: 'monthly' | 'weekly' | 'yearly' | 'emi';
   isOfflineOrWaking?: boolean;
   onReconnect?: () => void;
   onPrevMonth: () => void;
@@ -250,6 +251,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <CalendarDays size={14} />
             <span>Weekly Report View</span>
+          </div>
+        ) : activeDashboard === 'emi' ? (
+          <div
+            className="navbar-yearly-badge"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '999px',
+              backgroundColor: 'rgba(16, 185, 129, 0.14)',
+              border: '1px solid rgba(16, 185, 129, 0.28)',
+              color: '#34d399',
+              fontSize: '13px',
+              fontWeight: 700,
+            }}
+          >
+            <Landmark size={14} />
+            <span>EMI & Loan Tracker</span>
           </div>
         ) : (
           <>

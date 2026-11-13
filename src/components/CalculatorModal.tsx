@@ -578,3 +578,4 @@ export const CalculatorModal: React.FC<CalculatorModalProps> = ({
     </div>
   );
 };
+

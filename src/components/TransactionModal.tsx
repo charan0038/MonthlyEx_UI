@@ -13,6 +13,7 @@ interface TransactionModalProps {
   categories?: CategoryMeta[];
   forcedCategory?: string;
   initialAmount?: string;
+  initialNote?: string;
   onClose: () => void;
   onSave: (data: CreateTransactionInput, id?: string) => Promise<void>;
   onOpenCreateCategory?: (type: TransactionType) => void;
@@ -27,6 +28,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   categories = [],
   forcedCategory,
   initialAmount,
+  initialNote,
   onClose,
   onSave,
   onOpenCreateCategory,
@@ -99,7 +101,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setSelectedSubcategoryId(null);
       setSelectedSubcategory('');
       setPaymentMethod('UPI');
-      setNote('');
+      setNote(initialNote || '');
 
       const today = new Date();
       const currentPrefix = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
@@ -109,7 +111,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         setDate(`${defaultMonthKey}-01`);
       }
     }
-  }, [editingTransaction, defaultMonthKey, isOpen, categories, initialAmount]);
+  }, [editingTransaction, defaultMonthKey, isOpen, categories, initialAmount, initialNote]);
 
   const handleTypeChange = (newType: TransactionType) => {
     setType(newType);

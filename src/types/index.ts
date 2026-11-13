@@ -225,4 +225,59 @@ export interface WeeklySummary {
   transactions?: Transaction[];
 }
 
+export interface EmiPaymentItem {
+  transactionId: string;
+  amount: number;
+  date: string;
+  note?: string;
+  paymentMethod: string;
+}
+
+export interface EmiLoan {
+  id: number;
+  name: string;
+  totalAmount: number;
+  monthlyAmount: number;
+  categoryId: number;
+  categoryName: string;
+  categoryIcon: string;
+  categoryColor: string;
+  startDate: string;
+  dueDay: number;
+  totalTenorMonths: number;
+  notes?: string;
+  totalPaid: number;
+  remainingAmount: number;
+  progressPercentage: number;
+  paymentsCount: number;
+  isCompleted: boolean;
+  createdDate?: string;
+  recentPayments?: EmiPaymentItem[];
+}
+
+export interface CreateEmiInput {
+  name: string;
+  totalAmount: number;
+  monthlyAmount: number;
+  categoryId: number;
+  newCategoryName?: string;
+  newCategoryIcon?: string;
+  newCategoryColor?: string;
+  startDate?: string;
+  dueDay?: number;
+  totalTenorMonths?: number;
+  notes?: string;
+}
+
+export interface UpdateEmiInput {
+  name: string;
+  totalAmount: number;
+  monthlyAmount: number;
+  categoryId: number;
+  startDate?: string;
+  dueDay?: number;
+  totalTenorMonths?: number;
+  notes?: string;
+}
+
 
