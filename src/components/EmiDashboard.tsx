@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Landmark,
   Plus,
@@ -620,19 +621,50 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         </div>
       )}
 
-      {/* Create / Edit EMI Modal */}
-      {isModalOpen && (
-        <div className="emi-modal-overlay" onClick={() => !isSubmitting && setIsModalOpen(false)}>
-          <div className="emi-modal-content" onClick={(e) => e.stopPropagation()}>
+      {/* Create / Edit EMI Modal mounted directly to document.body via Portal */}
+      {isModalOpen && createPortal(
+        <div
+          className="emi-modal-backdrop active"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !isSubmitting) setIsModalOpen(false);
+          }}
+          data-theme={theme}
+        >
+          <div className="emi-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="emi-modal-header">
-              <h3 className="emi-modal-title">
-                {editingEmi ? 'Edit EMI / Loan Details' : 'Add New EMI / Loan Tracker'}
-              </h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div
+                  style={{
+                    width: '36px',
+                    height: '36px',
+                    borderRadius: '10px',
+                    background: 'rgba(99, 102, 241, 0.15)',
+                    color: '#818cf8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <Landmark size={18} />
+                </div>
+                <div>
+                  <h3 className="emi-modal-title">
+                    {editingEmi ? 'Edit EMI / Loan Details' : 'Add New EMI / Loan'}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.74rem', color: 'var(--text-muted, #94a3b8)' }}>
+                    {editingEmi ? 'Update principal, monthly amount or dates' : 'Track principal & auto-deduct from expenses'}
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
                 className="emi-modal-close-btn"
                 onClick={() => setIsModalOpen(false)}
                 disabled={isSubmitting}
+                aria-label="Close"
               >
                 <X size={20} />
               </button>
@@ -888,7 +920,8 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

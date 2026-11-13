@@ -697,56 +697,60 @@
   line-height: 1.5;
 }
 
-/* Modal Form Styles */
-.emi-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 10005;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
+/* ==========================================================================
+   Modal Form Styles (Portal mounted into document.body)
+   ========================================================================== */
+.emi-modal-backdrop {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(2, 6, 14, 0.82) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  z-index: 99999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.emi-modal-content {
+.emi-modal-card {
   background: var(--bg-surface, #1e293b);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  border-radius: 22px;
+  border-radius: 20px;
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.85);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 10006;
+  z-index: 100000;
+  animation: emiModalIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.emi-modal-form {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
+@keyframes emiModalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .emi-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 18px 22px;
   border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  flex-shrink: 0;
 }
 
 .emi-modal-title {
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 700;
   color: var(--text-main, #f8fafc);
   margin: 0;
@@ -757,7 +761,7 @@
   border: none;
   color: var(--text-muted, #94a3b8);
   cursor: pointer;
-  padding: 4px;
+  padding: 6px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -770,11 +774,22 @@
   color: var(--text-main, #f8fafc);
 }
 
-.emi-modal-body {
-  padding: 24px;
+.emi-modal-form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.emi-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .emi-form-group {
@@ -850,8 +865,10 @@
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  padding: 18px 24px;
+  padding: 16px 22px;
   border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  flex-shrink: 0;
+  background: var(--bg-surface, #1e293b);
 }
 
 .emi-btn-cancel {
@@ -903,10 +920,20 @@
 [data-theme="light"] .emi-card,
 [data-theme="light"] .emi-filter-pills,
 [data-theme="light"] .emi-empty-state,
-[data-theme="light"] .emi-modal-content {
-  background: #ffffff;
-  border-color: #e2e8f0;
+[data-theme="light"] .emi-modal-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
   box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .emi-modal-backdrop {
+  background: rgba(15, 23, 42, 0.55) !important;
+}
+
+[data-theme="light"] .emi-modal-header,
+[data-theme="light"] .emi-modal-footer {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
 }
 
 [data-theme="light"] .emi-matrix-grid,
@@ -981,16 +1008,26 @@
   }
 
   /* Full Screen Mobile View for Add/Edit EMI */
-  .emi-modal-overlay {
+  .emi-modal-backdrop {
     position: fixed !important;
     inset: 0 !important;
     padding: 0 !important;
-    z-index: 10005 !important;
+    margin: 0 !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: column !important;
     align-items: stretch !important;
-    justify-content: stretch !important;
+    justify-content: flex-start !important;
+    background: var(--bg-surface, #1e293b) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
-  .emi-modal-content {
+  [data-theme="light"] .emi-modal-backdrop {
+    background: #ffffff !important;
+  }
+
+  .emi-modal-card {
     position: fixed !important;
     inset: 0 !important;
     width: 100vw !important;
@@ -1001,14 +1038,21 @@
     border-radius: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    z-index: 10006 !important;
+    margin: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    background: var(--bg-surface, #1e293b) !important;
     overflow: hidden !important;
+    z-index: 100000 !important;
+    animation: none !important;
+  }
+
+  [data-theme="light"] .emi-modal-card {
+    background: #ffffff !important;
   }
 
   .emi-modal-header {
-    padding: 14px 18px !important;
+    padding: 14px 16px !important;
     padding-top: max(14px, env(safe-area-inset-top)) !important;
     border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
     flex-shrink: 0 !important;
@@ -1018,7 +1062,7 @@
     flex: 1 !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
-    padding: 18px 16px !important;
+    padding: 16px !important;
     padding-bottom: 24px !important;
     gap: 16px !important;
   }
@@ -1027,22 +1071,28 @@
     position: sticky !important;
     bottom: 0 !important;
     background: var(--bg-surface, #1e293b) !important;
-    padding: 14px 16px !important;
-    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    padding: 12px 16px !important;
+    padding-bottom: max(14px, env(safe-area-inset-bottom)) !important;
     border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
     flex-shrink: 0 !important;
     display: flex !important;
-    gap: 12px !important;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15) !important;
+    gap: 10px !important;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.12) !important;
     z-index: 10 !important;
+  }
+
+  [data-theme="light"] .emi-modal-footer {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06) !important;
   }
 
   .emi-btn-cancel,
   .emi-btn-save {
     flex: 1 !important;
     justify-content: center !important;
-    padding: 12px 18px !important;
-    font-size: 0.92rem !important;
+    padding: 12px 16px !important;
+    font-size: 0.9rem !important;
     min-height: 44px !important;
   }
 }
