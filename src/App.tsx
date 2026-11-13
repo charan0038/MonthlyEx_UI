@@ -38,6 +38,7 @@ import { CategoryModal } from './components/CategoryModal';
 import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { ProfileModal } from './components/ProfileModal';
 import { ConfirmModal } from './components/ConfirmModal';
+import { CalculatorModal } from './components/CalculatorModal';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ToastContainer } from './components/Toast';
 import type { ToastMessage } from './components/Toast';
@@ -79,6 +80,8 @@ export function App() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [isBudgetOpen, setIsBudgetOpen] = useState<boolean>(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState<boolean>(false);
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState<boolean>(false);
+  const [calculatorPrefillAmount, setCalculatorPrefillAmount] = useState<string>('');
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState<boolean>(false);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [categoryModalType, setCategoryModalType] = useState<'expense' | 'income'>('expense');
@@ -498,10 +501,25 @@ export function App() {
   };
 
   // CRUD actions
-  const handleOpenAdd = () => {
+  const handleOpenAdd = (amountToPrefill?: string) => {
     setEditingTransaction(null);
     setForcedTxCategory(undefined);
+    if (typeof amountToPrefill === 'string') {
+      setCalculatorPrefillAmount(amountToPrefill);
+    }
     setIsAddEditOpen(true);
+  };
+
+  const handleApplyCalculatorResult = (calculatedAmount: number) => {
+    const formattedStr = calculatedAmount.toString();
+    setCalculatorPrefillAmount(formattedStr);
+    setIsCalculatorOpen(false);
+    addToast(`Calculated ₹${calculatedAmount.toLocaleString('en-IN')} applied!`, 'success');
+    if (!isAddEditOpen) {
+      setEditingTransaction(null);
+      setForcedTxCategory(undefined);
+      setIsAddEditOpen(true);
+    }
   };
 
   const handleEdit = (tx: Transaction) => {
@@ -812,6 +830,7 @@ export function App() {
         onToggleTheme={toggleTheme}
         onExportPdf={handleExportPdf}
         onOpenCategories={() => handleOpenCategoryModal('expense')}
+        onOpenCalculator={() => setIsCalculatorOpen(true)}
         onOpenAddModal={handleOpenAdd}
         onOpenAuthModal={() => setIsAuthOpen(true)}
         onOpenProfile={() => setIsProfileOpen(true)}
@@ -1034,10 +1053,23 @@ export function App() {
         defaultMonthKey={monthYearKey}
         categories={categories}
         forcedCategory={forcedTxCategory}
-        onClose={() => setIsAddEditOpen(false)}
+        initialAmount={calculatorPrefillAmount}
+        onClose={() => {
+          setIsAddEditOpen(false);
+          setCalculatorPrefillAmount('');
+        }}
         onSave={handleSaveTransaction}
         onOpenCreateCategory={(t) => handleOpenCategoryModal(t)}
         onSubcategoryCreated={handleSubcategoryCreated}
+        onOpenCalculator={() => setIsCalculatorOpen(true)}
+      />
+
+      {/* Financial Calculator Modal */}
+      <CalculatorModal
+        isOpen={isCalculatorOpen}
+        onClose={() => setIsCalculatorOpen(false)}
+        onApplyResult={handleApplyCalculatorResult}
+        initialValue={calculatorPrefillAmount ? parseFloat(calculatorPrefillAmount) : undefined}
       />
 
       {/* Category Modal (Create / Manage Dynamic Categories) */}

@@ -12,6 +12,7 @@ import {
   LogIn,
   LogOut,
   Layers,
+  Calculator,
 } from 'lucide-react';
 
 import { getMonthName } from '../utils/formatters';
@@ -32,6 +33,7 @@ interface NavbarProps {
   onToggleTheme: () => void;
   onExportPdf: () => void;
   onOpenCategories?: () => void;
+  onOpenCalculator?: () => void;
   onOpenAddModal: () => void;
   onOpenAuthModal: () => void;
   onOpenProfile?: () => void;
@@ -58,6 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleTheme,
   onExportPdf,
   onOpenCategories,
+  onOpenCalculator,
   onOpenAddModal,
   onOpenAuthModal,
   onOpenProfile,
@@ -499,6 +502,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             aria-label="Categories"
           >
             <Layers size={18} />
+          </button>
+        )}
+
+        {/* Calculator Button */}
+        {onOpenCalculator && (
+          <button
+            className="icon-action-btn calculator-btn"
+            onClick={onOpenCalculator}
+            title="Financial Calculator"
+            aria-label="Calculator"
+          >
+            <Calculator size={18} />
           </button>
         )}
 

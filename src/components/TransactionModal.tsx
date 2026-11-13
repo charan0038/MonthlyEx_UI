@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Check, ArrowDownRight, ArrowUpRight, Smartphone, Banknote, CreditCard, Plus } from 'lucide-react';
+import { X, Check, ArrowDownRight, ArrowUpRight, Smartphone, Banknote, CreditCard, Plus, Calculator } from 'lucide-react';
 import type { Transaction, TransactionType, PaymentMethod, CreateTransactionInput, CategoryMeta, SubcategoryItem } from '../types';
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../constants/categories';
 import { CategoryIcon } from './CategoryIcon';
@@ -12,10 +12,12 @@ interface TransactionModalProps {
   defaultMonthKey: string;
   categories?: CategoryMeta[];
   forcedCategory?: string;
+  initialAmount?: string;
   onClose: () => void;
   onSave: (data: CreateTransactionInput, id?: string) => Promise<void>;
   onOpenCreateCategory?: (type: TransactionType) => void;
   onSubcategoryCreated?: (categoryId: number, newSub: SubcategoryItem) => void;
+  onOpenCalculator?: () => void;
 }
 
 export const TransactionModal: React.FC<TransactionModalProps> = ({
@@ -24,10 +26,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   defaultMonthKey,
   categories = [],
   forcedCategory,
+  initialAmount,
   onClose,
   onSave,
   onOpenCreateCategory,
   onSubcategoryCreated,
+  onOpenCalculator,
 }) => {
   const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState<string>('');
@@ -89,7 +93,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
       setNote(editingTransaction.note || '');
     } else {
       setType('expense');
-      setAmount('');
+      setAmount(initialAmount || '');
       const defaultExp = categories.find((c) => c.type === 'expense');
       setSelectedCategoryId(defaultExp?.dbId || 1);
       setSelectedSubcategoryId(null);
@@ -105,7 +109,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         setDate(`${defaultMonthKey}-01`);
       }
     }
-  }, [editingTransaction, defaultMonthKey, isOpen, categories]);
+  }, [editingTransaction, defaultMonthKey, isOpen, categories, initialAmount]);
 
   const handleTypeChange = (newType: TransactionType) => {
     setType(newType);
@@ -245,9 +249,22 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
 
           {/* Amount Input */}
           <div className="form-group">
-            <label className="form-label" htmlFor="txAmountInput">
-              Amount (₹) *
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label className="form-label" htmlFor="txAmountInput" style={{ margin: 0 }}>
+                Amount (₹) *
+              </label>
+              {onOpenCalculator && (
+                <button
+                  type="button"
+                  className="quick-link-btn"
+                  onClick={onOpenCalculator}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '11.5px', cursor: 'pointer' }}
+                  title="Open Calculator to compute amount"
+                >
+                  <Calculator size={13} /> Calculator
+                </button>
+              )}
+            </div>
             <div className="amount-input-wrap">
               <span className="amount-currency-symbol">₹</span>
               <input
