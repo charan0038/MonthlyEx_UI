@@ -89,6 +89,7 @@ export function App() {
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
   const [categoryModalType, setCategoryModalType] = useState<'expense' | 'income'>('expense');
   const [forcedTxCategory, setForcedTxCategory] = useState<string | undefined>(undefined);
+  const [forcedTxCategoryId, setForcedTxCategoryId] = useState<number | undefined>(undefined);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     type: 'rollover' | 'cash' | 'danger';
@@ -513,6 +514,7 @@ export function App() {
   const handleOpenAdd = (amountToPrefill?: string) => {
     setEditingTransaction(null);
     setForcedTxCategory(undefined);
+    setForcedTxCategoryId(undefined);
     setTxInitialNote('');
     if (typeof amountToPrefill === 'string') {
       setCalculatorPrefillAmount(amountToPrefill);
@@ -521,6 +523,7 @@ export function App() {
   };
 
   const handlePayEmi = (emi: EmiLoan) => {
+    setForcedTxCategoryId(emi.categoryId);
     setForcedTxCategory(emi.categoryName);
     setCalculatorPrefillAmount(emi.monthlyAmount.toString());
     setTxInitialNote(`${emi.name} - Monthly EMI`);
@@ -1095,6 +1098,7 @@ export function App() {
         defaultMonthKey={monthYearKey}
         categories={categories}
         forcedCategory={forcedTxCategory}
+        forcedCategoryId={forcedTxCategoryId}
         initialAmount={calculatorPrefillAmount}
         initialNote={txInitialNote}
         onClose={() => {
@@ -1102,6 +1106,7 @@ export function App() {
           setCalculatorPrefillAmount('');
           setTxInitialNote('');
           setForcedTxCategory(undefined);
+          setForcedTxCategoryId(undefined);
         }}
         onSave={handleSaveTransaction}
         onOpenCreateCategory={(t) => handleOpenCategoryModal(t)}

@@ -12,6 +12,7 @@ interface TransactionModalProps {
   defaultMonthKey: string;
   categories?: CategoryMeta[];
   forcedCategory?: string;
+  forcedCategoryId?: number;
   initialAmount?: string;
   initialNote?: string;
   onClose: () => void;
@@ -27,6 +28,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   defaultMonthKey,
   categories = [],
   forcedCategory,
+  forcedCategoryId,
   initialAmount,
   initialNote,
   onClose,
@@ -51,24 +53,6 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const [isSubLoading, setIsSubLoading] = useState<boolean>(false);
   const [subError, setSubError] = useState<string>('');
   const [customSubcategories, setCustomSubcategories] = useState<Record<number, SubcategoryItem[]>>({});
-
-  useEffect(() => {
-    if (forcedCategory) {
-      const match = categories.find(
-        (c) =>
-          c.label.toLowerCase() === forcedCategory.toLowerCase() ||
-          c.id.toString().toLowerCase() === forcedCategory.toLowerCase()
-      );
-      if (match?.dbId) {
-        setSelectedCategoryId(match.dbId);
-        setSelectedSubcategoryId(null);
-        setSelectedSubcategory('');
-        setIsAddingSub(false);
-        setNewSubName('');
-        setSubError('');
-      }
-    }
-  }, [forcedCategory, categories]);
 
   useEffect(() => {
     setIsAddingSub(false);
@@ -96,8 +80,38 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
     } else {
       setType('expense');
       setAmount(initialAmount || '');
-      const defaultExp = categories.find((c) => c.type === 'expense');
-      setSelectedCategoryId(defaultExp?.dbId || 1);
+
+      // Priority 1: Check forcedCategoryId or forcedCategory
+      let targetCatId: number | undefined;
+      if (forcedCategoryId && forcedCategoryId > 0) {
+        const matchById = categories.find((c) => c.dbId === forcedCategoryId);
+        if (matchById?.dbId) {
+          targetCatId = matchById.dbId;
+        } else {
+          targetCatId = forcedCategoryId;
+        }
+      }
+
+      if (!targetCatId && forcedCategory) {
+        const target = forcedCategory.trim().toLowerCase();
+        const match = categories.find(
+          (c) =>
+            (c.dbId !== undefined && c.dbId.toString() === target) ||
+            (c.id && c.id.toString().toLowerCase() === target) ||
+            (c.label && c.label.toLowerCase() === target) ||
+            (c.name && c.name.toLowerCase() === target)
+        );
+        if (match?.dbId) {
+          targetCatId = match.dbId;
+        }
+      }
+
+      if (!targetCatId) {
+        const defaultExp = categories.find((c) => c.type === 'expense');
+        targetCatId = defaultExp?.dbId || 1;
+      }
+
+      setSelectedCategoryId(targetCatId);
       setSelectedSubcategoryId(null);
       setSelectedSubcategory('');
       setPaymentMethod('UPI');
@@ -111,7 +125,20 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
         setDate(`${defaultMonthKey}-01`);
       }
     }
-  }, [editingTransaction, defaultMonthKey, isOpen, categories, initialAmount, initialNote]);
+  }, [editingTransaction, defaultMonthKey, isOpen, categories, initialAmount, initialNote, forcedCategory, forcedCategoryId]);
+
+  // Smoothly scroll the selected category tile into view when modal opens
+  useEffect(() => {
+    if (isOpen && selectedCategoryId) {
+      const timer = setTimeout(() => {
+        const el = document.querySelector('.category-tile.selected');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }, 120);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, selectedCategoryId]);
 
   const handleTypeChange = (newType: TransactionType) => {
     setType(newType);
