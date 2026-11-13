@@ -753,12 +753,22 @@ export const api = {
   // EMI & Loan Tracker endpoints
   // -------------------------------------------------------------
   async getEmis(): Promise<EmiLoan[]> {
-    const res = await authFetch(`${API_BASE}/emis`);
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Failed to fetch EMIs');
+    try {
+      const res = await authFetch(`${API_BASE}/emis`);
+      if (res.status === 404) {
+        // Backend hasn't deployed the Emis endpoint yet to cloud
+        console.warn('Backend /api/emis returned 404. Endpoint pending deployment on server.');
+        return [];
+      }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to fetch EMIs');
+      }
+      return await res.json();
+    } catch (err: any) {
+      if (err?.message?.includes('404')) return [];
+      throw err;
     }
-    return await res.json();
   },
 
   async getEmi(id: number): Promise<EmiLoan> {
@@ -810,12 +820,18 @@ export const api = {
   },
 
   async getEmiHistory(id: number): Promise<EmiPaymentItem[]> {
-    const res = await authFetch(`${API_BASE}/emis/${id}/history`);
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || 'Failed to fetch EMI payment history');
+    try {
+      const res = await authFetch(`${API_BASE}/emis/${id}/history`);
+      if (res.status === 404) return [];
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to fetch EMI payment history');
+      }
+      return await res.json();
+    } catch (err: any) {
+      if (err?.message?.includes('404')) return [];
+      throw err;
     }
-    return await res.json();
   },
 
   // Silently ping the backend health endpoint to wake up Render & Neon DB early

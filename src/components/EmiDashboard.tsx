@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import {
   Landmark,
   Plus,
@@ -64,19 +64,30 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
   const [historyCache, setHistoryCache] = useState<Record<number, EmiPaymentItem[]>>({});
   const [loadingHistoryId, setLoadingHistoryId] = useState<number | null>(null);
 
-  // Load EMIs from API
+  // Keep a stable ref to onToast so its reference changes never trigger re-renders or fetch loops
+  const onToastRef = useRef(onToast);
+  useEffect(() => {
+    onToastRef.current = onToast;
+  }, [onToast]);
+
+  const isFetchingRef = useRef(false);
+
+  // Load EMIs from API safely without infinite re-trigger cycles
   const loadEmis = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setIsLoading(true);
     try {
       const data = await api.getEmis();
       setEmis(data);
     } catch (err: any) {
       console.error('Failed to load EMIs:', err);
-      onToast?.(err?.message || 'Failed to load EMI records', 'error');
+      onToastRef.current?.(err?.message || 'Failed to load EMI records', 'error');
     } finally {
       setIsLoading(false);
+      isFetchingRef.current = false;
     }
-  }, [onToast]);
+  }, []);
 
   useEffect(() => {
     loadEmis();
@@ -163,7 +174,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         const history = await api.getEmiHistory(emi.id);
         setHistoryCache((prev) => ({ ...prev, [emi.id]: history }));
       } catch (err: any) {
-        onToast?.('Failed to fetch payment history', 'error');
+        onToastRef.current?.('Failed to fetch payment history', 'error');
       } finally {
         setLoadingHistoryId(null);
       }
@@ -213,7 +224,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         };
         const updated = await api.updateEmi(editingEmi.id, input);
         setEmis((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
-        onToast?.(`Updated "${updated.name}" successfully`, 'success');
+        onToastRef.current?.(`Updated "${updated.name}" successfully`, 'success');
       } else {
         const input: CreateEmiInput = {
           name,
@@ -230,7 +241,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
         };
         const created = await api.createEmi(input);
         setEmis((prev) => [created, ...prev]);
-        onToast?.(`Created EMI "${created.name}" and linked to category "${created.categoryName}"`, 'success');
+        onToastRef.current?.(`Created EMI "${created.name}" and linked to category "${created.categoryName}"`, 'success');
         onCategoriesUpdated?.();
       }
 
@@ -251,9 +262,9 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
     try {
       await api.deleteEmi(emi.id);
       setEmis((prev) => prev.filter((item) => item.id !== emi.id));
-      onToast?.(`Deleted "${emi.name}"`, 'info');
+      onToastRef.current?.(`Deleted "${emi.name}"`, 'info');
     } catch (err: any) {
-      onToast?.(err?.message || 'Failed to delete EMI', 'error');
+      onToastRef.current?.(err?.message || 'Failed to delete EMI', 'error');
     }
   };
 

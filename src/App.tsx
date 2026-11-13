@@ -122,13 +122,19 @@ export function App() {
     return () => stopKeepAlive();
   }, []);
 
-  const addToast = (message: string, toastType: 'success' | 'error' | 'info' = 'success') => {
-    const id = Date.now().toString() + Math.random().toString(36).substr(2, 4);
-    setToasts((prev) => [...prev, { id, message, type: toastType }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3200);
-  };
+  const addToast = useCallback((message: string, toastType: 'success' | 'error' | 'info' = 'success') => {
+    setToasts((prev) => {
+      // Prevent spamming identical duplicate toasts on screen at the same time
+      if (prev.some((t) => t.message === message)) {
+        return prev;
+      }
+      const id = Date.now().toString() + Math.random().toString(36).substr(2, 4);
+      setTimeout(() => {
+        setToasts((current) => current.filter((t) => t.id !== id));
+      }, 3200);
+      return [...prev, { id, message, type: toastType }];
+    });
+  }, []);
 
   // Sync theme
   useEffect(() => {
