@@ -638,7 +638,7 @@ export const EmiDashboard: React.FC<EmiDashboardProps> = ({
               </button>
             </div>
 
-            <form onSubmit={handleSaveEmi}>
+            <form onSubmit={handleSaveEmi} className="emi-modal-form">
               <div className="emi-modal-body">
                 {formError && (
                   <div style={{
