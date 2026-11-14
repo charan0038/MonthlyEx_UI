@@ -381,14 +381,14 @@ export function exportYearlyPdfReport({
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
   doc.text('Annual Transactions:', pageWidth / 2 + 6, currentY + 7);
-  doc.text('Annual Savings Rate:', pageWidth / 2 + 6, currentY + 13);
+  doc.text('Annual Retained Rate:', pageWidth / 2 + 6, currentY + 13);
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
   doc.text(`${summary.totalTransactions || 0} items`, pageWidth / 2 + 56, currentY + 7);
 
   doc.setTextColor(summary.savingsRate >= 20 ? 16 : 79, summary.savingsRate >= 20 ? 185 : 70, summary.savingsRate >= 20 ? 129 : 229);
-  doc.text(`${summary.savingsRate}% Saved`, pageWidth / 2 + 56, currentY + 13);
+  doc.text(`${summary.savingsRate}% Retained`, pageWidth / 2 + 56, currentY + 13);
 
   currentY += 24;
 
@@ -397,7 +397,7 @@ export function exportYearlyPdfReport({
     startY: currentY,
     margin: { left: 12, right: 12 },
     theme: 'grid',
-    head: [['Annual Income', 'Annual Expenses', 'Net Annual Savings', 'Monthly Avg Expense', 'Top Category']],
+    head: [['Annual Income', 'Annual Expenses', 'Net Annual Balance', 'Monthly Avg Expense', 'Top Category']],
     body: [[
       cleanCurrency(summary.totalIncome),
       cleanCurrency(summary.totalExpense),
@@ -471,7 +471,7 @@ export function exportYearlyPdfReport({
   autoTable(doc, {
     startY: currentY + 3,
     margin: { left: 12, right: 12 },
-    head: [['#', 'Month', 'Income', 'Expenses', 'Net Savings', 'Top Category']],
+    head: [['#', 'Month', 'Income', 'Expenses', 'Net Balance', 'Top Category']],
     body: monthBreakdownRows,
     headStyles: {
       fillColor: [30, 41, 59],

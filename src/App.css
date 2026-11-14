@@ -570,10 +570,6 @@ button, input, select, textarea {
   transform: translateY(-1px);
 }
 
-.mobile-whats-new-btn {
-  display: none !important;
-}
-
 .whats-new-btn {
   position: relative !important;
   color: #f97316 !important;
@@ -4084,17 +4080,12 @@ button, input, select, textarea {
     white-space: nowrap;
   }
 
-  /* Hide desktop Add button, user pill, and desktop update icon on mobile */
+  /* Hide desktop Add button, user pill, and desktop theme icons on mobile */
   .btn-desktop-add,
   .user-profile-pill,
-  .desktop-whats-new-btn,
   .header-actions .icon-action-btn:has(svg.lucide-sun),
   .header-actions .icon-action-btn:has(svg.lucide-moon) {
     display: none !important;
-  }
-
-  .mobile-whats-new-btn {
-    display: flex !important;
   }
 
   /* Monthly Budget Banner Card */

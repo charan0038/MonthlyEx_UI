@@ -25,6 +25,7 @@ import {
   computeMonthlySummary,
   isAutoBudgetTransaction,
   isMonthBudgetExplicit,
+  isTransferTransaction,
 } from '../utils/budgetHelper';
 import {
   computeWeeklySummary,
@@ -261,7 +262,10 @@ export const api = {
   async login(input: LoginInput): Promise<AuthResponse> {
     const res = await authFetch(`${API_BASE}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Identifier': input.mobileNumber || '',
+      },
       body: JSON.stringify(input),
     });
 
@@ -278,7 +282,10 @@ export const api = {
   async register(input: RegisterInput): Promise<AuthResponse> {
     const res = await authFetch(`${API_BASE}/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Identifier': input.mobileNumber || '',
+      },
       body: JSON.stringify(input),
     });
 
@@ -336,7 +343,10 @@ export const api = {
   async forgotPassword(input: ForgotPasswordInput): Promise<{ message: string }> {
     const res = await fetch(`${API_BASE}/auth/forgot-password`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-User-Identifier': input.mobileNumber || '',
+      },
       body: JSON.stringify(input),
     });
     const data = await res.json().catch(() => ({}));
@@ -497,6 +507,38 @@ export const api = {
           data.netSavings = data.totalIncome - data.totalExpense;
           data.savingsRate = data.totalIncome > 0 ? (data.netSavings / data.totalIncome) * 100 : 0;
         }
+      }
+
+      // Clean and exclude ALL transfer transactions (Opening balance transfers, rollover transfers, etc.)
+      // from Annual Income, Expenses, and Net Savings so transfers never falsely inflate savings!
+      const transferTxs = yearTxs.filter((t) => isTransferTransaction(t));
+      if (transferTxs.length > 0 && data.monthlyBreakdown) {
+        for (const t of transferTxs) {
+          const mKey = t.date ? t.date.substring(0, 7) : '';
+          const mNum = mKey ? parseInt(mKey.split('-')[1], 10) : 0;
+          const mb = data.monthlyBreakdown.find((m) => m.month === mNum);
+          if (mb) {
+            const amt = Number(t.amount) || 0;
+            if (t.type?.toLowerCase() === 'income') {
+              mb.totalIncome = Math.max(0, mb.totalIncome - amt);
+            } else if (t.type?.toLowerCase() === 'expense') {
+              mb.totalExpense = Math.max(0, mb.totalExpense - amt);
+            }
+            mb.netBalance = mb.totalIncome - mb.totalExpense;
+          }
+        }
+      }
+
+      // Authoritatively recalculate annual metrics purely from real earnings and spending
+      if (data.monthlyBreakdown) {
+        data.totalIncome = data.monthlyBreakdown.reduce((acc, curr) => acc + curr.totalIncome, 0);
+        data.totalExpense = data.monthlyBreakdown.reduce((acc, curr) => acc + curr.totalExpense, 0);
+        data.netSavings = data.totalIncome - data.totalExpense;
+        data.savingsRate = data.totalIncome > 0
+          ? Math.round(((data.netSavings / data.totalIncome) * 100) * 10) / 10
+          : 0;
+        data.averageMonthlyIncome = Math.round(data.totalIncome / 12);
+        data.averageMonthlyExpense = Math.round(data.totalExpense / 12);
       }
     } catch (e) {
       console.warn('Error checking yearly ghost transactions:', e);

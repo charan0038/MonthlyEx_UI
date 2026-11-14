@@ -174,20 +174,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Quick mobile-only actions (Theme + User + Updates) */}
+        {/* Quick mobile-only actions (Theme + User) */}
         <div className="mobile-header-actions">
-          {onOpenWhatsNew && (
-            <button
-              className="icon-action-btn whats-new-btn mobile-whats-new-btn"
-              onClick={onOpenWhatsNew}
-              title="What's New in Vessel (Updates)"
-              aria-label="What's New"
-            >
-              <Sparkles size={16} />
-              <span className="whats-new-badge-dot" />
-            </button>
-          )}
-
           <button
             className="icon-action-btn mobile-theme-btn"
             onClick={onToggleTheme}
@@ -570,7 +558,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* What's New Updates Button */}
         {onOpenWhatsNew && (
           <button
-            className="icon-action-btn whats-new-btn desktop-whats-new-btn"
+            className="icon-action-btn whats-new-btn"
             onClick={onOpenWhatsNew}
             title="What's New in Vessel (Updates)"
             aria-label="What's New"

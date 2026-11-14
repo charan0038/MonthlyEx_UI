@@ -398,11 +398,11 @@ export const YearlyDashboard: React.FC<YearlyDashboardProps> = ({
           </div>
         </div>
 
-        {/* Net Annual Savings */}
+        {/* Net Annual Balance */}
         <div className="card" style={{ padding: '16px', position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-muted)' }}>
-              Net Annual Savings
+              Net Annual Balance
             </span>
             <div
               style={{
@@ -441,7 +441,7 @@ export const YearlyDashboard: React.FC<YearlyDashboardProps> = ({
                 color: (summary?.savingsRate || 0) >= 20 ? '#34d399' : '#a5b4fc',
               }}
             >
-              {summary?.savingsRate || 0}% Saved
+              {(typeof summary?.savingsRate === 'number' ? summary.savingsRate.toFixed(1) : summary?.savingsRate || 0)}% Retained
             </span>
             <span style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
               {summary?.totalTransactions || 0} transactions
@@ -706,7 +706,7 @@ export const YearlyDashboard: React.FC<YearlyDashboardProps> = ({
                 <th style={{ padding: '10px 12px' }}>Month</th>
                 <th style={{ padding: '10px 12px' }}>Income</th>
                 <th style={{ padding: '10px 12px' }}>Expenses</th>
-                <th style={{ padding: '10px 12px' }}>Net Savings</th>
+                <th style={{ padding: '10px 12px' }}>Net Balance</th>
                 <th style={{ padding: '10px 12px' }}>Top Expense Category</th>
                 <th style={{ padding: '10px 12px', textAlign: 'right' }}>Action</th>
               </tr>

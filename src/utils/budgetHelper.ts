@@ -63,6 +63,38 @@ export const isRolloverTransferOutTransaction = (tx: Transaction): boolean => {
   );
 };
 
+export const isRolloverTransferInTransaction = (tx: Transaction): boolean => {
+  const isIncome = tx.type?.toLowerCase() === 'income';
+  const note = (tx.note || '').trim().toLowerCase();
+  const cat = typeof tx.category === 'object' ? (tx.category?.name || '') : (tx.category || '');
+  const catLower = cat.trim().toLowerCase();
+  return (
+    isIncome &&
+    (note.startsWith('opening balance from') ||
+      (note.includes('opening balance') && note.includes('from')) ||
+      note.startsWith('transferred from') ||
+      catLower === 'transfer' ||
+      catLower === 'transfers' ||
+      note.includes('rollover'))
+  );
+};
+
+export const isTransferTransaction = (tx: Transaction): boolean => {
+  const note = (tx.note || '').trim().toLowerCase();
+  const cat = typeof tx.category === 'object' ? (tx.category?.name || '') : (tx.category || '');
+  const catLower = cat.trim().toLowerCase();
+  return (
+    isRolloverTransferOutTransaction(tx) ||
+    isRolloverTransferInTransaction(tx) ||
+    catLower === 'transfer' ||
+    catLower === 'transfers' ||
+    note.startsWith('transfer to') ||
+    note.startsWith('transfer from') ||
+    note.startsWith('transferred to') ||
+    note.startsWith('transferred from')
+  );
+};
+
 export const computeMonthlySummary = (
   monthYear: string,
   txs: Transaction[],
